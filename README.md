@@ -109,9 +109,33 @@ We choose Option A initially.
 
 | Quantity | Target Accuracy | Method |
 |----------|-----------------|--------|
-| Equinox instant | < 1 minute | Meeus low-order + iteration |
+| Equinox instant | < 1 minute | VSOP87D + iteration |
 | EoT | < few seconds | Standard simplified formula |
 | Day boundary alignment | < 1 second | Use high-resolution time libs |
+
+**NEW:** The implementation now includes a dynamic VSOP87D coefficient loading system that allows configurable precision. See `VSOP87D_SYSTEM.md` for details.
+
+### VSOP87D Dynamic Precision System
+
+The astronomical calculations now support configurable precision through the VSOP87D Earth coefficient system:
+
+```python
+from core.solar import solar_longitude_from_datetime
+
+# Default precision
+lon = solar_longitude_from_datetime(datetime_obj)
+
+# High precision (1 arcsecond accuracy)
+lon_precise = solar_longitude_from_datetime(datetime_obj, max_error_arcsec=1.0)
+```
+
+**Features:**
+- On-demand coefficient loading based on accuracy requirements
+- Conservative error bounds for Earth heliocentric longitude
+- Automatic fallback to default coefficients
+- Backward compatibility with existing code
+
+**Generator Script:** `scripts/generate_vsop87.py` can download VSOP87D data and create coefficient files with custom precision levels.
 
 ### Implementation Plan
 
