@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-lint:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.11", "3.12" ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Show Python version
+        run: python -V
+
+      - name: Install dependencies
+        run: |
+            set -e
+            python -m pip install --upgrade pip
+            if [ -f pyproject.toml ]; then
+              # Ako imaš opcione dev zavisnosti: pip install -e ".[dev]"
+              pip install -e .
+            elif [ -f requirements.txt ]; then
+              pip install -r requirements.txt
+            fi
+            # Osiguraj osnovne alate
+            pip install ruff flake8 mypy pytest
+
+      - name: Ruff (lint + format check)
+        run: |
+          ruff check .
+          ruff format --check .
+
+      - name: Flake8
+        run: |
+          flake8 .
+        continue-on-error: true  # Postavi na false ako želiš da PR padne na svakom flake8 upozorenju
+
+      - name: Mypy (type checking)
+        run: |
+          mypy .
+        continue-on-error: true  # Pojačaj na false kad očistiš tip greške
+
+      - name: Run tests
+        env:
+          PYTHONWARNINGS: default
+        run: |
+          pytest -q --disable-warnings --maxfail=1
