@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Astronomical Watch</title>
+  <link rel="manifest" href="/static/manifest.webmanifest" />
+  <meta name="theme-color" content="#121212" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png" />
+  <style>
+    :root { color-scheme: dark light; }
+    body { font-family: system-ui, sans-serif; margin: 0; background:#0d0f14; color:#f5f7fa; display:flex; flex-direction:column; min-height:100vh; }
+    header { padding:1rem 1.25rem; background:#161b22; box-shadow:0 2px 4px rgba(0,0,0,.4); }
+    h1 { margin:0; font-size:1.15rem; letter-spacing:.05em; font-weight:600; }
+    main { flex:1; padding:1.25rem; max-width:860px; width:100%; margin:0 auto; }
+    footer { padding:.75rem 1.25rem; font-size:.75rem; text-align:center; color:#8892a0; }
+    pre { background:#1e2530; padding:1rem; border-radius:8px; overflow:auto; }
+    .grid { display:grid; gap:1rem; } 
+    .card { background:#1b222c; border:1px solid #27313f; border-radius:10px; padding:1rem 1.1rem; position:relative; }
+    .badge { position:absolute; top:.6rem; right:.75rem; font-size:.65rem; background:#27313f; padding:.3rem .55rem; border-radius:6px; letter-spacing:.05em; opacity:.85; }
+    .timestamp { font-family: "JetBrains Mono", "SFMono-Regular", monospace; font-size:1.65rem; line-height:1.2; margin:.2rem 0 .6rem; }
+    .mono { font-family: "JetBrains Mono", monospace; }
+    .progress-wrap { margin-top:.75rem; }
+    progress { width:100%; height:14px; border-radius:7px; overflow:hidden; }
+    progress::-webkit-progress-bar { background:#27313f; }
+    progress::-webkit-progress-value { background:#3d8bfd; }
+    progress::-moz-progress-bar { background:#3d8bfd; }
+    #status { font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; margin-left:.5rem; }
+    .row { display:flex; gap:.75rem; flex-wrap:wrap; }
+    button { background:#2563eb; color:#fff; border:none; border-radius:6px; padding:.55rem .9rem; font-size:.8rem; cursor:pointer; }
+    button:disabled { opacity:.5; cursor:default; }
+    a { color:#3d8bfd; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Astronomical Watch <span id="status">INIT</span></h1>
+  </header>
+  <main>
+    <div class="grid">
+      <section class="card">
+        <div class="badge">LIVE</div>
+        <div class="timestamp" id="astro-timestamp">Loading...</div>
+        <div id="details" class="mono" style="font-size:.8rem; line-height:1.45"></div>
+        <div class="progress-wrap">
+          <label style="font-size:.65rem; letter-spacing:.08em; opacity:.75">Milli-day</label>
+          <progress id="progress" max="999" value="0"></progress>
+        </div>
+        <div class="row" style="margin-top:1rem">
+          <button id="btn-refresh">Refresh</button>
+          <button id="btn-install" hidden>Install</button>
+        </div>
+      </section>
+      <section class="card">
+        <div class="badge">INFO</div>
+        <p style="margin-top:0">This is an early placeholder. Astronomical frame (day_index, equinox boundaries) not yet integrated.</p>
+        <p>API endpoints:</p>
+        <ul class="mono" style="font-size:.7rem; line-height:1.4">
+          <li>/api/now</li>
+          <li>/api/equinox/&lt;year&gt;</li>
+          <li>/api/ping</li>
+        </ul>
+        <p>Offline mode: shell loads; last successful JSON stays on screen (if already fetched).</p>
+      </section>
+    </div>
+    <section style="margin-top:2rem; font-size:.7rem; opacity:.65" class="mono">
+      <p>Placeholder build. Source on GitHub.</p>
+    </section>
+  </main>
+  <footer>
+    Astronomical Watch &copy; <span id="year"></span>
+  </footer>
+  <script src="/static/app.js" type="module"></script>
+</body>
+</html>
