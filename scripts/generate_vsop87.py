@@ -373,7 +373,7 @@ def main():
     
     generate_python_module(truncated_data, threshold, error_bound, output_file)
     
-    print(f"\nGeneration complete!")
+    print("\nGeneration complete!")
     print(f"Output file: {output_file}")
     print(f"Error bound: {error_bound:.3f} arcseconds")
 
