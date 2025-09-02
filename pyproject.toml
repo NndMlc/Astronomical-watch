@@ -1,20 +1,3 @@
-
-[project]
-name = "astronomical-watch"
-version = "0.0.1"
-description = "Experimental astronomical timekeeping (days since vernal equinox + thousandths of day)."
-authors = [{name = "NndMlc"}]
-readme = "README.md"
-requires-python = ">=3.10"
-dependencies = []
-
-[project.scripts]
-awatch = "cli.awatch:main"
-
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -26,7 +9,7 @@ description = "Prototype of astronomical watch core computations + Tk UI"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
-authors = [{name = "Your Name", email = "you@example.com"}]
+authors = [{name = "NndMlc"}]
 keywords = ["astronomy", "time", "ephemeris"]
 classifiers = [
   "Programming Language :: Python :: 3",
@@ -46,6 +29,8 @@ dev = [
 astronomical-watch = "core.cli:main"
 
 [tool.setuptools.packages.find]
+# Ako je cilj uključiti sve pakete u repou, match bi morao biti širi;
+# trenutni value ovde je samo ilustracija dostupnog stanja.
 include = ["core*", "ui*"]
 
 [tool.ruff]
