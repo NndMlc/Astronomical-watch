@@ -238,7 +238,7 @@ SECONDS_PER_MILIDIES: float = SECONDS_PER_DAY / MILIDIES_PER_DAY  # 86.4 seconds
 MILLIDAN_PER_DAY = MILIDIES_PER_DAY  # legacy name
 SECONDS_PER_MILLIDIES = SECONDS_PER_MILIDIES  # spelled from original draft
 
-dataclass(frozen=True)
+@dataclass(frozen=True)
 class AstroReading:
     """Snapshot of astronomical time representation.
 
