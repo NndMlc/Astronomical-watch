@@ -1,6 +1,88 @@
-# Astronomical-watch / Astronomski sat
+# Astronomical Watch
 
-English | [Srpski / Bosanski / Croatian](#srpski--bosanski--croatian)
+Dual-licensed astronomical timekeeping reference: immutable core + open interfaces.
+
+## Overview
+Represent UTC instants as `DDD.mmm` where:
+- `DDD` = day index since first reference noon ≥ vernal equinox of the current tropical year.
+- `mmm` = thousandths of the current day.
+
+## Install
+```bash
+pip install .
+```
+CLI:
+```bash
+awatch
+```
+Outputs e.g.:
+```
+174.532
+```
+
+## Licensing Model (Plan C)
+- Core (algorithmic invariants): Astronomical Watch Core License v1.0 (no redistribution of modified versions) with a narrowly scoped Security Exception (see LICENSE.CORE §11).
+- Everything else (CLI, wrappers, docs excluding spec) under MIT.
+
+## Quick Install & CLI Usage (New)
+
+```
+# Clone
+git clone https://github.com/NndMlc/Astronomical-watch.git
+cd Astronomical-watch
+
+# (Optional) Create virtual environment
+python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+# Run CLI directly (no packaging yet)
+python core/cli.py now
+python core/cli.py now --json
+python core/cli.py longitude --unit deg
+python core/cli.py equinox 2025
+
+# (When packaging is added)
+# pip install -e .
+# astronomical-watch now
+```
+
+Global option:
+
+```
+--max-error-arcsec N   # Request tighter solar longitude precision (if coefficient subsets available)
+```
+
+Examples:
+
+```
+python core/cli.py now --max-error-arcsec 5
+python core/cli.py longitude --unit rad
+python core/cli.py equinox 2026 --json
+```
+
+## Platform Support (Summary)
+
+| Layer | Linux | macOS | Windows | Web (PWA) | Native Mobile |
+|-------|-------|-------|---------|-----------|---------------|
+| CLI | Yes | Yes | Yes | Via server API | Future |
+| Tkinter GUI | Yes | Yes | Yes | No | Future |
+| REST API | Initial | Initial | Initial | Yes (FastAPI) | Via API |
+| PWA Frontend | – | – | – | Yes | Add to Home Screen |
+| Native App | – | – | – | – | Evaluating |
+
+See `README_PLATFORM_NOTES.md` for detailed roadmap and platform notes.
+
+## Web / PWA Quick Start (Initial Version)
+
+After adding web components (already included now):
+
+```
+pip install fastapi uvicorn
+python -m web.app
+# or: uvicorn web.app:app --reload
+```
+
+Open http://127.0.0.1:8000/ and “Install” / “Add to Home Screen” in supported browsers.
+Offline behavior: static shell loads; live JSON data requires connectivity.
 
 ---
 
@@ -22,7 +104,7 @@ Astronomical-watch is an experimental timekeeping system that replaces the conve
 
 ### Rationale
 
-The tropical year (interval between two vernal equinoxes) has a relatively stable length (~365.2422 mean solar days). Using its natural boundaries avoids the Gregorian leap day machinery. Expressing intra‑year position as (day_index, milli_day) yields a uniform metric-like coordinate within each tropical year.
+The tropical year (interval between two vernal equinoxes) has a relatively stable length (~365.2422 mean solar days). Using its natural boundaries avoids the Gregorian leap day machinery. Expressi...
 
 ### Core Quantities
 
@@ -47,7 +129,7 @@ There are two possible interpretations; the project should clarify which to adop
    - EoT is computed only for optional display (showing difference to apparent solar time).
 
 2. EoT Zero Crossing Interpretation:
-   - Start of each day would be when EoT = 0 at the reference meridian (moments when apparent and mean solar time coincide). (Complication: EoT=0 occurs only ~4 times per tropical year → unsuitable for a daily boundary.)
+   - Start of each day would be when EoT = 0 at the reference meridian (moments when apparent and mean solar time coincide). (Complication: EoT=0 occurs only ~4 times per tropical year → unsuita...
    
 Because the second interpretation cannot define daily boundaries, we proceed with (1). The README keeps the original note but clarifies operational meaning.
 
@@ -60,7 +142,7 @@ Now = t (UTC instant)
 
 1. If t < T_eq_y, recompute for previous equinox.
 2. Compute Δt = t − T_eq_y (seconds).
-3. Compute day_index = floor( (t − T_eq_y − offset_to_first_noon) / 86400 ), where offset_to_first_noon aligns day 0 start to the first mean noon after the equinox (or at equinox if it falls before noon rule).
+3. Compute day_index = floor( (t − T_eq_y − offset_to_first_noon) / 86400 ), where offset_to_first_noon aligns day 0 start to the first mean noon after the equinox (or at equinox if it falls b...
 4. Compute intra_day_seconds = (t − start_of_current_day).
 5. milli_day = floor( 1000 * intra_day_seconds / 86400 ). Range 000–999.
 6. When milli_day rolls 999 → 000, day_index increments.
@@ -109,9 +191,33 @@ We choose Option A initially.
 
 | Quantity | Target Accuracy | Method |
 |----------|-----------------|--------|
-| Equinox instant | < 1 minute | Meeus low-order + iteration |
+| Equinox instant | < 1 minute | VSOP87D + iteration |
 | EoT | < few seconds | Standard simplified formula |
 | Day boundary alignment | < 1 second | Use high-resolution time libs |
+
+**NEW:** The implementation now includes a dynamic VSOP87D coefficient loading system that allows configurable precision. See `VSOP87D_SYSTEM.md` for details.
+
+### VSOP87D Dynamic Precision System
+
+The astronomical calculations now support configurable precision through the VSOP87D Earth coefficient system:
+
+```python
+from core.solar import solar_longitude_from_datetime
+
+# Default precision
+lon = solar_longitude_from_datetime(datetime_obj)
+
+# High precision (1 arcsecond accuracy)
+lon_precise = solar_longitude_from_datetime(datetime_obj, max_error_arcsec=1.0)
+```
+
+**Features:**
+- On-demand coefficient loading based on accuracy requirements
+- Conservative error bounds for Earth heliocentric longitude
+- Automatic fallback to default coefficients
+- Backward compatibility with existing code
+
+**Generator Script:** `scripts/generate_vsop87.py` can download VSOP87D data and create coefficient files with custom precision levels.
 
 ### Implementation Plan
 
@@ -191,7 +297,7 @@ Tropska godina (između ravnodnevnica) je relativno stabilna (~365,2422 dana). K
 
 ### Tumačenje “početak dana je srednje astronomsko podne (Equation of Time = 0)”
 
-Praktično ćemo uzeti da je početak dana srednje solarno podne po lokalnom srednjem vremenu referentnog meridijana (jer EoT=0 se javlja samo ~4 puta godišnje, što nije pogodno za dnevnu granicu).
+Praktično ćemo uzeti da je početak dana srednje solarno podne po lokalnom srednjem vremenu referentnog meridijana (jer EoT=0 se javlja samo ~4 puta godišnje, što nije pogodno za dnevnu grani...
 
 ### Reprezentacija vremena
 
@@ -202,24 +308,27 @@ Format: YYYYeq:DDD.mmm (npr. 2025eq:123.457)
 - Meeus za Sunce i ravnodnevnicu (solar longitude = 0°).
 - Jednačina vremena standardnom formulom.
 
-### Plan implementacije
+## Security Exception Summary
+Urgent security patches may be temporarily distributed under strict conditions (see LICENSE.CORE §11) to remediate exploitable vulnerabilities; long-term divergence is not allowed.
 
-1. Biblioteka za proračune.
-2. CLI alat (npr. `astronomical-watch now`).
-3. Testovi naspram referentnih tabela (npr. NASA).
-4. Vizualizacija (dijal 0–999; progres godine).
+See: LICENSE.CORE, LICENSE.MIT, SPEC.md, TRADEMARK_POLICY.md, CONTRIBUTING.md
 
-### Otvorena pitanja
+## Rationale
+Ensures a stable canonical definition while allowing broad ecosystem tooling.
 
-- Da li strogo treba korigovati početak prvog dana ako je ravnodnevnica poslije podneva?
-- Kako tretirati nepotpun zadnji dan (prijedlog: dozvoliti trunciranje)?
+## Roadmap
+- [ ] ΔT refinement & higher precision solar terms
+- [ ] Error bound verification tests
+- [ ] JavaScript banner widget (MIT)
+- [ ] Web assembly build of core logic (read-only)
 
----
+## Disclaimer
+Not for navigation; educational / experimental.
 
 ## Contributing
+Read CONTRIBUTING.md first.
 
 (Placeholder — to be expanded.)
-
 ## License
 
 (Choose a suitable license: e.g., MIT / Apache-2.0.)

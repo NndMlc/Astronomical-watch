@@ -1,3 +1,4 @@
+
 # Python
 __pycache__/
 *.py[cod]
@@ -47,6 +48,23 @@ env.bak/
 venv.bak/
 
 # IDE
+
+__pycache__/
+*.pyc
+.build/
+.dist/
+.env
+.venv
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# IDE files
 .vscode/
 .idea/
 *.swp
@@ -64,3 +82,20 @@ Thumbs.db
 
 # Project specific
 equinox_cache.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+/tmp/
+*.tmp
+
+# VSOP87 data files (will be downloaded by generator)
+scripts/vsop87d.ear
+scripts/vsop87_coefficients/
+
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/
