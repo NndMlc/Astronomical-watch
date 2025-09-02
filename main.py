@@ -12,7 +12,12 @@ from datetime import datetime, timezone, timedelta
 from typing import Tuple
 
 from astronomical_watch import astronomical_now, compute_vernal_equinox
+from fastapi import FastAPI
+from routes import equinox  # importuj novi modul
 
+app = FastAPI()
+
+app.include_router(equinox.router, prefix="/api")
 
 def get_config_dir() -> Path:
     """Get the proper configuration directory for caching."""
