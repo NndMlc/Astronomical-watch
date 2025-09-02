@@ -1,0 +1,38 @@
+
+__pycache__/
+*.pyc
+.build/
+.dist/
+.env
+.venv
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+/tmp/
+*.tmp
+
+# VSOP87 data files (will be downloaded by generator)
+scripts/vsop87d.ear
+scripts/vsop87_coefficients/
+
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/
