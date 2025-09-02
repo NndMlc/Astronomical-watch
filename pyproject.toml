@@ -1,3 +1,20 @@
+
+[project]
+name = "astronomical-watch"
+version = "0.0.1"
+description = "Experimental astronomical timekeeping (days since vernal equinox + thousandths of day)."
+authors = [{name = "NndMlc"}]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+awatch = "cli.awatch:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"

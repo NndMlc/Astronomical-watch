@@ -1,8 +1,28 @@
-# Astronomical-watch / Astronomski sat
+# Astronomical Watch
 
-English | [Srpski / Bosanski / Croatian](#srpski--bosanski--croatian)
+Dual-licensed astronomical timekeeping reference: immutable core + open interfaces.
 
----
+## Overview
+Represent UTC instants as `DDD.mmm` where:
+- `DDD` = day index since first reference noon ≥ vernal equinox of the current tropical year.
+- `mmm` = thousandths of the current day.
+
+## Install
+```bash
+pip install .
+```
+CLI:
+```bash
+awatch
+```
+Outputs e.g.:
+```
+174.532
+```
+
+## Licensing Model (Plan C)
+- Core (algorithmic invariants): Astronomical Watch Core License v1.0 (no redistribution of modified versions) with a narrowly scoped Security Exception (see LICENSE.CORE §11).
+- Everything else (CLI, wrappers, docs excluding spec) under MIT.
 
 ## Quick Install & CLI Usage (New)
 
@@ -288,21 +308,25 @@ Format: YYYYeq:DDD.mmm (npr. 2025eq:123.457)
 - Meeus za Sunce i ravnodnevnicu (solar longitude = 0°).
 - Jednačina vremena standardnom formulom.
 
-### Plan implementacije
+## Security Exception Summary
+Urgent security patches may be temporarily distributed under strict conditions (see LICENSE.CORE §11) to remediate exploitable vulnerabilities; long-term divergence is not allowed.
 
-1. Biblioteka za proračune.
-2. CLI alat (npr. `astronomical-watch now`).
-3. Testovi naspram referentnih tabela (npr. NASA).
-4. Vizualizacija (dijal 0–999; progres godine).
+See: LICENSE.CORE, LICENSE.MIT, SPEC.md, TRADEMARK_POLICY.md, CONTRIBUTING.md
 
-### Otvorena pitanja
+## Rationale
+Ensures a stable canonical definition while allowing broad ecosystem tooling.
 
-- Da li strogo treba korigovati početak prvog dana ako je ravnodnevnica poslije podneva?
-- Kako tretirati nepotpun zadnji dan (prijedlog: dozvoliti trunciranje)?
+## Roadmap
+- [ ] ΔT refinement & higher precision solar terms
+- [ ] Error bound verification tests
+- [ ] JavaScript banner widget (MIT)
+- [ ] Web assembly build of core logic (read-only)
 
----
+## Disclaimer
+Not for navigation; educational / experimental.
 
 ## Contributing
+Read CONTRIBUTING.md first.
 
 (Placeholder — to be expanded.)
 ## License
