@@ -6,7 +6,6 @@ from __future__ import annotations
 import math
 from datetime import datetime, timezone
 from dataclasses import dataclass
-from typing import Union
 
 # Constants
 J2000_TT = 2451545.0  # JD of 2000-01-01 12:00:00 TT
