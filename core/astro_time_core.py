@@ -1,7 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
-from typing import Optional
 
 # Reference meridian (decimal degrees, West negative). Provided by project specification.
 LONGITUDE_REF_DEG: float = -168.975  # -168° 58′ 30″

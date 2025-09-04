@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 def test_widget():
     """Test the widget UI."""
     print("Testing Widget UI...")
-    from ui.widget import create_widget, AstronomicalWidget
+    from ui.widget import create_widget
     import tkinter as tk
     
     root = tk.Tk()

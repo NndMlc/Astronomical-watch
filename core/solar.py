@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Optional
 from .timebase import timescales_from_datetime, J2000
 from .vsop87_earth import earth_heliocentric_longitude
-from .nutation import nutation_simple, mean_obliquity
+from .nutation import nutation_simple
 
 TAU = 2 * math.pi
 

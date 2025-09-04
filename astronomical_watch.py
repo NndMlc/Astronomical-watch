@@ -5,10 +5,8 @@ Provides basic astronomical calculations including equinox computation.
 from __future__ import annotations
 import math
 from datetime import datetime, timezone
-from typing import Optional
 
 # Import core modules
-from core.timebase import timescales_from_datetime
 from core.solar import solar_longitude_from_datetime
 
 def compute_vernal_equinox(year: int) -> datetime:

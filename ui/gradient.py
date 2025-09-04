@@ -5,9 +5,8 @@ Computes dynamic sky gradients based on astronomical data (solar position, time,
 from __future__ import annotations
 import math
 from datetime import datetime, timezone
-from typing import Tuple, Dict, Any
+from typing import Tuple
 from core.solar import solar_longitude_from_datetime
-from core.timebase import timescales_from_datetime
 
 
 class SkyTheme:
