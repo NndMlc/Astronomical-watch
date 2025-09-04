@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "astronomical-watch"
+version = "0.0.1"
+description = "Prototype of astronomical watch core computations + Tk UI"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "NndMlc"}]
+keywords = ["astronomy", "time", "ephemeris"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent"
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "mypy>=1.8",
+  "ruff>=0.3.0"
+]
+
+[project.scripts]
+astronomical-watch = "core.cli:main"
+
+[tool.setuptools.packages.find]
+# Ako je cilj uključiti sve pakete u repou, match bi morao biti širi;
+# trenutni value ovde je samo ilustracija dostupnog stanja.
+include = ["core*", "ui*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+markers = [
+  "ui: tests requiring a display / tkinter"
+]
