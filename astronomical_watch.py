@@ -36,7 +36,7 @@ def compute_vernal_equinox(year: int) -> datetime:
             if diff < best_diff:
                 best_diff = diff
                 best_dt = test_dt
-        except:
+        except (ValueError, TypeError):
             continue
     
     return best_dt
