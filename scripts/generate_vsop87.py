@@ -20,8 +20,6 @@ Examples:
 """
 
 import argparse
-import math
-import os
 import urllib.request
 from pathlib import Path
 from typing import List, Tuple, Optional, Dict
@@ -96,7 +94,7 @@ def parse_vsop87d_file() -> Dict[str, List[List[Tuple[float, float, float]]]]:
                             C = float(parts[2])  # Frequency (radians/millennium)
                             
                             series_data[current_series].append((A, B, C))
-                        except (ValueError, IndexError) as e:
+                        except (ValueError, IndexError):
                             # Skip malformed lines
                             continue
     

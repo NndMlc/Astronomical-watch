@@ -3,7 +3,6 @@ Tests for UI gradient helper and theme logic.
 Tests non-GUI components only.
 """
 import unittest
-import math
 from datetime import datetime, timezone
 from ui.gradient import (
     SkyTheme, 

@@ -7,7 +7,6 @@ For full accuracy, use the scripts/generate_vsop87.py to create coefficient file
 All values in radians (L, B) and AU (R).
 """
 import math
-import os
 from pathlib import Path
 from typing import Optional, Dict, List, Tuple, Any
 

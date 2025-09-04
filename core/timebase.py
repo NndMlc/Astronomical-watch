@@ -5,7 +5,7 @@ Skeleton – ΔT i preciznost će se kasnije poboljšati.
 """
 from __future__ import annotations
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import math
 
 J2000 = 2451545.0  # JD of 2000-01-01 12:00:00 TT

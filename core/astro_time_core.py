@@ -18,7 +18,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
-from typing import Optional
 
 # ---------------------- Constants (frozen interface) ---------------------- #
 LONGITUDE_REF_DEG: float = -168.975  # 168°58'30" W

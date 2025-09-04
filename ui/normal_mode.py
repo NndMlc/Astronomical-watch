@@ -6,7 +6,6 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime, timezone
-from typing import Optional
 from .gradient import get_sky_theme, create_gradient_colors
 
 

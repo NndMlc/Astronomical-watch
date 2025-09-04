@@ -9,7 +9,6 @@ and shows how different accuracy requirements affect the results.
 import sys
 import os
 from datetime import datetime, timezone
-import math
 
 # Add repository to path
 sys.path.insert(0, os.path.dirname(__file__))

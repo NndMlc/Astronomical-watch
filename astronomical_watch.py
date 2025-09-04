@@ -7,6 +7,11 @@ vernal equinox computation (simplified) and an 'astronomical clock' reading.
 from __future__ import annotations
 
 import math
+
+from datetime import datetime, timezone
+
+# Import core modules
+
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
