@@ -32,6 +32,35 @@ def compute_vernal_equinox(year: int) -> datetime:
     Returns:
         UTC datetime of approximate equinox (precision depends on solar_longitude_from_datetime).
     """
+
+    # Approximate date around March 20th
+    approx_date = datetime(year, 3, 20, 12, 0, tzinfo=timezone.utc)
+    
+    # Use simple iteration to find when solar longitude is closest to 0
+    best_dt = approx_date
+    best_diff = float('inf')
+    
+    # Search within ±3 days of approximate date
+    from datetime import timedelta
+    for hours_offset in range(-72, 73, 1):  # Check every hour in ±3 days
+        test_dt = approx_date + timedelta(hours=hours_offset)
+        
+        try:
+            solar_lon = solar_longitude_from_datetime(test_dt)
+            # Find minimum angular difference from 0
+            diff = min(abs(solar_lon), abs(solar_lon - 2*math.pi))
+            
+            if diff < best_diff:
+                best_diff = diff
+                best_dt = test_dt
+        except (ValueError, TypeError):
+            continue
+    
+    return best_dt
+
+
+__all__ = ['compute_vernal_equinox']
+
     # Initial guess: March 20 ~12:00 UTC (typical date)
     current_dt = datetime(year, 3, 20, 12, 0, 0, tzinfo=timezone.utc)
 
@@ -114,3 +143,4 @@ def astronomical_now(utc_time: Optional[datetime] = None) -> dict:
 
 
 __all__ = ["compute_vernal_equinox", "astronomical_now"]
+

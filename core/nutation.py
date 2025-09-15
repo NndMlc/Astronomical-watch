@@ -29,7 +29,7 @@ def nutation_simple(jd: float) -> NutationAngles:
     t = (jd - J2000) / 36525.0
     # Srednje elongacije (rad) – približno
     D = math.radians((297.85036 + 445267.111480*t) % 360)
-    M = math.radians((357.52772 + 35999.050340*t) % 360)
+    # M = math.radians((357.52772 + 35999.050340*t) % 360)
     Mprime = math.radians((134.96298 + 477198.867398*t) % 360)
     F = math.radians((93.27191 + 483202.017538*t) % 360)
     # Dve najveće amplitude (IAU 1980 prva dva reda)
