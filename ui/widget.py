@@ -1,236 +1,124 @@
-"""
-Widget Mode for Astronomical Watch
-Provides a compact widget with dynamic sky gradient background and full-area click activation.
-"""
-from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime, timezone
-from typing import Callable
-from .gradient import get_sky_theme, create_gradient_colors
 
+from core.astro_time_core import AstronomicalYear, get_current_equinox, get_next_equinox
 
-class AstronomicalWidget:
-    """
-    A compact widget showing astronomical time with dynamic sky gradient background.
-    Entire widget area is clickable to open Normal Mode.
-    """
-    
-    def __init__(self, master: tk.Widget = None, on_click: Callable = None):
+class AstronomicalWidgetMode:
+    def __init__(self, master: tk.Widget = None):
         self.master = master or tk.Tk()
-        self.on_click_callback = on_click or self._default_click_handler
-        self.current_theme = None
-        
-        # Create main window if we're the root
-        if master is None:
-            self.master.title("Astronomical Watch - Widget")
-            self.master.geometry("200x80")
-            self.master.resizable(False, False)
-        
-        self._create_widgets()
-        self._setup_bindings()
-        self._apply_theme()
-    
-    def _create_widgets(self) -> None:
-        """Create the widget components."""
-        # Background canvas for gradient
-        self.bg_canvas = tk.Canvas(
-            self.master,
-            highlightthickness=0,
-            bd=0
-        )
-        self.bg_canvas.pack(fill=tk.BOTH, expand=True)
-        
-        # Overlay frame to hold content - use create_window for layout
-        self.overlay_frame = tk.Frame(self.bg_canvas, bg='', bd=0)
-        self.canvas_window = self.bg_canvas.create_window(
-            0, 0, anchor=tk.NW, window=self.overlay_frame
-        )
-        
-        # Time display label
-        self.time_label = tk.Label(
-            self.overlay_frame,
-            text="2024eq:123.456",
-            font=("Arial", 12, "bold"),
-            bg='',  # Transparent background
-            bd=0
-        )
-        self.time_label.pack(pady=10)
-        
-        # Progress bar for day fraction
-        self.progress = ttk.Progressbar(
-            self.overlay_frame,
-            mode='determinate',
-            length=150
-        )
-        self.progress['value'] = 45.6  # Example value
-        self.progress.pack(pady=5)
-        
-        # Status label
-        self.status_label = tk.Label(
-            self.overlay_frame,
-            text="Day 123 of astronomical year",
-            font=("Arial", 8),
-            bg='',  # Transparent background
-            bd=0
-        )
-        self.status_label.pack()
-    
-    def _setup_bindings(self) -> None:
-        """Set up click bindings for full widget activation."""
-        # Bind click events to all components for full activation
-        widgets_to_bind = [
-            self.master,         # Root window
-            self.bg_canvas,      # Background canvas
-            self.overlay_frame,  # Overlay frame
-            self.time_label,     # Time label
-            self.status_label    # Status label
-        ]
-        
-        for widget in widgets_to_bind:
-            widget.bind("<Button-1>", self._handle_click)
-            widget.bind("<Double-Button-1>", self._handle_click)
-        
-        # Progress bar needs special handling
-        self.progress.bind("<Button-1>", self._handle_click)
-        
-        # Handle canvas resize
-        self.bg_canvas.bind('<Configure>', self._on_canvas_configure)
-    
-    def _on_canvas_configure(self, event) -> None:
-        """Handle canvas resize to maintain gradient."""
-        # Update canvas window size
-        self.bg_canvas.itemconfig(
-            self.canvas_window,
-            width=event.width,
-            height=event.height
-        )
-        # Redraw gradient
-        self._draw_gradient()
-    
-    def _handle_click(self, event) -> None:
-        """Handle click events - call the callback to open Normal Mode."""
-        if self.on_click_callback:
-            self.on_click_callback()
-    
-    def _default_click_handler(self) -> None:
-        """Default click handler - shows a message."""
-        print("Widget clicked - would open Normal Mode")
-        # In real implementation, this would open the Normal Mode window
-    
-    def _draw_gradient(self) -> None:
-        """Draw the vertical gradient background."""
-        if not self.current_theme:
-            return
-            
-        # Clear existing gradient
-        self.bg_canvas.delete("gradient")
-        
-        # Get canvas dimensions
-        canvas_width = self.bg_canvas.winfo_width()
-        canvas_height = self.bg_canvas.winfo_height()
-        
-        if canvas_width <= 1 or canvas_height <= 1:
-            # Canvas not yet sized
-            self.master.after(50, self._draw_gradient)
-            return
-        
-        # Create gradient colors
-        num_steps = max(50, canvas_height // 2)  # Smooth gradient
-        gradient_colors = create_gradient_colors(self.current_theme, num_steps)
-        
-        # Draw gradient as horizontal lines
-        step_height = canvas_height / len(gradient_colors)
-        
-        for i, color in enumerate(gradient_colors):
-            y1 = i * step_height
-            y2 = (i + 1) * step_height
-            
-            self.bg_canvas.create_rectangle(
-                0, y1, canvas_width, y2,
-                fill=color, outline=color,
-                tags="gradient"
-            )
-    
-    def _apply_theme(self, dt: datetime = None) -> None:
-        """Apply current sky theme to the widget."""
-        theme = get_sky_theme(dt)
-        
-        if theme != self.current_theme:
-            self.current_theme = theme
-            
-            # Update text colors
-            text_color = theme.text_hex
-            self.time_label.config(fg=text_color)
-            self.status_label.config(fg=text_color)
-            
-            # Make overlay frame transparent  
-            self.overlay_frame.config(bg='')
-            self.time_label.config(bg='')
-            self.status_label.config(bg='')
-            
-            # Redraw gradient background
-            self._draw_gradient()
-    
-    def update_time_display(self, dt: datetime = None) -> None:
-        """Update the time display and refresh theme if needed."""
-        if dt is None:
-            dt = datetime.now(timezone.utc)
-        
-        # Update theme (which may have changed with time)
-        self._apply_theme(dt)
-        
-        # Update time display (simplified astronomical format)
-        day_of_year = dt.timetuple().tm_yday
-        hour_fraction = (dt.hour * 3600 + dt.minute * 60 + dt.second) / 86400
-        milli_day = int(hour_fraction * 1000)
-        
-        time_str = f"{dt.year}eq:{day_of_year:03d}.{milli_day:03d}"
-        self.time_label.config(text=time_str)
-        
-        # Update status
-        status_str = f"Day {day_of_year} of astronomical year"
-        self.status_label.config(text=status_str)
-        
-        # Update progress bar
-        self.progress['value'] = milli_day / 10  # Scale to 0-100
-    
-    def set_click_handler(self, callback: Callable) -> None:
-        """Set the callback function for widget clicks."""
-        self.on_click_callback = callback
-    
-    def start_updates(self, interval_ms: int = 1000) -> None:
-        """Start automatic time updates."""
-        def update():
-            self.update_time_display()
-            self.master.after(interval_ms, update)
-        
-        update()
+        self.master.title("Astronomical Watch - Widget Mode")
+        self.master.geometry("210x140")
+        self.master.minsize(160, 120)
 
+        self._firework_shown = False
 
-def create_widget(master: tk.Widget = None, on_click: Callable = None) -> AstronomicalWidget:
-    """Factory function to create an AstronomicalWidget."""
-    return AstronomicalWidget(master, on_click)
+        self.frame = tk.Frame(self.master, bg='', bd=0)
+        self.frame.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
 
+        self.title_label = tk.Label(self.frame, text="Astronomical Watch", font=("Arial", 9, "bold"), bg='', bd=0)
+        self.title_label.pack(pady=(2, 2))
 
-def demo_widget():
-    """Standalone demo of the widget."""
-    root = tk.Tk()
-    root.title("Astronomical Widget Demo")
-    root.geometry("250x120")
-    
-    def click_handler():
-        print("Widget clicked! Opening Normal Mode...")
-        # In real app, would open normal mode window
-    
-    widget = create_widget(root, click_handler)
-    widget.start_updates()
-    
-    root.mainloop()
+        self.value_label = tk.Label(self.frame, text="---·---", font=("Arial", 22, "bold"), bg='', bd=0)
+        self.value_label.pack(pady=(2, 2))
 
+        self.progress_var = tk.IntVar(value=0)
+        self.progress_bar = ttk.Progressbar(self.frame, orient="horizontal", length=130, mode="determinate", maximum=99, variable=self.progress_var)
+        self.progress_bar.pack(pady=(2, 2))
+
+        self.countdown_frame = tk.Frame(self.frame, bg="#d5ffd5", bd=0)
+        self.countdown_label = tk.Label(self.countdown_frame, text="", font=("Arial", 10, "bold"), bg="#d5ffd5", fg="#225c17")
+        self.countdown_label.pack(padx=4, pady=2)
+        self.countdown_frame.pack(fill=tk.X, pady=(6,0))
+        self.countdown_frame.pack_forget()
+
+        # Klik/tap na widget otvara normal mod
+        self.frame.bind("<Button-1>", self._open_normal_mode)
+        self.value_label.bind("<Button-1>", self._open_normal_mode)
+        self.progress_bar.bind("<Button-1>", self._open_normal_mode)
+
+        self._update_display()
+
+    def _update_display(self):
+        now = datetime.now(timezone.utc)
+        eq = get_current_equinox(now)
+        astro_year = AstronomicalYear(eq)
+        astro_year.update(now)
+        dies = astro_year.day_index
+        milidies = astro_year.milidan
+
+        self.value_label.config(text=f"{dies}·{milidies}")
+        self.progress_var.set(milidies % 100)
+
+        next_eq = get_next_equinox(now)
+        if next_eq:
+            astro_year.update(now)
+            dies_now = astro_year.day_index
+            milidies_now = astro_year.milidan
+
+            astro_year.update(next_eq)
+            dies_next = astro_year.day_index
+            milidies_next = astro_year.milidan
+
+            dies_diff = dies_next - dies_now
+            milidies_diff = milidies_next - milidies_now
+            if milidies_diff < 0:
+                dies_diff -= 1
+                milidies_diff += 1000
+
+            if dies_diff < 11 and dies_diff >= 0:
+                if dies_diff == 0:
+                    stotinke = milidies_diff % 100
+                    centi_str = f".{stotinke:02}"
+                    countdown_str = f"{dies_diff}·{milidies_diff}{centi_str}"
+                    self.countdown_label.config(
+                        text=f"Vernal Equinox in: {countdown_str}",
+                        font=("Arial", 10, "bold"),
+                        fg="#b02c06" if stotinke == 0 else "#008c00"
+                    )
+                else:
+                    countdown_str = f"{dies_diff}·{milidies_diff}"
+                    self.countdown_label.config(
+                        text=f"Vernal Equinox in: {countdown_str}",
+                        font=("Arial", 10, "bold"),
+                        fg="#008c00"
+                    )
+                self.countdown_frame.pack(fill=tk.X, pady=(6,0))
+                if dies_diff == 0 and milidies_diff == 0 and not self._firework_shown:
+                    self._firework_shown = True
+                    self._fireworks()
+            else:
+                self.countdown_frame.pack_forget()
+                self._firework_shown = False
+        else:
+            self.countdown_frame.pack_forget()
+            self._firework_shown = False
+
+        self.master.after(200, self._update_display)
+
+    def _fireworks(self):
+        win = tk.Toplevel(self.master)
+        win.title("Vernal Equinox!")
+        win.geometry("210x150")
+        canvas = tk.Canvas(win, width=210, height=120, bg="black")
+        canvas.pack()
+        import random
+        for _ in range(18):
+            x, y = random.randint(30, 180), random.randint(20, 100)
+            color = random.choice(["red", "yellow", "lime", "blue", "magenta", "cyan", "orange", "white"])
+            r = random.randint(10, 22)
+            canvas.create_oval(x-r, y-r, x+r, y+r, outline=color, width=3)
+            win.update()
+            win.after(80)
+        win.after(1800, win.destroy)
+
+    def _open_normal_mode(self, event=None):
+        try:
+            from ui.normal_mode import AstronomicalNormalMode
+            AstronomicalNormalMode(self.master)
+        except ImportError:
+            pass  # Optionally show error dialog
 
 if __name__ == "__main__":
-    demo_widget()
-
-
-__all__ = ['AstronomicalWidget', 'create_widget']
+    app = AstronomicalWidgetMode()
+    app.master.mainloop()

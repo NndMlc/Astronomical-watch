@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import datetime, timezone
 
-from core.astro_time_core import AstronomicalYear, get_current_equinox
+from core.astro_time_core import AstronomicalYear, get_current_equinox, get_next_equinox
 from ui.gradient import get_sky_theme
 from ui.explanation_card import EXPLANATION_TEXT
 from ui.comparison_card import ComparisonCard
@@ -22,13 +22,15 @@ class AstronomicalNormalMode:
     def __init__(self, master: tk.Widget = None, on_back=None, on_language=None):
         self.master = master or tk.Tk()
         self.master.title("Astronomical Watch - Normal Mode")
-        self.master.geometry("370x320")
+        self.master.geometry("370x350")
         self.master.minsize(340, 270)
 
         now = datetime.now(timezone.utc)
         self.current_equinox = get_current_equinox(now)
         self.astro_year = AstronomicalYear(self.current_equinox)
         self.astro_year.update(now)
+
+        self._firework_shown = False  # Flag to hide countdown after fireworks
 
         # Canvas za gradient pozadinu
         self.bg_canvas = tk.Canvas(self.master, highlightthickness=0, bd=0)
@@ -85,6 +87,13 @@ class AstronomicalNormalMode:
         self.language_menu = None
         self.selected_language = LANGUAGES[0][1]  # default 'en'
 
+        # Countdown frame (hidden initially)
+        self.countdown_frame = tk.Frame(self.frame, bg="#d5ffd5", bd=0)
+        self.countdown_label = tk.Label(self.countdown_frame, text="", font=("Arial", 12, "bold"), bg="#d5ffd5", fg="#225c17")
+        self.countdown_label.pack(padx=8, pady=5)
+        self.countdown_frame.pack(fill=tk.X, pady=(10,0))
+        self.countdown_frame.pack_forget()  # Hide at startup
+
         self._update_display()
 
     def _on_canvas_configure(self, event):
@@ -123,17 +132,76 @@ class AstronomicalNormalMode:
         if new_equinox != self.current_equinox:
             self.current_equinox = new_equinox
             self.astro_year = AstronomicalYear(self.current_equinox)
+            self._firework_shown = False  # Reset fireworks for new equinox
+
         self.astro_year.update(now)
         day = self.astro_year.day_index
         milidies = self.astro_year.milidan
         self.day_value_label.config(text=f"{day}")
         self.milidies_value_label.config(text=f"{milidies}")
         self.progress_var.set(milidies % 100)
-        # Standardno vreme
         local_now = datetime.now()
         self.clock_label.config(text=local_now.strftime("%H:%M %m/%d"))
         self._draw_gradient()
+
+        # Countdown to next vernal equinox
+        next_eq = get_next_equinox(now)
+        show_countdown = False
+        if next_eq:
+            eq = get_current_equinox(now)
+            astro_year = AstronomicalYear(eq)
+            astro_year.update(now)
+            dies_now = astro_year.day_index
+            milidies_now = astro_year.milidan
+
+            astro_year.update(next_eq)
+            dies_next = astro_year.day_index
+            milidies_next = astro_year.milidan
+
+            dies_diff = dies_next - dies_now
+            milidies_diff = milidies_next - milidies_now
+            if milidies_diff < 0:
+                dies_diff -= 1
+                milidies_diff += 1000
+
+            if dies_diff < 11 and dies_diff >= 0:
+                show_countdown = True
+
+                stotinke = milidies_diff % 100
+                self.countdown_label.config(
+                    text=f"Vernal Equinox in: {dies_diff} Dies, {milidies_diff} miliDies ({stotinke:02} centi-miliDies)"
+                )
+                self.countdown_frame.pack(fill=tk.X, pady=(10,0))
+
+                # Vatromet kad nastupi trenutak ekvinoksa
+                if dies_diff == 0 and milidies_diff == 0 and not self._firework_shown:
+                    self._firework_shown = True
+                    self._fireworks()
+            else:
+                self.countdown_frame.pack_forget()
+                self._firework_shown = False
+        else:
+            self.countdown_frame.pack_forget()
+            self._firework_shown = False
+
         self.master.after(200, self._update_display)
+
+    def _fireworks(self):
+        win = tk.Toplevel(self.master)
+        win.title("Vernal Equinox!")
+        win.geometry("400x350")
+        canvas = tk.Canvas(win, width=400, height=320, bg="black")
+        canvas.pack()
+        import random
+        # Jednostavna animacija vatrometa
+        for _ in range(40):
+            x, y = random.randint(40, 360), random.randint(40, 280)
+            color = random.choice(["red", "yellow", "lime", "blue", "magenta", "cyan", "orange", "white"])
+            r = random.randint(15, 35)
+            canvas.create_oval(x-r, y-r, x+r, y+r, outline=color, width=3)
+            win.update()
+            win.after(80)
+        win.after(2500, win.destroy)
 
     def _show_language_menu(self):
         if self.language_menu is not None:
