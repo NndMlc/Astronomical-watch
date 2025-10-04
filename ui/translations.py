@@ -32,8 +32,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "Equinoccio de primavera en: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Esta tarjeta te permite convertir entre fecha/hora estándar y tiempo astronómico, encontrar el milidies correspondiente para una hora y minuto dados y viceversa, y ver cuánto tiempo queda hasta el próximo equinoccio de primavera.",
+        "calculations_text": "Esta tarjeta muestra tu ubicación y el meridiano astronómico (milidies) para tu lugar, así como la curva de la Ecuación del Tiempo para tu ubicación. Puedes ver cuándo ocurre el mediodía astronómico local y cómo se relaciona con el tiempo astronómico global. El gráfico marca los equinoccios, los solsticios y el 1 de enero.",
     },
     "zh": {
         "title": "天文时钟",
@@ -44,8 +44,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "春分还有: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "此卡片允许你在标准日期/时间与天文时间之间转换，查找给定小时和分钟对应的 milidies 及其逆向转换，并查看距离下一个春分还有多少时间。",
+        "calculations_text": "此卡片显示你的地理位置和该地的天文子午线（milidies），以及你位置的时间方程曲线。你可以看到本地天文中午发生的时间及其与全球天文时间的关系。图表标记了分至点、至日和一月一日。",
     },
     "ar": {
         "title": "الساعة الفلكية",
@@ -56,8 +56,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "الاعتدال الربيعي بعد: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "تتيح لك هذه البطاقة التحويل بين التاريخ/الوقت القياسي والوقت الفلكي، وإيجاد قيمة milidies لساعة ودقيقة معينة أو العكس، ومعرفة الوقت المتبقي حتى الاعتدال الربيعي القادم.",
+        "calculations_text": "تعرض هذه البطاقة موقعك وخط الطول الفلكي (milidies) لموقعك، بالإضافة إلى منحنى معادلة الوقت لموقعك. يمكنك رؤية توقيت الظهر الفلكي المحلي وعلاقته بالوقت الفلكي العالمي. يوضح الرسم البياني الاعتدالات والانقلابات و1 يناير.",
     },
     "pt": {
         "title": "Relógio Astronômico",
@@ -68,8 +68,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "Equinócio vernal em: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Este cartão permite converter entre data/hora padrão e tempo astronômico, encontrar o milidies correspondente para uma determinada hora e minuto e vice-versa, e ver quanto tempo falta para o próximo equinócio de primavera.",
+        "calculations_text": "Este cartão mostra sua localização e o meridiano astronômico (milidies) para seu local, assim como a curva da Equação do Tempo para sua localização. Você pode ver quando ocorre o meio-dia astronômico local e como ele se relaciona com o tempo astronômico global. O gráfico marca os equinócios, solstícios e 1º de janeiro.",
     },
     "fr": {
         "title": "Montre Astronomique",
@@ -80,8 +80,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "Équinoxe vernal dans : {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Cette carte vous permet de convertir entre la date/heure standard et le temps astronomique, de trouver le milidies correspondant à une heure et une minute données et inversement, et de voir combien de temps il reste avant le prochain équinoxe de printemps.",
+        "calculations_text": "Cette carte affiche votre position et le méridien astronomique (milidies) pour votre lieu, ainsi que la courbe de l'équation du temps pour votre emplacement. Vous pouvez voir quand le midi astronomique local se produit et comment il se rapporte au temps astronomique global. Le graphique marque les équinoxes, les solstices et le 1er janvier.",
     },
     "de": {
         "title": "Astronomische Uhr",
@@ -92,8 +92,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "Frühlings-Tagundnachtgleiche in: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Diese Karte ermöglicht die Umrechnung zwischen Standarddatum/-uhrzeit und astronomischer Zeit, das Finden der entsprechenden milidies für eine bestimmte Stunde und Minute und umgekehrt sowie die Anzeige, wie viel Zeit bis zur nächsten Frühlings-Tagundnachtgleiche verbleibt.",
+        "calculations_text": "Diese Karte zeigt Ihren Standort und den astronomischen Meridian (milidies) für Ihren Ort sowie die Zeitgleichungskurve für Ihren Standort. Sie können sehen, wann der lokale astronomische Mittag stattfindet und wie er sich auf die globale astronomische Zeit bezieht. Die Grafik markiert die Äquinoktien, Solstitien und den 1. Januar.",
     },
     "ru": {
         "title": "Астрономические часы",
@@ -104,8 +104,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "Весеннее равноденствие через: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Эта карта позволяет конвертировать между стандартной датой/временем и астрономическим временем, находить соответствующие milidies для заданного часа и минуты и наоборот, а также видеть, сколько осталось до следующего весеннего равноденствия.",
+        "calculations_text": "Эта карта показывает ваше местоположение и астрономический меридиан (milidies) для вашего места, а также кривую уравнения времени для вашего местоположения. Вы можете увидеть, когда наступает местный астрономический полдень и как он соотносится с глобальным астрономическим временем. На графике отмечены равноденствия, солнцестояния и 1 января.",
     },
     "ja": {
         "title": "天文時計",
@@ -116,8 +116,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "春分まで: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "このカードでは、標準の日付/時刻と天文時間の相互変換、指定した時刻に対応する milidies の算出（またはその逆）、そして次の春分までの残り時間を確認できます。",
+        "calculations_text": "このカードは、あなたの位置とその場所における天文子午線（milidies）、およびその場所の時差（Equation of Time）曲線を表示します。地域の天文正午がいつか、またそれが世界的な天文時間とどう関係するかを確認できます。グラフには分至点、至点、1月1日が記されています。",
     },
     "hi": {
         "title": "खगोलीय घड़ी",
@@ -128,8 +128,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "वर्नल विषुव में: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "यह कार्ड आपको मानक दिनांक/समय और खगोलीय समय के बीच रूपांतरण, दिए गए घंटे और मिनट के लिए milidies प्राप्त करने या उसका उल्टा, और अगले वसंत विषुव तक कितना समय बचा है, यह देखने की सुविधा देता है।",
+        "calculations_text": "यह कार्ड आपके स्थान और आपके स्थान के लिए खगोलीय मेरिडियन (milidies), और आपके स्थान के लिए समय समीकरण (Equation of Time) वक्र दिखाता है। आप देख सकते हैं कि स्थानीय खगोलीय दोपहर कब होती है और यह वैश्विक खगोलीय समय से कैसे संबंधित है। ग्राफ में विषुव, संक्रांति और 1 जनवरी को चिह्नित किया गया है।",
     },
     "fa": {
         "title": "ساعت نجومی",
@@ -140,8 +140,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "اعتدال بهاری در: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "این کارت امکان تبدیل بین تاریخ/زمان استاندارد و زمان نجومی، یافتن milidies مربوط به ساعت و دقیقه خاص و بالعکس، و مشاهده زمان باقی‌مانده تا اعتدال بهاری بعدی را فراهم می‌کند.",
+        "calculations_text": "این کارت موقعیت شما و نصف‌النهار نجومی (milidies) برای محل شما و همچنین منحنی معادله زمان برای موقعیت شما را نمایش می‌دهد. می‌توانید ببینید ظهر نجومی محلی چه زمانی رخ می‌دهد و چگونه با زمان نجومی جهانی مرتبط است. نمودار اعتدال‌ها، انقلاب‌ها و ۱ ژانویه را نشان می‌دهد.",
     },
     "id": {
         "title": "Jam Astronomi",
@@ -152,8 +152,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "Ekuinoks vernal dalam: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Kartu ini memungkinkan Anda mengonversi antara tanggal/waktu standar dan waktu astronomi, menemukan milidies yang sesuai untuk jam dan menit tertentu, atau sebaliknya, serta melihat berapa lama lagi hingga ekuinoks vernal berikutnya.",
+        "calculations_text": "Kartu ini menampilkan lokasi Anda dan meridian astronomi (milidies) untuk tempat Anda, serta kurva Persamaan Waktu untuk lokasi Anda. Anda dapat melihat kapan tengah hari astronomi lokal terjadi dan bagaimana kaitannya dengan waktu astronomi global. Grafik menandai ekuinoks, solstis, dan 1 Januari.",
     },
     "sw": {
         "title": "Saa ya Astronomia",
@@ -164,8 +164,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "Vernal Equinox ndani ya: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Kadi hii inakuwezesha kubadilisha kati ya tarehe/muda wa kawaida na muda wa anga, kupata milidies inayolingana na saa na dakika fulani au kinyume chake, na kuona muda uliobaki hadi usawa wa masika ujao.",
+        "calculations_text": "Kadi hii inaonyesha eneo lako na meridian ya anga (milidies) kwa eneo lako, pamoja na mduara wa Equation of Time kwa eneo lako. Unaweza kuona lini mchana wa anga wa eneo lako unafanyika na jinsi unavyohusiana na muda wa anga wa dunia nzima. Mchoro unaonyesha masika, solstisi, na Januari 1.",
     },
     "ha": {
         "title": "Agogon Taurari",
@@ -176,8 +176,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "Vernal Equinox a cikin: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Wannan kati yana ba ka damar canza tsakanin kwanan wata/lokaci na gargajiya da lokaci na taurari, nemo milidies daidai da sa'a da minti, ko akasin haka, da kuma ganin lokaci da ya rage kafin daidaiton bazara mai zuwa.",
+        "calculations_text": "Wannan kati yana nuna wurin da kake da meridian na taurari (milidies) don wuri, da kuma zane na Equation of Time don wurinka. Za ka iya ganin lokacin da rana ta taurari ta gida ke faruwa da yadda take da alaƙa da lokaci na taurari na duniya. Zane yana nuna daidaiton rana, solstisi da 1 ga Janairu.",
     },
     "tr": {
         "title": "Astronomik Saat",
@@ -188,8 +188,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "İlkbahar ekinoksu için: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Bu kart, standart tarih/saat ile astronomik zaman arasında dönüşüm, belirli bir saat ve dakika için milidies bulma veya tersini yapma ve bir sonraki ilkbahar ekinoksuna kadar kalan zamanı görme imkanı sağlar.",
+        "calculations_text": "Bu kart, bulunduğunuz konumu ve oradaki astronomik meridyeni (milidies) ile konumunuzun Zaman Denklemi eğrisini gösterir. Yerel astronomik öğlenin ne zaman gerçekleştiğini ve bunun küresel astronomik zamanla nasıl ilişkili olduğunu görebilirsiniz. Grafik ekinoksları, gündönümlerini ve 1 Ocak'ı işaretler.",
     },
     "el": {
         "title": "Αστρονομικό Ρολόι",
@@ -200,8 +200,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "Εαρινή ισημερία σε: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Αυτή η κάρτα σας επιτρέπει να μετατρέπετε μεταξύ της τυπικής ημερομηνίας/ώρας και του αστρονομικού χρόνου, να βρίσκετε το αντίστοιχο milidies για δεδομένη ώρα και λεπτό και το αντίστροφο, καθώς και να δείτε πόσος χρόνος απομένει μέχρι την επόμενη εαρινή ισημερία.",
+        "calculations_text": "Αυτή η κάρτα δείχνει την τοποθεσία σας και τον αστρονομικό μεσημβρινό (milidies) για το μέρος σας, καθώς και την καμπύλη της Εξίσωσης Χρόνου για την τοποθεσία σας. Μπορείτε να δείτε πότε συμβαίνει το τοπικό αστρονομικό μεσημέρι και πώς σχετίζεται με τον παγκόσμιο αστρονομικό χρόνο. Το γράφημα σημειώνει τις ισημερίες, τα ηλιοστάσια και την 1η Ιανουαρίου.",
     },
     "pl": {
         "title": "Zegar Astronomiczny",
@@ -212,8 +212,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "Równonoc wiosenna za: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Ta karta pozwala na konwersję między standardową datą/godziną a czasem astronomicznym, znalezienie odpowiedniego milidies dla podanej godziny i minuty oraz odwrotnie, a także zobaczenie, ile czasu pozostało do następnej równonocy wiosennej.",
+        "calculations_text": "Ta karta pokazuje twoją lokalizację i astronomiczny południk (milidies) dla twojego miejsca, jak również krzywą równania czasu dla twojej lokalizacji. Możesz zobaczyć, kiedy występuje lokalne astronomiczne południe i jak się ono ma do globalnego czasu astronomicznego. Wykres oznacza równonoce, przesilenia i 1 stycznia.",
     },
     "it": {
         "title": "Orologio Astronomico",
@@ -224,8 +224,8 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "Equinozio di primavera tra: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Questa scheda permette la conversione tra data/ora standard e tempo astronomico, di trovare il milidies corrispondente per una data ora e minuto e viceversa, e di vedere quanto manca al prossimo equinozio di primavera.",
+        "calculations_text": "Questa scheda mostra la tua posizione e il meridiano astronomico (milidies) per il tuo luogo, oltre alla curva dell'Equazione del Tempo per la tua posizione. Puoi vedere quando si verifica il mezzogiorno astronomico locale e come si relaziona con il tempo astronomico globale. Il grafico segna gli equinozi, i solstizi e il 1 gennaio.",
     },
     "nl": {
         "title": "Astronomisch Horloge",
@@ -236,11 +236,10 @@ TRANSLATIONS = {
         "milidies": "miliDies",
         "countdown_label": "Lente-equinox over: {dies}·{milidies}",
         "explanation_text": "",
-        "comparison_text": "",
-        "calculations_text": "",
+        "comparison_text": "Deze kaart stelt je in staat om te converteren tussen standaard datum/tijd en astronomische tijd, het bijbehorende milidies te vinden voor een bepaald uur en minuut en omgekeerd, en te zien hoeveel tijd er nog rest tot de volgende lente-equinox.",
+        "calculations_text": "Deze kaart toont je locatie en de astronomische meridiaan (milidies) voor jouw plaats, evenals de tijdsvergelijkingscurve voor jouw locatie. Je kunt zien wanneer het lokale astronomische middaguur plaatsvindt en hoe dat zich verhoudt tot de mondiale astronomische tijd. De grafiek markeert de equinoxen, solstices en 1 januari.",
     },
 }
-
 def tr(key, lang="en", **kwargs):
     txt = TRANSLATIONS.get(lang, TRANSLATIONS["en"]).get(key, "")
     return txt.format(**kwargs) if kwargs else txt
