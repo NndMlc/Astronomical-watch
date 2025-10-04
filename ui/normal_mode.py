@@ -1,24 +1,12 @@
-"""
-Normal Mode for Astronomical Watch
-Prikaz sa dinamičkim gradientom (boje neba).
-
-- Naslov "Astronomical Watch" malim fontom
-- Oznake "Dies" i "miliDies" malim fontom, brojevi velikim fontom
-- Progres bar, ispod njega standardno vreme manjim fontom ("hh:mm MM/DD")
-- Dugmad u nizu: "Explanation", "Comparison", "Calculations"
-- Gornji levi ugao: dugme za povratak na Widget Mode
-- Gornji desni ugao: dugme za izbor jezika (otvara listu jezika)
-
-Automatsko osvežavanje prikaza ~200ms.
-"""
-
-from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime, timezone
 
 from core.astro_time_core import AstronomicalYear, get_current_equinox
 from ui.gradient import get_sky_theme
+from ui.explanation_card import EXPLANATION_TEXT
+from ui.comparison_card import ComparisonCard
+from ui.calculation_card import CalculationCard
 
 LANGUAGES = [
     ("English", "en"), ("Spanish", "es"), ("Chinese", "zh"),
@@ -42,68 +30,58 @@ class AstronomicalNormalMode:
         self.astro_year = AstronomicalYear(self.current_equinox)
         self.astro_year.update(now)
 
-        # Canvas za gradient
+        # Canvas za gradient pozadinu
         self.bg_canvas = tk.Canvas(self.master, highlightthickness=0, bd=0)
         self.bg_canvas.pack(fill=tk.BOTH, expand=True)
         self.bg_canvas.bind('<Configure>', self._on_canvas_configure)
 
-        # Sredi okvir na canvas
+        # Glavni okvir na canvasu
         self.frame = tk.Frame(self.bg_canvas, bg='', bd=0)
         self.canvas_window = self.bg_canvas.create_window(0, 0, anchor=tk.NW, window=self.frame)
 
-        # Gornji levi: dugme za povratak na Widget Mode
+        # Gornji levi ugao: povratak na Widget Mode
         self.back_btn = tk.Button(self.bg_canvas, text="⟵", font=("Arial", 12), command=self._back, bd=0, relief=tk.FLAT, bg="#e6e6e6", activebackground="#d6d6d6")
         self.bg_canvas.create_window(10, 10, anchor=tk.NW, window=self.back_btn, tags="nav_back")
 
-        # Gornji desni: dugme za izbor jezika
+        # Gornji desni ugao: izbor jezika
         self.lang_btn = tk.Button(self.bg_canvas, text="🌐", font=("Arial", 12), command=self._show_language_menu, bd=0, relief=tk.FLAT, bg="#e6e6e6", activebackground="#d6d6d6")
         self.bg_canvas.create_window(0, 10, anchor=tk.NE, window=self.lang_btn, tags="nav_lang")
 
         # Naslov malim fontom
-        self.title_label = tk.Label(
-            self.frame, text="Astronomical Watch",
-            font=("Arial", 10, "bold"), bg='', bd=0
-        )
+        self.title_label = tk.Label(self.frame, text="Astronomical Watch", font=("Arial", 10, "bold"), bg='', bd=0)
         self.title_label.pack(pady=(24, 10))
 
-        # Dan od ekvinoksa ("Dies") -- oznaka malim fontom, broj velikim
+        # Dies i miliDies
         self.dies_label = tk.Label(self.frame, text="Dies", font=("Arial", 10), bg='', bd=0)
         self.dies_label.pack()
         self.day_value_label = tk.Label(self.frame, text="---", font=("Arial", 26, "bold"), bg='', bd=0)
         self.day_value_label.pack(pady=(0, 10))
-
-        # Hiljaditi deo dana ("miliDies") -- oznaka malim fontom, broj velikim
         self.milidies_label = tk.Label(self.frame, text="miliDies", font=("Arial", 10), bg='', bd=0)
         self.milidies_label.pack()
         self.milidies_value_label = tk.Label(self.frame, text="---", font=("Arial", 26, "bold"), bg='', bd=0)
         self.milidies_value_label.pack(pady=(0, 12))
 
-        # Jedan progres bar (0–99)
+        # Progres bar
         self.progress_var = tk.IntVar(value=0)
-        self.progress_bar = ttk.Progressbar(
-            self.frame, orient="horizontal", length=220, mode="determinate",
-            maximum=99, variable=self.progress_var
-        )
+        self.progress_bar = ttk.Progressbar(self.frame, orient="horizontal", length=220, mode="determinate", maximum=99, variable=self.progress_var)
         self.progress_bar.pack(pady=(0, 2))
 
-        # Standardno vreme ispod progres bara, manjim fontom
+        # Standardno vreme ispod progres bara
         self.clock_label = tk.Label(self.frame, text="", font=("Arial", 10), bg='', bd=0)
         self.clock_label.pack(pady=(5, 12))
 
-        # Dugmad u nizu ("Explanation", "Comparison", "Calculations")
+        # Dugmad za otvaranje kartica
         self.btn_frame = tk.Frame(self.frame, bg="", bd=0)
         self.btn_frame.pack(pady=(0, 10))
-        self.explanation_btn = tk.Button(self.btn_frame, text="Explanation", font=("Arial", 10), width=12, bd=0, relief=tk.RAISED)
-        self.comparison_btn = tk.Button(self.btn_frame, text="Comparison", font=("Arial", 10), width=12, bd=0, relief=tk.RAISED)
-        self.calculations_btn = tk.Button(self.btn_frame, text="Calculations", font=("Arial", 10), width=12, bd=0, relief=tk.RAISED)
+        self.explanation_btn = tk.Button(self.btn_frame, text="Explanation", font=("Arial", 10), width=12, bd=0, relief=tk.RAISED, command=self._show_explanation)
+        self.comparison_btn = tk.Button(self.btn_frame, text="Comparison", font=("Arial", 10), width=12, bd=0, relief=tk.RAISED, command=self._show_comparison)
+        self.calculations_btn = tk.Button(self.btn_frame, text="Calculations", font=("Arial", 10), width=12, bd=0, relief=tk.RAISED, command=self._show_calculations)
         self.explanation_btn.pack(side=tk.LEFT, padx=2)
         self.comparison_btn.pack(side=tk.LEFT, padx=2)
         self.calculations_btn.pack(side=tk.LEFT, padx=2)
 
         self.on_back = on_back
         self.on_language = on_language
-
-        # Meni za izbor jezika
         self.language_menu = None
         self.selected_language = LANGUAGES[0][1]  # default 'en'
 
@@ -146,18 +124,14 @@ class AstronomicalNormalMode:
             self.current_equinox = new_equinox
             self.astro_year = AstronomicalYear(self.current_equinox)
         self.astro_year.update(now)
-
         day = self.astro_year.day_index
         milidies = self.astro_year.milidan
-
         self.day_value_label.config(text=f"{day}")
         self.milidies_value_label.config(text=f"{milidies}")
         self.progress_var.set(milidies % 100)
-
         # Standardno vreme
         local_now = datetime.now()
         self.clock_label.config(text=local_now.strftime("%H:%M %m/%d"))
-
         self._draw_gradient()
         self.master.after(200, self._update_display)
 
@@ -166,7 +140,6 @@ class AstronomicalNormalMode:
             self.language_menu.destroy()
             self.language_menu = None
             return
-        # Popup prozor sa listom jezika
         self.language_menu = tk.Toplevel(self.master)
         self.language_menu.title("Choose language")
         self.language_menu.geometry("+{}+{}".format(self.master.winfo_x()+self.master.winfo_width()-180, self.master.winfo_y()+40))
@@ -176,7 +149,6 @@ class AstronomicalNormalMode:
             btn = tk.Button(self.language_menu, text=name, font=("Arial", 10), width=20,
                             command=lambda c=code: self._select_language(c))
             btn.pack(pady=1)
-        # Close when focus lost
         self.language_menu.transient(self.master)
         self.language_menu.grab_set()
         self.language_menu.protocol("WM_DELETE_WINDOW", self._close_language_menu)
@@ -195,6 +167,28 @@ class AstronomicalNormalMode:
     def _back(self):
         if self.on_back:
             self.on_back()
+
+    # Dugmad za kartice:
+    def _show_explanation(self):
+        win = tk.Toplevel(self.master)
+        win.title("Explanation — Astronomical Watch")
+        win.geometry("480x600")
+        frame = tk.Frame(win)
+        frame.pack(fill=tk.BOTH, expand=True)
+        text_widget = tk.Text(frame, wrap=tk.WORD, font=("Arial", 11), padx=12, pady=14, bg="#f8f8fa")
+        text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        text_widget.insert(tk.END, EXPLANATION_TEXT)
+        text_widget.config(state=tk.DISABLED)
+        scrollbar = tk.Scrollbar(frame, command=text_widget.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        text_widget.config(yscrollcommand=scrollbar.set)
+        tk.Button(win, text="Close", command=win.destroy, font=("Arial", 10), padx=12, pady=5).pack(pady=8)
+
+    def _show_comparison(self):
+        ComparisonCard(self.master)
+
+    def _show_calculations(self):
+        CalculationCard(self.master)
 
 def create_normal_mode(master: tk.Widget = None, on_back=None, on_language=None) -> AstronomicalNormalMode:
     return AstronomicalNormalMode(master, on_back=on_back, on_language=on_language)
