@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from core.astro_time_core import AstronomicalYear, get_current_equinox, get_next_equinox
 from ui.gradient import get_sky_theme
-from ui.explanation_card import EXPLANATION_TEXT
+from ui.explanation_sr_card import EXPLANATION_TEXT
 from ui.comparison_card import ComparisonCard
 from ui.calculation_card import CalculationCard
 

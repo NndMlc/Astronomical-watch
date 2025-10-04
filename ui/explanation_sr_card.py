@@ -1,7 +1,7 @@
 EXPLANATION_TEXT = """
-Astronomical Watch — Explanation
+Astronomski Sat — Objašnjenje
 
-Astronomical Watch je sat koji prikazuje vreme zasnovano na pravim astronomskim ciklusima, umesto klasičnog kalendarskog vremena. Ovakav sat je namenjen svima koji žele da razumeju i prate vreme prema kretanju Zemlje oko Sunca, bez konvencionalnih ograničenja poput kalendara, vremenskih zona i lokalnog vremena.
+Astronomski Sat je sat koji prikazuje vreme zasnovano na pravim astronomskim ciklusima, umesto klasičnog kalendarskog vremena. Ovakav sat je namenjen svima koji žele da razumeju i prate vreme prema kretanju Zemlje oko Sunca, bez konvencionalnih ograničenja poput kalendara, vremenskih zona i lokalnog vremena.
 
 Zašto godina počinje od prolećne ravnodnevnice?
 -------------------------------------------------
@@ -23,11 +23,11 @@ Pravo podne (local solar noon) se menja svaki dan zbog promena u brzini Zemljine
 
 Promena podneva po "Equation of Time"
 --------------------------------------
-Equation of Time je razlika između stvarnog solarnog vremena (pravog podneva) i srednjeg solarnog vremena. Ova razlika nastaje zbog kombinacije eliptične orbite Zemlje i nagiba njene ose. Astronomical Watch prikazuje dan u odnosu na srednje podne, ali koristi astronomske funkcije za izračunavanje i prikaz odstupanja, čime korisnik može videti koliko se stvarno podne razlikuje od proseka. Ova informacija je korisna za razumevanje prirodnih ritmova vremena i razlika između kalendarskog i astronomskog dana.
+Equation of Time je razlika između stvarnog solarnog vremena (pravog podneva) i srednjeg solarnog vremena. Ova razlika nastaje zbog kombinacije eliptične orbite Zemlje i nagiba njene ose. Astronomski Sat prikazuje dan u odnosu na srednje podne, ali koristi astronomske funkcije za izračunavanje i prikaz odstupanja, čime korisnik može videti koliko se stvarno podne razlikuje od proseka. Ova informacija je korisna za razumevanje prirodnih ritmova vremena i razlika između kalendarskog i astronomskog dana.
 
-Koje funkcije koristi Astronomical Watch?
+Koje funkcije koristi Astronomski Sat?
 ------------------------------------------
-Astronomical Watch koristi više naprednih astronomskih funkcija:
+Astronomski Sat koristi više naprednih astronomskih funkcija:
 
 - Precizno određivanje trenutka prolećne ravnodnevnice za svaku godinu koristeći visoko tačne astronomske proračune.
 - Izračunavanje dana od ekvinoksa, što omogućava tačno praćenje astronomskog dana u godini.
@@ -36,25 +36,25 @@ Astronomical Watch koristi više naprednih astronomskih funkcija:
 - Dinamička promena boja interfejsa (gradient) u skladu sa položajem Sunca na nebu.
 - Prikaz odbrojavanja do sledeće prolećne ravnodnevnice, sa specijalnim efektima vatrometa u trenutku ekvinoksa.
 
-Univerzalno vreme — Astronomical Watch vs. standardni sat
+Univerzalno vreme — Astronomski Sat uporedo sa standardnim satm
 ----------------------------------------------------------
-Jedna od najvažnijih razlika je što Astronomical Watch prikazuje **isto vreme za sve na planeti**. Vreme je globalno definisano prema astronomskim ciklusima i ne zavisi od lokalnih vremenskih zona. Bez obzira gde se nalazite, na severu ili jugu, istoku ili zapadu, sat prikazuje identičan broj Dies i miliDies za svakog korisnika u istom trenutku. Standardni sat, s druge strane, koristi lokalno vreme i vremenske zone, pa se vreme razlikuje od mesta do mesta, dok Astronomical Watch ukida te razlike i stvara jedinstven univerzalni sistem.
+Jedna od najvažnijih razlika je što Astronomski Sat prikazuje **isto vreme za sve na planeti**. Vreme je globalno definisano prema astronomskim ciklusima i ne zavisi od lokalnih vremenskih zona. Bez obzira gde se nalazite, na severu ili jugu, istoku ili zapadu, sat prikazuje identičan broj Dies i miliDies za svakog korisnika u istom trenutku. Standardni sat, s druge strane, koristi lokalno vreme i vremenske zone, pa se vreme razlikuje od mesta do mesta, dok Astronomski Sat ukida te razlike i stvara jedinstven univerzalni sistem.
 
 Istorija standardnog vremena
 -----------------------------
-Standardno vreme i sistem vremenskih zona nastali su tek krajem 19. veka razvojem železnica i telegrafa. Pre toga, svako mesto je imalo svoje lokalno vreme određeno pravim podnevom, pa su satovi u gradovima bili različiti. Prva zvanična vremenska zona uvedena je u Kanadi 1878. godine, a međunarodna konferencija u Vašingtonu 1884. usvojila je Grinički meridijan kao nultu tačku za računanje vremena. Vremenske zone su postale praktične za globalnu komunikaciju i transport, ali su istovremeno uneli arbitrarne, političke i društvene razlike u svakodnevni život. Astronomical Watch prevazilazi te razlike, vraćajući vreme njegovim prirodnim, univerzalnim osnovama.
+Standardno vreme i sistem vremenskih zona nastali su tek krajem 19. veka razvojem železnica i telegrafa. Pre toga, svako mesto je imalo svoje lokalno vreme određeno pravim podnevom, pa su satovi u gradovima bili različiti. Prva zvanična vremenska zona uvedena je u Kanadi 1878. godine, a međunarodna konferencija u Vašingtonu 1884. usvojila je Grinički meridijan kao nultu tačku za računanje vremena. Vremenske zone su postale praktične za globalnu komunikaciju i transport, ali su istovremeno uneli arbitrarne, političke i društvene razlike u svakodnevni život. Astronomski Sat prevazilazi te razlike, vraćajući vreme njegovim prirodnim, univerzalnim osnovama.
 
 Poređenje sa standardnim vremenom
 ----------------------------------
-Standardno vreme je proizvod istorijskih, geografskih i društvenih dogovora. Vremenske zone su određene političkim granicama, a početak dana i godine nije vezan za prirodne astronomske događaje. Na primer, ponoć u standardnom vremenu ne označava nikakvu posebnu astronomsku pojavu, već je proizvoljna tačka na lokalnom satu. Astronomical Watch, nasuprot tome, vezuje sve svoje jedinice za stvarne astronomske trenutke, čineći deo univerzalnog ciklusa koji važi za celu planetu.
+Standardno vreme je proizvod istorijskih, geografskih i društvenih dogovora. Vremenske zone su određene političkim granicama, a početak dana i godine nije vezan za prirodne astronomske događaje. Na primer, ponoć u standardnom vremenu ne označava nikakvu posebnu astronomsku pojavu, već je proizvoljna tačka na lokalnom satu. Astronomski Sat, nasuprot tome, vezuje sve svoje jedinice za stvarne astronomske trenutke, čineći deo univerzalnog ciklusa koji važi za celu planetu.
 
 Praktična upotreba
 ------------------
-Astronomical Watch je koristan za naučnike, astronome, edukatore, ljubitelje prirode, kao i za svakoga ko želi da se uskladi sa univerzalnim ritmovima Zemlje. Pruža osećaj povezanosti sa planetom i kosmičkim događanjima, omogućava lakše globalno razumevanje vremena bez zbunjujućih lokalnih razlika, i podstiče korisnike da razmišljaju o vremenu kao o univerzalnom, prirodnom fenomenu.
+Astronomski Sat je koristan za naučnike, astronome, edukatore, ljubitelje prirode, kao i za svakoga ko želi da se uskladi sa univerzalnim ritmovima Zemlje. Pruža osećaj povezanosti sa planetom i kosmičkim događanjima, omogućava lakše globalno razumevanje vremena bez zbunjujućih lokalnih razlika, i podstiče korisnike da razmišljaju o vremenu kao o univerzalnom, prirodnom fenomenu.
 
 Zašto pratiti vreme astronomski?
 ---------------------------------
-Astronomical Watch omogućava korisnicima da prate vreme na način koji je najbliži stvarnim astronomskim ciklusima i kretanjima Zemlje oko Sunca. Takav pristup daje dublje razumevanje prirodnih ritmova, pomaže u edukaciji, podstiče povezivanje sa prirodom i omogućava globalnu koordinaciju bez veštačkih razlika u vremenu.
+Astronomki Sat omogućava korisnicima da prate vreme na način koji je najbliži stvarnim astronomskim ciklusima i kretanjima Zemlje oko Sunca. Takav pristup daje dublje razumevanje prirodnih ritmova, pomaže u edukaciji, podstiče povezivanje sa prirodom i omogućava globalnu koordinaciju bez veštačkih razlika u vremenu.
 
-Ukratko, Astronomical Watch je sat budućnosti — univerzalan, precizan, edukativan i inspirativan.
+Ukratko, Astronomki Sat je sat budućnosti — univerzalan, precizan, edukativan i inspirativan.
 """
