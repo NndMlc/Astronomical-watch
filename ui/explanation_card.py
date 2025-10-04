@@ -30,4 +30,14 @@ Astronomical Watch koristi više naprednih astronomskih funkcija:
 - Dinamička promena boja interfejsa (gradient) u skladu sa položajem Sunca na nebu.
 
 Ovako definisan sat omogućava korisnicima da prate vreme na način koji je najbliži stvarnim astronomskim ciklusima i kretanjima Zemlje oko Sunca.
+
+Astronomical Watch vs Standard Clock:
+------------------------------------------
+
+- Astronomical Watch koristi stvarne astronomske cikluse (ekvinokse, podneva, meridijan), dok standardni sat koristi fiksne kalendarske datume i lokalno vreme.
+- Astronomska godina počinje sa prolećnom ravnodnevnicom, dok standardna godina počinje 1. januara.
+- Astronomski dan meri se od srednjeg podneva na referentnom meridijanu, dok standardni dan počinje u ponoć lokalnog vremena.
+- Astronomical Watch prikazuje hiljadite delove dana za precizniji prikaz trenutka, dok standardni sat deli dan na sate, minute i sekunde.
+- Prikaz boja neba u interfejsu Astronomical Watch-a odražava položaj Sunca, dok standardni sat nema takvu vizuelizaciju.
+
 """
