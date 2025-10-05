@@ -10,11 +10,14 @@ from ui.translations import tr, LANGUAGES
 from ui.comparison_card import ComparisonCard
 from ui.calculation_card import CalculationCard
 
-# Pretpostavka: postoji modul ui.explanation_cards sa EXPLANATION_XX_TEXT za svaki jezik
-try:
-    import ui.explanation_cards as explanation_cards
-except ImportError:
-    explanation_cards = None
+# Attempt to import ui.explanation_cards if it exists, otherwise fallback gracefully
+import importlib.util
+explanation_cards = None
+explanation_cards_path = os.path.join(os.path.dirname(__file__), "explanation_cards.py")
+if os.path.exists(explanation_cards_path):
+    spec = importlib.util.spec_from_file_location("ui.explanation_cards", explanation_cards_path)
+    explanation_cards = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(explanation_cards)
 
 SETTINGS_FILE = "settings.json"
 
