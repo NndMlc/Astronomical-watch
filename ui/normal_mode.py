@@ -1,22 +1,39 @@
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime, timezone
+import json
+import os
 
 from core.astro_time_core import AstronomicalYear, get_current_equinox, get_next_equinox
 from ui.gradient import get_sky_theme
-from ui.explanation_sr_card import EXPLANATION_TEXT
+from ui.translations import tr, LANGUAGES
 from ui.comparison_card import ComparisonCard
 from ui.calculation_card import CalculationCard
 
-LANGUAGES = [
-    ("English", "en"), ("Spanish", "es"), ("Chinese", "zh"),
-    ("Arabic", "ar"), ("Portuguese", "pt"), ("French", "fr"),
-    ("German", "de"), ("Russian", "ru"), ("Japanese", "ja"),
-    ("Hindi", "hi"), ("Iranian", "fa"), ("Bahasa", "id"),
-    ("Swahili", "sw"), ("Hausa", "ha"), ("Turkish", "tr"),
-    ("Greek", "el"), ("Serbian", "sr"), ("Polish", "pl"),
-    ("Italian", "it"), ("Dutch", "nl")
-]
+# Pretpostavka: postoji modul ui.explanation_cards sa EXPLANATION_XX_TEXT za svaki jezik
+try:
+    import ui.explanation_cards as explanation_cards
+except ImportError:
+    explanation_cards = None
+
+SETTINGS_FILE = "settings.json"
+
+def load_language_from_settings():
+    try:
+        if os.path.exists(SETTINGS_FILE):
+            with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
+                settings = json.load(f)
+                return settings.get("language", "en")
+    except Exception:
+        pass
+    return "en"
+
+def save_language_to_settings(lang_code):
+    try:
+        with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
+            json.dump({"language": lang_code}, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print("Error saving language:", e)
 
 class AstronomicalNormalMode:
     def __init__(self, master: tk.Widget = None, on_back=None, on_language=None):
@@ -30,69 +47,60 @@ class AstronomicalNormalMode:
         self.astro_year = AstronomicalYear(self.current_equinox)
         self.astro_year.update(now)
 
-        self._firework_shown = False  # Flag to hide countdown after fireworks
+        self._firework_shown = False
 
-        # Canvas za gradient pozadinu
         self.bg_canvas = tk.Canvas(self.master, highlightthickness=0, bd=0)
         self.bg_canvas.pack(fill=tk.BOTH, expand=True)
         self.bg_canvas.bind('<Configure>', self._on_canvas_configure)
 
-        # Glavni okvir na canvasu
         self.frame = tk.Frame(self.bg_canvas, bg='', bd=0)
         self.canvas_window = self.bg_canvas.create_window(0, 0, anchor=tk.NW, window=self.frame)
 
-        # Gornji levi ugao: povratak na Widget Mode
         self.back_btn = tk.Button(self.bg_canvas, text="⟵", font=("Arial", 12), command=self._back, bd=0, relief=tk.FLAT, bg="#e6e6e6", activebackground="#d6d6d6")
         self.bg_canvas.create_window(10, 10, anchor=tk.NW, window=self.back_btn, tags="nav_back")
 
-        # Gornji desni ugao: izbor jezika
         self.lang_btn = tk.Button(self.bg_canvas, text="🌐", font=("Arial", 12), command=self._show_language_menu, bd=0, relief=tk.FLAT, bg="#e6e6e6", activebackground="#d6d6d6")
         self.bg_canvas.create_window(0, 10, anchor=tk.NE, window=self.lang_btn, tags="nav_lang")
 
-        # Naslov malim fontom
-        self.title_label = tk.Label(self.frame, text="Astronomical Watch", font=("Arial", 10, "bold"), bg='', bd=0)
+        # Default language is loaded from settings.json (or English if not set)
+        self.selected_language = load_language_from_settings()
+        self.language_menu = None
+        self.on_back = on_back
+        self.on_language = on_language
+
+        self.title_label = tk.Label(self.frame, text=tr("title", self.selected_language), font=("Arial", 10, "bold"), bg='', bd=0)
         self.title_label.pack(pady=(24, 10))
 
-        # Dies i miliDies
-        self.dies_label = tk.Label(self.frame, text="Dies", font=("Arial", 10), bg='', bd=0)
+        self.dies_label = tk.Label(self.frame, text=tr("dies", self.selected_language), font=("Arial", 10), bg='', bd=0)
         self.dies_label.pack()
         self.day_value_label = tk.Label(self.frame, text="---", font=("Arial", 26, "bold"), bg='', bd=0)
         self.day_value_label.pack(pady=(0, 10))
-        self.milidies_label = tk.Label(self.frame, text="miliDies", font=("Arial", 10), bg='', bd=0)
+        self.milidies_label = tk.Label(self.frame, text=tr("milidies", self.selected_language), font=("Arial", 10), bg='', bd=0)
         self.milidies_label.pack()
         self.milidies_value_label = tk.Label(self.frame, text="---", font=("Arial", 26, "bold"), bg='', bd=0)
         self.milidies_value_label.pack(pady=(0, 12))
 
-        # Progres bar
         self.progress_var = tk.IntVar(value=0)
         self.progress_bar = ttk.Progressbar(self.frame, orient="horizontal", length=220, mode="determinate", maximum=99, variable=self.progress_var)
         self.progress_bar.pack(pady=(0, 2))
 
-        # Standardno vreme ispod progres bara
         self.clock_label = tk.Label(self.frame, text="", font=("Arial", 10), bg='', bd=0)
         self.clock_label.pack(pady=(5, 12))
 
-        # Dugmad za otvaranje kartica
         self.btn_frame = tk.Frame(self.frame, bg="", bd=0)
         self.btn_frame.pack(pady=(0, 10))
-        self.explanation_btn = tk.Button(self.btn_frame, text="Explanation", font=("Arial", 10), width=12, bd=0, relief=tk.RAISED, command=self._show_explanation)
-        self.comparison_btn = tk.Button(self.btn_frame, text="Comparison", font=("Arial", 10), width=12, bd=0, relief=tk.RAISED, command=self._show_comparison)
-        self.calculations_btn = tk.Button(self.btn_frame, text="Calculations", font=("Arial", 10), width=12, bd=0, relief=tk.RAISED, command=self._show_calculations)
+        self.explanation_btn = tk.Button(self.btn_frame, text=tr("explanation", self.selected_language), font=("Arial", 10), width=12, bd=0, relief=tk.RAISED, command=self._show_explanation)
+        self.comparison_btn = tk.Button(self.btn_frame, text=tr("comparison", self.selected_language), font=("Arial", 10), width=12, bd=0, relief=tk.RAISED, command=self._show_comparison)
+        self.calculations_btn = tk.Button(self.btn_frame, text=tr("calculations", self.selected_language), font=("Arial", 10), width=12, bd=0, relief=tk.RAISED, command=self._show_calculations)
         self.explanation_btn.pack(side=tk.LEFT, padx=2)
         self.comparison_btn.pack(side=tk.LEFT, padx=2)
         self.calculations_btn.pack(side=tk.LEFT, padx=2)
 
-        self.on_back = on_back
-        self.on_language = on_language
-        self.language_menu = None
-        self.selected_language = LANGUAGES[0][1]  # default 'en'
-
-        # Countdown frame (hidden initially)
         self.countdown_frame = tk.Frame(self.frame, bg="#d5ffd5", bd=0)
         self.countdown_label = tk.Label(self.countdown_frame, text="", font=("Arial", 12, "bold"), bg="#d5ffd5", fg="#225c17")
         self.countdown_label.pack(padx=8, pady=5)
         self.countdown_frame.pack(fill=tk.X, pady=(10,0))
-        self.countdown_frame.pack_forget()  # Hide at startup
+        self.countdown_frame.pack_forget()
 
         self._update_display()
 
@@ -105,7 +113,8 @@ class AstronomicalNormalMode:
         theme = get_sky_theme(datetime.now(timezone.utc))
         w = self.bg_canvas.winfo_width()
         h = self.bg_canvas.winfo_height()
-        if w < 1 or h < 1: return
+        if w < 1 or h < 1:
+            return
         self.bg_canvas.delete("gradient")
         steps = 64
         for i in range(steps):
@@ -132,7 +141,7 @@ class AstronomicalNormalMode:
         if new_equinox != self.current_equinox:
             self.current_equinox = new_equinox
             self.astro_year = AstronomicalYear(self.current_equinox)
-            self._firework_shown = False  # Reset fireworks for new equinox
+            self._firework_shown = False
 
         self.astro_year.update(now)
         day = self.astro_year.day_index
@@ -144,7 +153,6 @@ class AstronomicalNormalMode:
         self.clock_label.config(text=local_now.strftime("%H:%M %m/%d"))
         self._draw_gradient()
 
-        # Countdown to next vernal equinox
         next_eq = get_next_equinox(now)
         show_countdown = False
         if next_eq:
@@ -167,13 +175,11 @@ class AstronomicalNormalMode:
             if dies_diff < 11 and dies_diff >= 0:
                 show_countdown = True
 
-                stotinke = milidies_diff % 100
                 self.countdown_label.config(
-                    text=f"Vernal Equinox in: {dies_diff} Dies, {milidies_diff} miliDies ({stotinke:02} centi-miliDies)"
+                    text=tr("countdown_label", self.selected_language, dies=dies_diff, milidies=milidies_diff)
                 )
                 self.countdown_frame.pack(fill=tk.X, pady=(10,0))
 
-                # Vatromet kad nastupi trenutak ekvinoksa
                 if dies_diff == 0 and milidies_diff == 0 and not self._firework_shown:
                     self._firework_shown = True
                     self._fireworks()
@@ -188,12 +194,11 @@ class AstronomicalNormalMode:
 
     def _fireworks(self):
         win = tk.Toplevel(self.master)
-        win.title("Vernal Equinox!")
+        win.title(tr("countdown_label", self.selected_language, dies=0, milidies=0))
         win.geometry("400x350")
         canvas = tk.Canvas(win, width=400, height=320, bg="black")
         canvas.pack()
         import random
-        # Jednostavna animacija vatrometa
         for _ in range(40):
             x, y = random.randint(40, 360), random.randint(40, 280)
             color = random.choice(["red", "yellow", "lime", "blue", "magenta", "cyan", "orange", "white"])
@@ -228,24 +233,44 @@ class AstronomicalNormalMode:
 
     def _select_language(self, code):
         self.selected_language = code
+        save_language_to_settings(code)
         self._close_language_menu()
+        self._update_language_labels()
         if self.on_language:
             self.on_language(code)
+
+    def _update_language_labels(self):
+        self.title_label.config(text=tr("title", self.selected_language))
+        self.dies_label.config(text=tr("dies", self.selected_language))
+        self.milidies_label.config(text=tr("milidies", self.selected_language))
+        self.explanation_btn.config(text=tr("explanation", self.selected_language))
+        self.comparison_btn.config(text=tr("comparison", self.selected_language))
+        self.calculations_btn.config(text=tr("calculations", self.selected_language))
+        # Countdown label will auto-update in _update_display
 
     def _back(self):
         if self.on_back:
             self.on_back()
 
-    # Dugmad za kartice:
+    def _get_explanation_text(self):
+        key = f"EXPLANATION_{self.selected_language.upper()}_TEXT"
+        if explanation_cards and hasattr(explanation_cards, key):
+            return getattr(explanation_cards, key)
+        fallback = tr("explanation_text", self.selected_language)
+        if not fallback:
+            fallback = tr("explanation_text", "en")
+        return fallback
+
     def _show_explanation(self):
         win = tk.Toplevel(self.master)
-        win.title("Explanation — Astronomical Watch")
+        win.title(f"{tr('explanation', self.selected_language)} — {tr('title', self.selected_language)}")
         win.geometry("480x600")
         frame = tk.Frame(win)
         frame.pack(fill=tk.BOTH, expand=True)
         text_widget = tk.Text(frame, wrap=tk.WORD, font=("Arial", 11), padx=12, pady=14, bg="#f8f8fa")
         text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        text_widget.insert(tk.END, EXPLANATION_TEXT)
+        explanation = self._get_explanation_text()
+        text_widget.insert(tk.END, explanation)
         text_widget.config(state=tk.DISABLED)
         scrollbar = tk.Scrollbar(frame, command=text_widget.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -253,10 +278,10 @@ class AstronomicalNormalMode:
         tk.Button(win, text="Close", command=win.destroy, font=("Arial", 10), padx=12, pady=5).pack(pady=8)
 
     def _show_comparison(self):
-        ComparisonCard(self.master)
+        ComparisonCard(self.master, lang=self.selected_language)
 
     def _show_calculations(self):
-        CalculationCard(self.master)
+        CalculationCard(self.master, lang=self.selected_language)
 
 def create_normal_mode(master: tk.Widget = None, on_back=None, on_language=None) -> AstronomicalNormalMode:
     return AstronomicalNormalMode(master, on_back=on_back, on_language=on_language)
