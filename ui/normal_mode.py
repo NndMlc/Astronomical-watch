@@ -19,7 +19,7 @@ if os.path.exists(explanation_cards_path):
     explanation_cards = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(explanation_cards)
 
-SETTINGS_FILE = "settings.json"git pull --no-rebase
+SETTINGS_FILE = "settings.json"
 
 def load_language_from_settings():
     try:
