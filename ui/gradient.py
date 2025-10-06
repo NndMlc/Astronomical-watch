@@ -6,7 +6,7 @@ from __future__ import annotations
 import math
 from datetime import datetime, timezone
 from typing import Tuple
-from core.solar import solar_longitude_from_datetime
+from astronomical_watch.core.solar import solar_longitude_from_datetime
 
 
 class SkyTheme:
