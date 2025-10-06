@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import datetime, timezone
 
-from core.astro_time_core import AstronomicalYear, get_current_equinox, get_next_equinox
+from src.astronomical_watch.core.astro_time_core import AstronomicalYear, get_current_equinox, get_next_equinox
 
 class AstronomicalWidgetMode:
     def __init__(self, master: tk.Widget = None):
