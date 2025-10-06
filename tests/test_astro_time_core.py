@@ -1,6 +1,6 @@
 """Tests for astro_time_core module."""
 from datetime import datetime, timezone, timedelta
-from core.astro_time_core import (
+from astronomical_watch.core.astro_time_core import (
     AstroYear,
     NOON_UTC_HOUR,
     NOON_UTC_MINUTE,

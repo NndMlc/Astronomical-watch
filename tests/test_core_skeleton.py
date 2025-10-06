@@ -1,9 +1,9 @@
 import math
 from datetime import datetime, timezone
-from core.timebase import timescales_from_datetime
-from core.solar import solar_longitude_from_datetime
-from core.nutation import nutation_simple
-from core.frames import ecliptic_to_equatorial
+from astronomical_watch.core.timebase import timescales_from_datetime
+from astronomical_watch.core.solar import solar_longitude_from_datetime
+from astronomical_watch.core.nutation import nutation_simple
+from astronomical_watch.core.frames import ecliptic_to_equatorial
 
 def test_julian_day_monotonic():
     dt1 = datetime(2024, 1, 1, tzinfo=timezone.utc)

@@ -13,9 +13,9 @@ from datetime import datetime, timezone
 # Add repository to path
 sys.path.insert(0, os.path.dirname(__file__))
 
-from core.solar import solar_longitude_from_datetime, apparent_solar_longitude
-from core.vsop87_earth import _find_coefficient_file
-from core.timebase import timescales_from_datetime
+from astronomical_watch.core.solar import solar_longitude_from_datetime, apparent_solar_longitude
+from astronomical_watch.core.vsop87_earth import _find_coefficient_file
+from astronomical_watch.core.timebase import timescales_from_datetime
 from astronomical_watch import compute_vernal_equinox
 
 def rad_to_arcsec(rad):

@@ -7,7 +7,7 @@ import math
 import pytest
 from datetime import datetime, timezone
 
-from core.astro_time_core import AstroYear, LONGITUDE_REF_DEG
+from astronomical_watch.core.astro_time_core import AstroYear, LONGITUDE_REF_DEG
 
 
 def test_meridian_mapping_inverse_within_half_cell():

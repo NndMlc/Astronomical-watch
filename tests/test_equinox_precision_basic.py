@@ -5,11 +5,11 @@ Tests analytic results, internet fetch fallback, and precision comparison.
 import unittest
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone
-from services.equinox_service import (
+from astronomical_watch.services.equinox_service import (
     get_vernal_equinox, get_vernal_equinox_datetime, check_all_methods,
     compare_methods, clear_cache
 )
-from solar.equinox_precise import compute_vernal_equinox_precise, validate_equinox_solution
+from astronomical_watch.solar.equinox_precise import compute_vernal_equinox_precise, validate_equinox_solution
 from astronomical_watch import compute_vernal_equinox
 
 

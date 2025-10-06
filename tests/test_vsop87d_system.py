@@ -11,9 +11,9 @@ import os
 # Add the repository root to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from core.solar import solar_longitude_from_datetime, apparent_solar_longitude
-from core.vsop87_earth import earth_heliocentric_longitude, _find_coefficient_file, _get_coefficients
-from core.timebase import timescales_from_datetime
+from astronomical_watch.core.solar import solar_longitude_from_datetime, apparent_solar_longitude
+from astronomical_watch.core.vsop87_earth import earth_heliocentric_longitude, _find_coefficient_file, _get_coefficients
+from astronomical_watch.core.timebase import timescales_from_datetime
 
 class TestVSOP87DSystem(unittest.TestCase):
     """Test the VSOP87D dynamic loading system."""
@@ -120,7 +120,7 @@ class TestVSOP87DSystem(unittest.TestCase):
     
     def test_vsop87_time_conversion(self):
         """Test VSOP87 time conversion consistency."""
-        from core.vsop87_earth import _t
+        from astronomical_watch.core.vsop87_earth import _t
         
         # Test that time conversion is consistent
         t = _t(self.test_jd_tt)

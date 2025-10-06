@@ -3,7 +3,7 @@ Test ΔT values from Espenak & Meeus polynomials.
 Validates against expected values for selected years.
 """
 import unittest
-from astro.timescales import delta_t_espenak_meeus
+from astronomical_watch.astro.timescales import delta_t_espenak_meeus
 
 
 class TestTimescalesDeltaT(unittest.TestCase):

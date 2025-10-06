@@ -139,7 +139,7 @@ def demonstrate_astronomical_integration():
     print("\n=== DEMONSTRATION: Astronomical Integration ===")
     
     from ui.gradient import get_solar_altitude_approximation
-    from core.solar import solar_longitude_from_datetime
+    from astronomical_watch.core.solar import solar_longitude_from_datetime
     from datetime import datetime, timezone
     
     print("Solar data driving gradient themes:")
