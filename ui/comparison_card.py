@@ -1,6 +1,6 @@
 from tkinter import Toplevel, Label, Frame, Entry, Button
 from datetime import datetime, timezone, timedelta
-from core.astro_time_core import get_current_equinox, AstronomicalYear, get_next_equinox
+from astronomical_watch.core.astro_time_core import get_current_equinox, AstronomicalYear, get_next_equinox
 from ui.translations import tr
 
 def milidies_to_hm(milidies):
