@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import json
 import os
 
-from core.astro_time_core import AstronomicalYear, get_current_equinox, get_next_equinox
+from src.astronomical_watch.core.astro_time_core import AstronomicalYear, get_current_equinox, get_next_equinox
 from ui.gradient import get_sky_theme
 from ui.translations import tr, LANGUAGES
 from ui.comparison_card import ComparisonCard
