@@ -1,3 +1,4 @@
+```
 Astronomical Watch Core License v1.0 (NO MODIFICATION LICENSE)
 
 Copyright (c) 2025 NndMlc
@@ -6,6 +7,17 @@ All rights reserved.
 1. Definitions.
    "Core" means the set of source files located under the path
    src/astronomical_watch/core/ as listed verbatim in CORE_FILES.md at the time of distribution.
+
+   The protected Core now explicitly includes:
+   - __init__.py
+   - solar.py
+   - equinox.py
+   - timeframe.py
+   - timebase.py
+   - vsop87_earth.py
+   - nutation.py
+   - frames.py
+   - delta_t.py
 
 2. Grant of Permission.
    You are permitted to (a) use and execute the Core; (b) copy and redistribute
@@ -62,3 +74,5 @@ All rights reserved.
       (d) You submit the patch upstream and cease distribution within 30 days unless the
           patch (or an equivalent fix) is accepted upstream or the author grants written extension.
     Any other modification or continued distribution outside these bounds remains prohibited.
+
+```
