@@ -1,0 +1,51 @@
+@echo off
+title Astronomical Watch mikroDies - Windows Launch
+color 0B
+echo.
+echo ================================================
+echo    ASTRONOMICAL WATCH DESKTOP - WINDOWS
+echo ================================================
+echo.
+echo 🌟 Launching mikroDies precision desktop widget...
+echo.
+
+REM Check if Python is available
+python --version >nul 2>&1
+if errorlevel 1 (
+    echo ❌ Python nije pronađen!
+    echo.
+    echo Molimo instaliraj Python sa https://python.org/downloads/
+    echo Tokom instalacije štikliraj "Add Python to PATH"
+    echo.
+    pause
+    exit /b 1
+)
+
+echo ✓ Python pronađen
+echo.
+
+REM Try to run the Windows optimized version first
+if exist "windows_awatch.py" (
+    echo ▶️  Pokretam Windows optimizovanu verziju...
+    python windows_awatch.py
+) else if exist "standalone_desktop.py" (
+    echo ▶️  Pokretam standalone verziju...
+    python standalone_desktop.py
+) else if exist "desktop_app.py" (
+    echo ▶️  Pokretam glavnu desktop aplikaciju...
+    python desktop_app.py
+) else (
+    echo ❌ Nijedna desktop aplikacija nije pronađena!
+    echo.
+    echo Potrebni fajlovi:
+    echo - windows_awatch.py (preporučeno)
+    echo - standalone_desktop.py 
+    echo - desktop_app.py
+    echo.
+    pause
+    exit /b 1
+)
+
+echo.
+echo 👋 Desktop aplikacija zatvorena
+pause
