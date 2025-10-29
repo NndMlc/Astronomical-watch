@@ -48,4 +48,3 @@ def astronomical_time(dt: datetime) -> tuple[int, int]:
     if milli_day > 999:
         milli_day = 999
     return day_index, milli_day
-"""

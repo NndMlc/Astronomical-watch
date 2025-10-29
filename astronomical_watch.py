@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
-from astronomical_watch.core.solar import solar_longitude_from_datetime
+from src.astronomical_watch.core.solar import solar_longitude_from_datetime
 
 
 def compute_vernal_equinox(year: int) -> datetime:
@@ -57,35 +57,6 @@ def compute_vernal_equinox(year: int) -> datetime:
             continue
     
     return best_dt
-
-
-__all__ = ['compute_vernal_equinox']
-
-    # Initial guess: March 20 ~12:00 UTC (typical date)
-    current_dt = datetime(year, 3, 20, 12, 0, 0, tzinfo=timezone.utc)
-
-    for _ in range(10):
-        lon = solar_longitude_from_datetime(current_dt)  # radians, 0..2π
-        if lon > math.pi:
-            lon -= 2 * math.pi  # normalize to (-π, π]
-
-        if abs(lon) < 1e-8:
-            break
-
-        # Approximate derivative using a 1-hour finite difference
-        dt_step = timedelta(hours=1)
-        lon_plus = solar_longitude_from_datetime(current_dt + dt_step)
-        if lon_plus > math.pi:
-            lon_plus -= 2 * math.pi
-        deriv = (lon_plus - lon) / (dt_step.total_seconds() / 86400.0)  # rad/day
-
-        if abs(deriv) < 1e-12:
-            break
-
-        correction_days = -lon / deriv
-        current_dt += timedelta(days=correction_days)
-
-    return current_dt
 
 
 def astronomical_now(utc_time: Optional[datetime] = None) -> dict:
@@ -142,5 +113,19 @@ def astronomical_now(utc_time: Optional[datetime] = None) -> dict:
     }
 
 
-__all__ = ["compute_vernal_equinox", "astronomical_now"]
+__all__ = ["compute_vernal_equinox", "astronomical_now", "astronomical_time"]
+
+
+def astronomical_time(utc_time: Optional[datetime] = None) -> tuple[int, int]:
+    """
+    Get current astronomical time as (day_index, milli_day) tuple.
+    
+    Args:
+        utc_time: Optional UTC datetime, defaults to now
+        
+    Returns:
+        Tuple of (day_index, milli_day)
+    """
+    result = astronomical_now(utc_time)
+    return result["day_index"], result["milli_day"]
 

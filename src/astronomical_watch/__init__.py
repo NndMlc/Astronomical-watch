@@ -7,15 +7,12 @@ Dual licensing model (Plan C):
 
 Public API (initial, unstable):
     compute_vernal_equinox(year)
-    equation_of_time(dt)
     astronomical_time(dt) -> (day_index, milli_day)
 """
 from .core.equinox import compute_vernal_equinox  # noqa: F401
-from .core.solar import equation_of_time  # noqa: F401
 from .core.timeframe import astronomical_time  # noqa: F401
 
 __all__ = [
     "compute_vernal_equinox",
-    "equation_of_time",
     "astronomical_time",
 ]
