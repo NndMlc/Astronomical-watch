@@ -514,12 +514,6 @@ class NormalMode:
         progress_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
         progress_frame.pack(pady=(20, 5), padx=40)
         
-        tk.Label(progress_frame,
-                text="mikroDies Progress",
-                font=("Arial", 12),
-                bg=self.current_theme.bottom_color,
-                fg=self.current_theme.text_color).pack(pady=(0, 5))
-        
         self.main_progress_var = tk.IntVar(value=0)
         self.main_progress_bar = ttk.Progressbar(progress_frame,
                                                variable=self.main_progress_var,
@@ -528,12 +522,13 @@ class NormalMode:
                                                mode='determinate')
         self.main_progress_bar.pack()
         
-        self.progress_label = tk.Label(progress_frame,
-                                      text="0 / 1000 (0.0%)",
-                                      font=("Arial", 10),
-                                      bg=self.current_theme.bottom_color,
-                                      fg=self.current_theme.text_color)
-        self.progress_label.pack(pady=(5, 0))
+        # Label ISPOD progress bar-a sa trocifrenim mikroDies
+        self.mikro_label = tk.Label(progress_frame,
+                                   text="mikroDies: 000",
+                                   font=("DejaVu Sans Mono", 14),
+                                   bg=self.current_theme.bottom_color,
+                                   fg=self.current_theme.text_color)
+        self.mikro_label.pack(pady=(8, 0))
         
         # 5. STANDARDNO VREME - vidno odvojeno
         time_separator = tk.Frame(self.main_frame, bg=self.current_theme.text_color, height=1)
@@ -549,61 +544,69 @@ class NormalMode:
                                            fg=self.current_theme.text_color)
         self.standard_time_label.pack()
         
-        # 6. DUGMAD za kartice
+        # 6. DUGMAD sa slikama u jednom nizu
         buttons_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
         buttons_frame.pack(pady=(20, 30))
         
-        # Red dugmadi
-        button_row1 = tk.Frame(buttons_frame, bg=self.current_theme.bottom_color)
-        button_row1.pack(pady=5)
+        # Jedan red dugmadi sa slikama
+        button_row = tk.Frame(buttons_frame, bg=self.current_theme.bottom_color)
+        button_row.pack()
         
-        explanation_btn = tk.Button(button_row1,
-                                   text="Explanation",
-                                   font=("Arial", 11),
+        # Explanation - slovo "i"
+        explanation_btn = tk.Button(button_row,
+                                   text="i",
+                                   font=("Arial", 20, "bold"),
                                    bg=self.current_theme.top_color,
                                    fg=self.current_theme.text_color,
-                                   bd=1,
+                                   bd=2,
                                    relief='raised',
-                                   width=12,
+                                   width=4,
+                                   height=2,
                                    command=self.show_explanation)
-        explanation_btn.pack(side=tk.LEFT, padx=5)
+        explanation_btn.pack(side=tk.LEFT, padx=8)
+        self.create_tooltip(explanation_btn, "Explanation")
         
-        comparison_btn = tk.Button(button_row1,
-                                  text="Comparison",
-                                  font=("Arial", 11),
+        # Comparison - "<>"
+        comparison_btn = tk.Button(button_row,
+                                  text="<>",
+                                  font=("Arial", 16, "bold"),
                                   bg=self.current_theme.top_color,
                                   fg=self.current_theme.text_color,
-                                  bd=1,
+                                  bd=2,
                                   relief='raised',
-                                  width=12,
+                                  width=4,
+                                  height=2,
                                   command=self.show_comparison)
-        comparison_btn.pack(side=tk.LEFT, padx=5)
+        comparison_btn.pack(side=tk.LEFT, padx=8)
+        self.create_tooltip(comparison_btn, "Comparison")
         
-        # Drugi red dugmadi
-        button_row2 = tk.Frame(buttons_frame, bg=self.current_theme.bottom_color)
-        button_row2.pack(pady=5)
-        
-        calculation_btn = tk.Button(button_row2,
-                                   text="Calculation",
-                                   font=("Arial", 11),
+        # Calculation - kalkulator
+        calculation_btn = tk.Button(button_row,
+                                   text="🧮",
+                                   font=("Arial", 16),
                                    bg=self.current_theme.top_color,
                                    fg=self.current_theme.text_color,
-                                   bd=1,
+                                   bd=2,
                                    relief='raised',
-                                   width=12,
+                                   width=4,
+                                   height=2,
                                    command=self.show_calculation)
-        calculation_btn.pack(side=tk.LEFT, padx=5)
+        calculation_btn.pack(side=tk.LEFT, padx=8)
+        self.create_tooltip(calculation_btn, "Calculation")
         
-        settings_btn = tk.Button(button_row2,
-                               text="Settings",
-                               font=("Arial", 11),
+        # Settings - mašinski ključ
+        settings_btn = tk.Button(button_row,
+                               text="🔧",
+                               font=("Arial", 16),
                                bg=self.current_theme.top_color,
                                fg=self.current_theme.text_color,
-                               bd=1,
+                               bd=2,
                                relief='raised',
-                               width=12,
+                               width=4,
+                               height=2,
                                command=self.show_settings)
-        settings_btn.pack(side=tk.LEFT, padx=5)
+        settings_btn.pack(side=tk.LEFT, padx=8)
+        self.create_tooltip(settings_btn, "Settings")
         
     def minimize_to_widget(self):
         """Minimize to widget mode"""
@@ -638,9 +641,9 @@ class NormalMode:
             # 2. miliDies broj (veliki font, trocifreni)
             self.milides_number_label.config(text=f"{data['milides']:03d}")
             
-            # 3. Progress bar za mikroDies
+            # 3. Progress bar za mikroDies i label ispod
             self.main_progress_var.set(data['mikrodiet'])
-            self.progress_label.config(text=f"{data['mikrodiet']} / 1000 ({data['mikrodiet']/10:.1f}%)")
+            self.mikro_label.config(text=f"mikroDies: {data['mikrodiet']:03d}")
             
             # 4. Standardno vreme - UTC+timezone DD/MM/YYYY hh:mm:ss
             utc_time = data['utc']
@@ -681,6 +684,30 @@ class NormalMode:
         
         # Schedule next update
         self.parent.after(100, self.update_normal)
+    
+    def create_tooltip(self, widget, text):
+        """Kreiraj tooltip za widget"""
+        def show_tooltip(event):
+            tooltip = tk.Toplevel()
+            tooltip.wm_overrideredirect(True)
+            tooltip.wm_geometry(f"+{event.x_root+10}+{event.y_root+10}")
+            
+            label = tk.Label(tooltip, text=text,
+                           background="lightyellow",
+                           relief="solid",
+                           borderwidth=1,
+                           font=("Arial", 9))
+            label.pack()
+            
+            # Auto-hide nakon 2 sekunde
+            tooltip.after(2000, tooltip.destroy)
+            
+            # Sakrij kad se miš pomeri
+            def hide_tooltip(event):
+                tooltip.destroy()
+            widget.bind("<Leave>", hide_tooltip)
+        
+        widget.bind("<Enter>", show_tooltip)
     
     def show_language_menu(self):
         """Prikaži meni za izbor jezika"""
