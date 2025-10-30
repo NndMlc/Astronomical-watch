@@ -23,20 +23,18 @@ Desktop aplikacija sa widget/normal mode funkcionalnostima.
 - **Always on Top**: Da, uvek vidljiv
 - **Modernizovan dizajn**:
   - **Bez title bar-a** (overrideredirect=True)
-  - **Kompaktne dimenzije**: 160x110px  
-  - **Zaobljeni uglovi** (12px radius)
+  - **Kompaktne dimenzije**: 160x85px (smanjeno sa 110px)
+  - **Pravi zaobljeni uglovi** (12px radius sa arc technique)
   - **Dynamic gradient pozadina** iz astronomical data
   - **Canvas-based rendering** za smooth updates
+  - **Kontrastne boje**: automatski bela/crna na osnovu pozadine
 - **Sadržaj**:
   - Naslov "Astronomical Watch" (8px font)
   - Dies.miliDies brojevi (16px bold font)
   - Label "Dies . miliDies" (7px font)  
-  - **Color-coded progress bar** za mikroDies (0-1000):
-    - 0-250: Zelena
-    - 250-500: Žuta
-    - 500-750: Narandžasta  
-    - 750-1000: Pink/Crvena
-  - μDies status (7px font)
+  - **Jednostavan progress bar** za mikroDies (0-1000)
+    - Jedna boja (bela/crna) za optimalnu vidljivost
+    - Bez color coding - fokus na funkcionalnost
 - **Interakcija**: Dupli klik → Normal Mode
 
 #### Normal Mode:

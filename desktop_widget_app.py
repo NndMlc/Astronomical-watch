@@ -97,9 +97,9 @@ class WidgetMode:
         # Remove window decorations (title bar)
         self.parent.overrideredirect(True)
         
-        # Compact modern size
+        # Compact modern size - smanjeno zbog uklanjanja mikroDies label
         self.widget_width = 160
-        self.widget_height = 110
+        self.widget_height = 85
         
         self.parent.geometry(f"{self.widget_width}x{self.widget_height}")
         self.parent.resizable(False, False)
@@ -158,7 +158,7 @@ class WidgetMode:
         self.create_rounded_corners()
     
     def create_rounded_corners(self):
-        """Kreiraj zaobljene uglove efekt"""
+        """Kreiraj pravi zaobljeni uglovi efekat"""
         corner_radius = 12
         
         # Get system background color for masking
@@ -171,39 +171,59 @@ class WidgetMode:
         # Clear previous corners
         self.canvas.delete("corners")
         
-        # Create corner masks (small triangles)
+        # Create rounded corner arcs (not triangles)
         # Top-left corner
-        self.canvas.create_polygon(
-            0, 0, corner_radius, 0, 0, corner_radius,
+        self.canvas.create_arc(
+            0, 0, corner_radius * 2, corner_radius * 2,
+            start=90, extent=90, style='pieslice',
             fill=bg_color, outline=bg_color, tags="corners"
         )
         
         # Top-right corner  
-        self.canvas.create_polygon(
-            self.widget_width, 0, self.widget_width - corner_radius, 0, 
-            self.widget_width, corner_radius,
+        self.canvas.create_arc(
+            self.widget_width - corner_radius * 2, 0,
+            self.widget_width, corner_radius * 2,
+            start=0, extent=90, style='pieslice',
             fill=bg_color, outline=bg_color, tags="corners"
         )
         
         # Bottom-left corner
-        self.canvas.create_polygon(
-            0, self.widget_height, 0, self.widget_height - corner_radius,
-            corner_radius, self.widget_height,
+        self.canvas.create_arc(
+            0, self.widget_height - corner_radius * 2,
+            corner_radius * 2, self.widget_height,
+            start=180, extent=90, style='pieslice',
             fill=bg_color, outline=bg_color, tags="corners"
         )
         
         # Bottom-right corner
-        self.canvas.create_polygon(
+        self.canvas.create_arc(
+            self.widget_width - corner_radius * 2, self.widget_height - corner_radius * 2,
             self.widget_width, self.widget_height,
-            self.widget_width, self.widget_height - corner_radius,
-            self.widget_width - corner_radius, self.widget_height,
+            start=270, extent=90, style='pieslice',
             fill=bg_color, outline=bg_color, tags="corners"
         )
     
+    def get_contrast_color(self, background_theme):
+        """Dobij kontrastnu boju za text i progress bar na osnovu pozadine"""
+        if not background_theme:
+            return "#ffffff"
+        
+        # Parse background color za luminosity
+        bg_color = background_theme.bottom_color.lstrip('#')
+        r = int(bg_color[0:2], 16)
+        g = int(bg_color[2:4], 16) 
+        b = int(bg_color[4:6], 16)
+        
+        # Calculate relative luminance
+        luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+        
+        # Return white for dark backgrounds, black for light backgrounds
+        return "#ffffff" if luminance < 0.5 else "#000000"
+    
     def create_content(self):
-        """Kreiraj sadržaj widget-a na canvas-u"""
-        # Dobij boju teksta iz trenutne teme
-        text_color = self.current_theme.text_color if self.current_theme else "#ffffff"
+        """Kreiraj sadržaj widget-a na canvas-u - kompaktan dizajn"""
+        # Dobij kontrastnu boju
+        contrast_color = self.get_contrast_color(self.current_theme)
         
         # Clear previous content
         self.canvas.delete("content")
@@ -213,55 +233,49 @@ class WidgetMode:
             self.widget_width // 2, 12,
             text="Astronomical Watch",
             font=("Segoe UI", 8, "normal"),
-            fill=text_color,
+            fill=contrast_color,
             tags="content"
         )
         
         # 2. Brojevi koji pokazuju Dies i miliDies razdvojeni tackom
         self.time_text = self.canvas.create_text(
-            self.widget_width // 2, 40,
+            self.widget_width // 2, 35,
             text="000.000",
             font=("Consolas", 16, "bold"),
-            fill=text_color,
+            fill=contrast_color,
             tags="content"
         )
         
         # 3. Label na kome pise "Dies . miliDies"
         self.format_text = self.canvas.create_text(
-            self.widget_width // 2, 58,
+            self.widget_width // 2, 52,
             text="Dies . miliDies",
             font=("Segoe UI", 7, "normal"),
-            fill=text_color,
+            fill=contrast_color,
             tags="content"
         )
         
-        # 4. Progress bar za mikroDies (0-1000)
-        bar_y = 75
+        # 4. Progress bar za mikroDies (0-1000) - samo jednostavna boja
+        bar_y = 67
         bar_height = 6
         bar_margin = 15
         
         # Progress bar background
         self.progress_bg = self.canvas.create_rectangle(
             bar_margin, bar_y, self.widget_width - bar_margin, bar_y + bar_height,
-            fill="#000000", outline="#555555", width=1,
+            fill="#333333" if contrast_color == "#ffffff" else "#cccccc", 
+            outline="",
             tags="content"
         )
         
-        # Progress bar fill (will be updated)
+        # Progress bar fill - jednostavna bela ili crna boja
         self.progress_fill = self.canvas.create_rectangle(
             bar_margin + 1, bar_y + 1, bar_margin + 1, bar_y + bar_height - 1,
-            fill="#00ff88", outline="",
+            fill=contrast_color, outline="",
             tags="content"
         )
         
-        # mikroDies status
-        self.mikro_text = self.canvas.create_text(
-            self.widget_width // 2, 95,
-            text="μDies: 0",
-            font=("Segoe UI", 7, "normal"),
-            fill=text_color,
-            tags="content"
-        )
+        # UKLONJEN mikroDies label - kompaktniji dizajn
         
     def bind_double_click(self):
         """Bind double click event na canvas i sve elemente"""
@@ -316,15 +330,15 @@ class WidgetMode:
                 self.create_content()  # Recreate content with new colors
                 self._last_gradient_update = time.time()
             
-            # Get current theme text color
-            text_color = self.current_theme.text_color if self.current_theme else "#ffffff"
+            # Get current contrast color
+            contrast_color = self.get_contrast_color(self.current_theme)
             
             # Update text displays
             # Dies i miliDies razdvojeni tackom
             time_str = "{:03d}.{:03d}".format(data['dies'], data['milides'])
-            self.canvas.itemconfig(self.time_text, text=time_str, fill=text_color)
+            self.canvas.itemconfig(self.time_text, text=time_str, fill=contrast_color)
             
-            # Update progress bar za mikroDies (0-1000)
+            # Update progress bar za mikroDies (0-1000) - jednostavna boja
             mikro_value = data['mikrodiet']
             bar_margin = 15
             bar_width = self.widget_width - (2 * bar_margin) - 2  # Account for border
@@ -333,35 +347,23 @@ class WidgetMode:
             # Update progress fill
             self.canvas.coords(
                 self.progress_fill,
-                bar_margin + 1, 76, 
-                bar_margin + 1 + progress_width, 80
+                bar_margin + 1, 68, 
+                bar_margin + 1 + progress_width, 72
             )
             
-            # Color progress bar based on value
-            if mikro_value < 250:
-                progress_color = "#00ff88"  # Green
-            elif mikro_value < 500:
-                progress_color = "#ffff00"  # Yellow  
-            elif mikro_value < 750:
-                progress_color = "#ff8800"  # Orange
-            else:
-                progress_color = "#ff0088"  # Pink/Red
-                
-            self.canvas.itemconfig(self.progress_fill, fill=progress_color)
-            
-            # Update mikroDies status
-            mikro_text = f"μDies: {mikro_value}"
-            self.canvas.itemconfig(self.mikro_text, text=mikro_text, fill=text_color)
+            # Keep progress bar same color as text (contrast color)
+            self.canvas.itemconfig(self.progress_fill, fill=contrast_color)
             
             # Update other text colors
-            self.canvas.itemconfig(self.title_text, fill=text_color)
-            self.canvas.itemconfig(self.format_text, fill=text_color)
+            self.canvas.itemconfig(self.title_text, fill=contrast_color)
+            self.canvas.itemconfig(self.format_text, fill=contrast_color)
             
         except Exception as e:
             # Error handling - show fallback
             try:
+                contrast_color = self.get_contrast_color(self.current_theme)
                 self.canvas.itemconfig(self.time_text, text="ERR.ERR")
-                self.canvas.itemconfig(self.mikro_text, text="μDies: ?")
+                # UKLONJEN mikroDies error display
             except:
                 pass
         

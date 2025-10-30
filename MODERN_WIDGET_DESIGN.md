@@ -13,8 +13,6 @@
 │         Dies . miliDies         │  <- Mali font (7px)
 │                                 │
 │ ████████████░░░░░░░░░░░░░░░░░   │  <- Progress bar (mikroDies)
-│                                 │
-│           μDies: 567            │  <- Status (7px)
 └─────────────────────────────────┘
 ```
 
@@ -25,14 +23,14 @@
 - Čist, minimalan izgled
 
 #### 2. **Kompaktnije dimenzije** ✓
-- **Širina**: 160px (previously 180px)
-- **Visina**: 110px (previously 120px)
+- **Širina**: 160px
+- **Visina**: 85px (smanjeno sa 110px)
 - Bolje se uklapa u ugao ekrana
 
-#### 3. **Zaobljeni uglovi** ✓
-- `create_rounded_corners()` method
+#### 3. **Pravi zaobljeni uglovi** ✓
+- `create_arc()` sa `pieslice` style umesto sečenih trouglova
 - Corner radius: 12px
-- Maskiranje uglova sa system background color
+- Stvarni zaobljeni efekat
 
 #### 4. **Gradient pozadina** ✓
 - **Dynamic sky theme** na osnovu trenutnog vremena
@@ -40,10 +38,14 @@
 - **Fallback** na solid color ako gradient nije dostupan
 - **Refresh svakih 60 sekundi** za dynamic promene
 
-#### 5. **Canvas-based rendering** ✓
-- **Sve na Canvas-u** umesto tkinter widgeta
-- **Bolju kontolu** nad pozicioniranjem i bojama
-- **Smooth updates** bez flicker-a
+#### 5. **Pojednostavljene boje** ✓
+- **Kontrastne boje**: samo bela ili crna na osnovu pozadine
+- **Progress bar**: jednostavna bela/crna boja (bez color coding)
+- **Optimalna vidljivost** na svim gradient pozadinama
+
+#### 6. **Uklonjen mikroDies label** ✓
+- Kompaktniji dizajn
+- Fokus na glavne podatke: Dies.miliDies + progress bar
 
 ### Gradient Integration:
 
@@ -64,12 +66,9 @@ theme = get_sky_theme(current_time)
 1. **Naslov**: Diskretno, 8px font
 2. **Dies.miliDies**: **Prominentno**, 16px bold
 3. **Format label**: Objašnjenje, 7px
-4. **Progress bar**: **Vizuelni indicator**, color-coded:
-   - 0-250: Zelena
-   - 250-500: Žuta  
-   - 500-750: Narandžasta
-   - 750-1000: Pink/Crvena
-5. **μDies status**: Numerička vrednost, 7px
+4. **Progress bar**: **Vizuelni indicator**, jednostavna bela/crna boja
+   - Automatski contrast sa pozadinom
+   - Bolja vidljivost na svim gradient bojama
 
 ### Interaction:
 
