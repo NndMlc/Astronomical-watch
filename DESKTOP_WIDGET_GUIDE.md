@@ -29,12 +29,12 @@ Desktop aplikacija sa widget/normal mode funkcionalnostima.
   - **Canvas-based rendering** za smooth updates
   - **Mixed outline strategy**: brojevi sa outline, ostalo čisto belo
 - **Sadržaj**:
-  - Naslov "Astronomical Watch" (9px font, samo bela boja)
-  - Dies.miliDies brojevi (16px bold font, bela sa crnom ivicom) - FOKUS
-  - Label "Dies . miliDies" (10px font, samo bela boja)  
+  - Naslov "Astronomical Watch" (9px font, samo bela boja) - diskretno gore
+  - Dies.miliDies brojevi (28px bold font, bela sa crnom ivicom) - DOMINANTNI
+  - Label "Dies . miliDies" (10px font, samo bela boja) - blizu dna
   - **Jednostavan progress bar** za mikroDies (0-1000)
-    - Blizu labeli (y=58), minimalni margini (3px)
-    - Bela boja na tamnoj pozadini (#333333)
+    - Na samom dnu (y=72), mala donja margina
+    - Tanki (5px) i širok za maksimalno mesto brojevima
 - **Interakcija**: Dupli klik → Normal Mode
 
 #### Normal Mode:

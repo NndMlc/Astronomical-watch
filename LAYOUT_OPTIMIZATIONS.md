@@ -1,50 +1,52 @@
-# Widget Layout Dorade - Finalna Kompaktna Optimizacija ✅
+# Widget Layout Dorade - Veliki Brojevi Optimizacija ✅
 
-## 🎯 Finalne optimizacije za maksimalnu kompaktnost:
+## 🎯 Finalna optimizacija za maksimalne brojeve:
 
-### 1. **📏 Kompaktne dimenzije sa minimalnim marginima**
-- **Širina**: 140px (smanjeno sa 160px)
-- **Visina**: 80px (smanjeno sa 95px)
-- **Screen margin**: 5px (smanjeno sa 20px)
+### 1. **📏 Iste kompaktne dimenzije**
+- **Širina**: 140px
+- **Visina**: 80px
+- **Screen margin**: 5px
 - **Maksimalna efikasnost prostora**
 
-### 2. **🔤 Brojevi - originalna veličina sa outline** 
-**Font**: `("Consolas", 16, "bold")` ✅ (vraćeno na original)
+### 2. **🔤 Brojevi - SKORO DUPLO VEĆI** 
+**Font**: `("Consolas", 28, "bold")` ✅ (povećano sa 16px)
 
-Dies.miliDies brojevi:
+Dies.miliDies brojevi su sada **dominantni**:
+- **75% veći font** (16→28px) - skoro duplo!
 - **Bela boja sa crnom ivicom** - savršena vidljivost
-- **Pozicija**: y=28 (centrovano)
-- **Outline tehniga** zadržana za brojeve
+- **Pozicija**: y=30 (više mesta oko njih)
+- **Centralni fokus** widget-a
 
-### 3. **📝 Naslov i label - veći fontovi, samo beli**
-**Naslov**: `("Segoe UI", 9, "normal")` - povećano sa 7px ✅  
-**Label**: `("Segoe UI", 10, "normal")` - povećano sa 9px ✅
+### 3. **📝 Label i progress bar spušteni na dno**
+**Label pozicija**: y=60 (spušten sa y=44) ✅  
+**Progress bar pozicija**: y=72 (spušten sa y=58) ✅
 
-Oba **SAMO BELA BOJA** (bez outline):
-- **Jednostavniji izgled** - manje vizuelnog "noise"
-- **Fokus na brojeve** koje imaju outline
-- **Čist dizajn**
+Oba elementa sada **blizu donje granice**:
+- **Mala donja margina** (3-5px)
+- **Maksimalno mesto** za brojeve u centru
+- **Kompaktan donji layout**
 
-### 4. **📊 Progress bar blizu labeli**
-**Pozicija**: y=58 (blizu labeli, umesto na dnu) ✅  
-**Margin**: 3px (minimalni, umesto 8px) ✅
+### 4. **📊 Progress bar optimizovan**
+**Visina**: 5px (smanjeno sa 6px) ✅  
+**Margin**: 3px (minimalni) ✅
 
 Progress bar je sada:
-- **Direktno ispod labeli** - kompaktan layout
-- **Širok skoro do granica** (margin=3px)
-- **Integrisano sa sadržajem**
+- **Na samom dnu** (y=72-77)
+- **Tannji** za više mesta
+- **Širok skoro do granica**
 
 ## 📊 Finalni kompaktni layout:
 
 ```
 ┌───────────────────────┐  140x80px
-│  Astronomical Watch   │  <- y=8, 9px beli (čist)
+│  Astronomical Watch   │  <- y=8, 9px beli (diskretno)
 │                       │
-│      224.567          │  <- y=28, 16px bold (SA outline)
+│      224.567          │  <- y=30, 28px bold (VELIKI!)
 │                       │  
-│   Dies . miliDies     │  <- y=44, 10px beli (čist)
+│                       │  <- Slobodan prostor za brojeve
 │                       │
-│ ██████████████████   │  <- y=58, margin=3px (integrisano)
+│   Dies . miliDies     │  <- y=60, 10px beli (dno)
+│ ██████████████████   │  <- y=72, mala donja margina
 └───────────────────────┘
 ```
 
@@ -53,12 +55,14 @@ Progress bar je sada:
 - **Naslov/Label**: Samo beli ⚪ (čist dizajn)
 - **Progress bar**: Beli na tamnom ⚫⚪ (kontrast)
 
-## 💡 Rezultat - Maksimalna kompaktnost:
+## 💡 Rezultat - Maksimalni brojevi u kompaktnom widget-u:
 **140x80px widget sa:**
-- ✅ **Brojevi vidljivi** sa outline tehnikom
-- ✅ **Čist dizajn** naslova i labeli  
-- ✅ **Kompaktan layout** sa minimalnim marginima
-- ✅ **Progress bar integrisano** sa sadržajem
-- ✅ **Efikasno korišćenje prostora**
+- ✅ **28px brojevi** - skoro duplo veći, dominantni
+- ✅ **Čist dizajn** naslova (diskretno gore)  
+- ✅ **Donji layout** za label i progress bar
+- ✅ **Maksimalno mesto** za glavne podatke
+- ✅ **Savršen balans** veličine i kompaktnosti
+
+**Dies.miliDies brojevi su sada glavni fokus widget-a!** 🎯
 
 **Widget je sada fokusiran na ključne informacije sa maksimalnom vidljivošću!** 🚀

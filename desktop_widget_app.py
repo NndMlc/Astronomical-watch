@@ -193,31 +193,31 @@ class WidgetMode:
         self.title_text = self.canvas.create_text(
             self.widget_width // 2, 8,
             text="Astronomical Watch",
-            font=("Segoe UI", 9, "normal"),  # Povećano sa 7 na 9
+            font=("Segoe UI", 9, "normal"),
             fill="#ffffff",
             tags="content"
         )
         
-        # 2. Brojevi koji pokazuju Dies i miliDies - SA OUTLINE (bela preko crne)
+        # 2. Brojevi koji pokazuju Dies i miliDies - SKORO DUPLO VEĆI
         self.time_text, self.time_outline = self.create_text_with_outline(
-            self.widget_width // 2, 28,
+            self.widget_width // 2, 30,
             "000.000",
-            ("Consolas", 16, "bold"),  # Vraćeno na originalnu veličinu
+            ("Consolas", 28, "bold"),  # Povećano sa 16 na 28 (skoro duplo)
             tags="content"
         )
         
-        # 3. Label veći font - SAMO BELA BOJA (bez outline)
+        # 3. Label veći font - SPUŠTEN BLIZU DONJE GRANICE
         self.format_text = self.canvas.create_text(
-            self.widget_width // 2, 44,
+            self.widget_width // 2, 60,  # Spušten sa 44 na 60
             text="Dies . miliDies",
-            font=("Segoe UI", 10, "normal"),  # Povećano sa 9 na 10
+            font=("Segoe UI", 10, "normal"),
             fill="#ffffff",
             tags="content"
         )
         
-        # 4. Progress bar blizu labeli - minimalni margini
-        bar_y = 58  # Približeno labeli (smanjeno sa 85)
-        bar_height = 6
+        # 4. Progress bar NA SAMOM DNU sa malom marginom
+        bar_y = 72  # Spušten sa 58 na 72 (blizu dna)
+        bar_height = 5  # Smanjeno sa 6 na 5 za više mesta
         bar_margin = 3  # Minimalni margin
         
         # Progress bar background - tamna za kontrast sa belom
@@ -328,11 +328,11 @@ class WidgetMode:
                 bar_width = self.widget_width - (2 * bar_margin) - 2  # Account for border
                 progress_width = (mikro_value / 1000.0) * bar_width
                 
-                # Update progress fill - nove koordinate
+                # Update progress fill - nove koordinate (dno)
                 self.canvas.coords(
                     self.progress_fill,
-                    bar_margin + 1, 59,  # y=59 (bar_y + 1)
-                    bar_margin + 1 + progress_width, 63  # y=63 (bar_y + height - 1)
+                    bar_margin + 1, 73,  # y=73 (bar_y + 1)
+                    bar_margin + 1 + progress_width, 76  # y=76 (bar_y + height - 1)
                 )
                 
                 # Keep progress bar white
