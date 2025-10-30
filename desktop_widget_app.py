@@ -370,10 +370,10 @@ class NormalMode:
         
     def setup_normal_window(self):
         """Setup normal mode window sa gradientom"""
-        self.parent.title("Astronomical Watch - Full Display")
-        self.parent.geometry("520x650")  # Povećano za dodatni sadržaj
+        self.parent.title("Astronomical Watch")
+        self.parent.geometry("400x600")  # Prilagođeno za vertikalni layout
         self.parent.resizable(True, True)
-        self.parent.minsize(500, 600)  # Minimalne dimenzije
+        self.parent.minsize(350, 550)  # Minimalne dimenzije
         
         # Restore normal decorations
         self.parent.overrideredirect(False)
@@ -381,8 +381,8 @@ class NormalMode:
         # Center window
         screen_width = self.parent.winfo_screenwidth()
         screen_height = self.parent.winfo_screenheight()
-        x = (screen_width // 2) - 260  # Adjusted for new width
-        y = (screen_height // 2) - 325  # Adjusted for new height
+        x = (screen_width // 2) - 200  # Adjusted for new width
+        y = (screen_height // 2) - 300  # Adjusted for new height
         self.parent.geometry(f"+{x}+{y}")
         
         # Get current sky theme
@@ -425,240 +425,185 @@ class NormalMode:
                 )
     
     def create_normal_ui(self):
-        """Kreiraj full UI sa gradientom"""
+        """Kreiraj jednostavan vertikalni normal mode UI - NOVA SPECIFIKACIJA"""
         
-        # Main canvas for gradient background
-        self.main_canvas = tk.Canvas(
-            self.parent,
-            highlightthickness=0,
-            bd=0
-        )
-        self.main_canvas.pack(fill='both', expand=True)
+        # Main container sa scroll
+        self.main_canvas = tk.Canvas(self.parent, bg=self.current_theme.bottom_color, highlightthickness=0)
+        self.main_canvas.pack(fill=tk.BOTH, expand=True)
         
-        # Draw gradient background
-        self.draw_normal_gradient()
+        self.main_frame = tk.Frame(self.main_canvas, bg=self.current_theme.bottom_color)
+        canvas_frame = self.main_canvas.create_window(0, 0, anchor=tk.NW, window=self.main_frame)
         
-        # Main frame over canvas
-        self.main_frame = tk.Frame(self.main_canvas, bg='', highlightthickness=0, bd=0)
-        self.main_frame.configure(bg=self.current_theme.bottom_color)
-        
-        canvas_frame = self.main_canvas.create_window(0, 0, anchor='nw', window=self.main_frame)
-        
-        # Configure canvas scrolling
-        def configure_canvas(event):
-            self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
-            canvas_width = event.width
+        def configure_canvas(event=None):
+            canvas_width = event.width if event else self.main_canvas.winfo_width()
             self.main_canvas.itemconfig(canvas_frame, width=canvas_width)
         
         self.main_canvas.bind('<Configure>', configure_canvas)
         
-        # Header sa minimize dugmetom
+        # 1. HEADER sa dugmićima
         header_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
         header_frame.pack(fill=tk.X, padx=20, pady=15)
         
-        # Minimize dugme u gornjem desnom uglu
-        minimize_btn = tk.Button(header_frame,
-                               text="━",  # Unicode minimize simbol
-                               font=("Arial", 14, "bold"),
-                               bg=self.current_theme.top_color,
-                               fg=self.current_theme.text_color,
-                               bd=1,
-                               relief='raised',
-                               width=3,
-                               command=self.minimize_to_widget)
-        minimize_btn.pack(side=tk.RIGHT)
+        # Levo dugme - povratak na widget
+        back_btn = tk.Button(header_frame,
+                           text="←",
+                           font=("Arial", 16, "bold"),
+                           bg=self.current_theme.top_color,
+                           fg=self.current_theme.text_color,
+                           bd=1,
+                           relief='raised',
+                           width=3,
+                           command=self.minimize_to_widget)
+        back_btn.pack(side=tk.LEFT)
         
+        # Naslov u centru
         title = tk.Label(header_frame,
-                        text="ASTRONOMICAL WATCH",
-                        font=("Segoe UI", 16, "bold"),
+                        text="Astronomical Watch",
+                        font=("Arial", 16, "bold"),
                         bg=self.current_theme.bottom_color,
                         fg=self.current_theme.text_color)
-        title.pack(side=tk.LEFT)
+        title.pack(side=tk.LEFT, expand=True)
         
-        subtitle = tk.Label(header_frame,
-                           text="mikroDies Precision • Web API Style",
-                           font=("Segoe UI", 11),
-                           bg=self.current_theme.bottom_color,
-                           fg=self.current_theme.text_color)
-        subtitle.pack(side=tk.LEFT, padx=(0, 10))
+        # Desno dugme - izbor jezika
+        lang_btn = tk.Button(header_frame,
+                           text="🌐",
+                           font=("Arial", 16),
+                           bg=self.current_theme.top_color,
+                           fg=self.current_theme.text_color,
+                           bd=1,
+                           relief='raised',
+                           width=3,
+                           command=self.show_language_menu)
+        lang_btn.pack(side=tk.RIGHT)
         
-        # Main time card with semi-transparent background
-        time_frame = tk.Frame(self.main_frame, bg=self.current_theme.top_color, relief='raised', bd=1)
-        time_frame.pack(fill=tk.X, padx=20, pady=(0, 15))
+        # 2. DIES broj + label
+        dies_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
+        dies_frame.pack(pady=(20, 5))
         
-        self.main_time_label = tk.Label(time_frame,
-                                       text="000.000.000",
-                                       font=("Consolas", 24, "bold"),
-                                       bg=self.current_theme.top_color,
-                                       fg=self.current_theme.text_color)
-        self.main_time_label.pack(pady=15)
+        self.dies_number_label = tk.Label(dies_frame,
+                                         text="000",
+                                         font=("DejaVu Sans Mono", 48, "bold"),
+                                         bg=self.current_theme.bottom_color,
+                                         fg=self.current_theme.text_color)
+        self.dies_number_label.pack()
         
-        format_desc = tk.Label(time_frame,
-                              text="Dies . miliDies . mikroDies",
-                              font=("Segoe UI", 10),
-                              bg=self.current_theme.top_color,
-                              fg=self.current_theme.text_color)
-        format_desc.pack(pady=(0, 10))
+        tk.Label(dies_frame,
+                text="Dies",
+                font=("Arial", 14),
+                bg=self.current_theme.bottom_color,
+                fg=self.current_theme.text_color).pack()
         
-        # Info grid - PROŠIRENO kao web API prikaz
-        info_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
-        info_frame.pack(fill=tk.X, padx=20, pady=(0, 15))
+        # 3. MILIDIES broj + label
+        milides_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
+        milides_frame.pack(pady=(15, 5))
         
-        # Timestamp card - kao web API
-        timestamp_frame = tk.Frame(info_frame, bg=self.current_theme.top_color, relief='raised', bd=1)
-        timestamp_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        tk.Label(timestamp_frame, text="TIMESTAMPS",
-                font=("Arial", 10, "bold"), bg=self.current_theme.top_color, fg=self.current_theme.text_color).pack(pady=(8, 5))
-        
-        self.timestamp_basic_label = tk.Label(timestamp_frame,
-                                             text="Basic: 000.000",
-                                             font=("Consolas", 12),
-                                             bg=self.current_theme.top_color,
-                                             fg=self.current_theme.text_color)
-        self.timestamp_basic_label.pack(pady=2)
-        
-        self.timestamp_full_label = tk.Label(timestamp_frame,
-                                            text="Full: 000.000.000",
-                                            font=("Consolas", 12),
-                                            bg=self.current_theme.top_color,
-                                            fg=self.current_theme.text_color)
-        self.timestamp_full_label.pack(pady=(2, 8))
-        
-        # Glavni sadržaj - dve kolone
-        content_frame = tk.Frame(info_frame, bg=self.current_theme.bottom_color)
-        content_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        # Left column - Components
-        left_col = tk.Frame(content_frame, bg=self.current_theme.bottom_color)
-        left_col.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        
-        tk.Label(left_col, text="ASTRONOMICAL COMPONENTS",
-                font=("Arial", 10, "bold"), bg=self.current_theme.bottom_color, fg=self.current_theme.text_color).pack(anchor='w', pady=(0, 5))
-        self.dies_label = tk.Label(left_col,
-                                  text="Dies: ---",
-                                  font=("Consolas", 10),
-                                  bg=self.current_theme.bottom_color,
-                                  fg=self.current_theme.text_color)
-        self.dies_label.pack(anchor='w', pady=2)
-        
-        self.milides_label = tk.Label(left_col,
-                                     text="miliDies: ---",
-                                     font=("Consolas", 10),
-                                     bg=self.current_theme.bottom_color,
-                                     fg=self.current_theme.text_color)
-        self.milides_label.pack(anchor='w', pady=2)
-        
-        self.mikrodiet_label = tk.Label(left_col,
-                                       text="mikroDies: ---",
-                                       font=("Consolas", 10),
-                                       bg=self.current_theme.bottom_color,
-                                       fg=self.current_theme.text_color)
-        self.mikrodiet_label.pack(anchor='w', pady=2)
-        
-        self.mikro_fraction_label = tk.Label(left_col,
-                                            text="μDies Fraction: ---.---",
-                                            font=("Consolas", 10),
+        self.milides_number_label = tk.Label(milides_frame,
+                                            text="000",
+                                            font=("DejaVu Sans Mono", 48, "bold"),
                                             bg=self.current_theme.bottom_color,
                                             fg=self.current_theme.text_color)
-        self.mikro_fraction_label.pack(anchor='w', pady=2)
+        self.milides_number_label.pack()
         
-        # Right column - Time References
-        right_col = tk.Frame(content_frame, bg=self.current_theme.bottom_color)
-        right_col.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        tk.Label(milides_frame,
+                text="miliDies",
+                font=("Arial", 14),
+                bg=self.current_theme.bottom_color,
+                fg=self.current_theme.text_color).pack()
         
-        tk.Label(right_col, text="TIME REFERENCES",
-                font=("Arial", 10, "bold"), bg=self.current_theme.bottom_color, fg=self.current_theme.text_color).pack(anchor='e', pady=(0, 5))
-        self.utc_label = tk.Label(right_col,
-                                 text="UTC: ---",
-                                 font=("Consolas", 10),
-                                 bg=self.current_theme.bottom_color,
-                                 fg=self.current_theme.text_color)
-        self.utc_label.pack(anchor='e', pady=2)
-        
-        self.utc_iso_label = tk.Label(right_col,
-                                     text="UTC ISO: ---",
-                                     font=("Consolas", 9),
-                                     bg=self.current_theme.bottom_color,
-                                     fg=self.current_theme.text_color)
-        self.utc_iso_label.pack(anchor='e', pady=2)
-        
-        self.local_label = tk.Label(right_col,
-                                   text="Local: ---",
-                                   font=("Consolas", 10),
-                                   bg=self.current_theme.bottom_color,
-                                   fg=self.current_theme.text_color)
-        self.local_label.pack(anchor='e', pady=2)
-        
-        # Equinox information card
-        equinox_frame = tk.Frame(info_frame, bg=self.current_theme.top_color, relief='raised', bd=1)
-        equinox_frame.pack(fill=tk.X, pady=(0, 10))
-        
-        tk.Label(equinox_frame, text="EQUINOX PERIOD",
-                font=("Arial", 10, "bold"), bg=self.current_theme.top_color, fg=self.current_theme.text_color).pack(pady=(8, 5))
-        
-        self.current_equinox_label = tk.Label(equinox_frame,
-                                             text="Current: 2025-03-20T09:01:28Z",
-                                             font=("Consolas", 9),
-                                             bg=self.current_theme.top_color,
-                                             fg=self.current_theme.text_color)
-        self.current_equinox_label.pack(pady=1)
-        
-        self.next_equinox_label = tk.Label(equinox_frame,
-                                          text="Next: 2026-03-20T14:45:50Z",
-                                          font=("Consolas", 9),
-                                          bg=self.current_theme.top_color,
-                                          fg=self.current_theme.text_color)
-        self.next_equinox_label.pack(pady=(1, 8))
-        
-        # Progress section
-        progress_frame = tk.Frame(self.parent, bg=self.card_color, relief='sunken', bd=2)
-        progress_frame.pack(fill=tk.X, padx=20, pady=(0, 15))
+        # 4. PROGRESS BAR za mikroDies
+        progress_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
+        progress_frame.pack(pady=(20, 5), padx=40)
         
         tk.Label(progress_frame,
-                text="mikroDies Progress (0-1000)",
-                font=("Arial", 10, "bold"),
-                bg=self.card_color,
-                fg=self.text_color).pack(pady=(10, 5))
+                text="mikroDies Progress",
+                font=("Arial", 12),
+                bg=self.current_theme.bottom_color,
+                fg=self.current_theme.text_color).pack(pady=(0, 5))
         
         self.main_progress_var = tk.IntVar(value=0)
         self.main_progress_bar = ttk.Progressbar(progress_frame,
                                                variable=self.main_progress_var,
                                                maximum=1000,
-                                               length=380,
+                                               length=300,
                                                mode='determinate')
-        self.main_progress_bar.pack(pady=(0, 5))
+        self.main_progress_bar.pack()
         
         self.progress_label = tk.Label(progress_frame,
-                                      text="0 / 1000 mikroDies",
-                                      font=("Arial", 9),
-                                      bg=self.card_color,
-                                      fg='#cccccc')
-        self.progress_label.pack(pady=(0, 10))
+                                      text="0 / 1000 (0.0%)",
+                                      font=("Arial", 10),
+                                      bg=self.current_theme.bottom_color,
+                                      fg=self.current_theme.text_color)
+        self.progress_label.pack(pady=(5, 0))
         
-        # Control buttons
-        button_frame = tk.Frame(self.parent, bg=self.bg_color)
-        button_frame.pack(fill=tk.X, padx=20, pady=10)
+        # 5. STANDARDNO VREME - vidno odvojeno
+        time_separator = tk.Frame(self.main_frame, bg=self.current_theme.text_color, height=1)
+        time_separator.pack(fill=tk.X, padx=50, pady=(25, 15))
         
-        minimize_btn = tk.Button(button_frame,
-                               text="Minimize to Widget",
-                               command=self.minimize_to_widget,
-                               bg=self.card_color,
-                               fg=self.text_color,
+        time_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
+        time_frame.pack(pady=(0, 20))
+        
+        self.standard_time_label = tk.Label(time_frame,
+                                           text="UTC+1  30/10/2025  12:34:56",
+                                           font=("DejaVu Sans Mono", 16),
+                                           bg=self.current_theme.bottom_color,
+                                           fg=self.current_theme.text_color)
+        self.standard_time_label.pack()
+        
+        # 6. DUGMAD za kartice
+        buttons_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
+        buttons_frame.pack(pady=(20, 30))
+        
+        # Red dugmadi
+        button_row1 = tk.Frame(buttons_frame, bg=self.current_theme.bottom_color)
+        button_row1.pack(pady=5)
+        
+        explanation_btn = tk.Button(button_row1,
+                                   text="Explanation",
+                                   font=("Arial", 11),
+                                   bg=self.current_theme.top_color,
+                                   fg=self.current_theme.text_color,
+                                   bd=1,
+                                   relief='raised',
+                                   width=12,
+                                   command=self.show_explanation)
+        explanation_btn.pack(side=tk.LEFT, padx=5)
+        
+        comparison_btn = tk.Button(button_row1,
+                                  text="Comparison",
+                                  font=("Arial", 11),
+                                  bg=self.current_theme.top_color,
+                                  fg=self.current_theme.text_color,
+                                  bd=1,
+                                  relief='raised',
+                                  width=12,
+                                  command=self.show_comparison)
+        comparison_btn.pack(side=tk.LEFT, padx=5)
+        
+        # Drugi red dugmadi
+        button_row2 = tk.Frame(buttons_frame, bg=self.current_theme.bottom_color)
+        button_row2.pack(pady=5)
+        
+        calculation_btn = tk.Button(button_row2,
+                                   text="Calculation",
+                                   font=("Arial", 11),
+                                   bg=self.current_theme.top_color,
+                                   fg=self.current_theme.text_color,
+                                   bd=1,
+                                   relief='raised',
+                                   width=12,
+                                   command=self.show_calculation)
+        calculation_btn.pack(side=tk.LEFT, padx=5)
+        
+        settings_btn = tk.Button(button_row2,
+                               text="Settings",
+                               font=("Arial", 11),
+                               bg=self.current_theme.top_color,
+                               fg=self.current_theme.text_color,
+                               bd=1,
                                relief='raised',
-                               bd=2,
-                               padx=20)
-        minimize_btn.pack(side=tk.LEFT)
-        
-        close_btn = tk.Button(button_frame,
-                            text="Close Application",
-                            command=self.parent.quit,
-                            bg='#8b0000',
-                            fg=self.text_color,
-                            relief='raised',
-                            bd=2,
-                            padx=20)
-        close_btn.pack(side=tk.RIGHT)
+                               width=12,
+                               command=self.show_settings)
+        settings_btn.pack(side=tk.LEFT, padx=5)
         
     def minimize_to_widget(self):
         """Minimize to widget mode"""
@@ -666,7 +611,7 @@ class NormalMode:
             self.on_minimize()
     
     def update_normal(self):
-        """Update normal mode display - WEB API stil"""
+        """Update normal mode display - NOVA JEDNOSTAVNA SPECIFIKACIJA"""
         try:
             if HAS_CORE:
                 try:
@@ -680,88 +625,87 @@ class NormalMode:
                         'dies': reading.day_index,
                         'milides': reading.miliDies,
                         'mikrodiet': reading.mikroDies,
-                        'mikro_fraction': reading.mikroDies_fraction,
-                        'utc': reading.utc,
-                        'current_equinox': current_eq,
-                        'next_equinox': next_eq
+                        'utc': reading.utc
                     }
                 except:
-                    calc_data = AstronomicalCalculator.calculate_time()
-                    data = {
-                        'dies': calc_data['dies'],
-                        'milides': calc_data['milides'], 
-                        'mikrodiet': calc_data['mikrodiet'],
-                        'mikro_fraction': 0.0,
-                        'utc': calc_data['utc'],
-                        'current_equinox': datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc),
-                        'next_equinox': datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
-                    }
+                    data = AstronomicalCalculator.calculate_time()
             else:
-                calc_data = AstronomicalCalculator.calculate_time()
-                data = {
-                    'dies': calc_data['dies'],
-                    'milides': calc_data['milides'], 
-                    'mikrodiet': calc_data['mikrodiet'],
-                    'mikro_fraction': 0.0,
-                    'utc': calc_data['utc'],
-                    'current_equinox': datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc),
-                    'next_equinox': datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
-                }
+                data = AstronomicalCalculator.calculate_time()
             
-            # Main time display - NOVO FORMATIRANJE
-            time_str = "{}.{:03d}.{:03d}".format(
-                data['dies'], data['milides'], data['mikrodiet']
-            )
-            self.main_time_label.config(text=time_str)
+            # 1. Dies broj (veliki font)
+            self.dies_number_label.config(text=str(data['dies']))
             
-            # Timestamps - kao web API
-            basic_timestamp = "{}.{:03d}".format(data['dies'], data['milides'])
-            full_timestamp = "{}.{:03d}.{:03d}".format(data['dies'], data['milides'], data['mikrodiet'])
+            # 2. miliDies broj (veliki font, trocifreni)
+            self.milides_number_label.config(text=f"{data['milides']:03d}")
             
-            self.timestamp_basic_label.config(text=f"Basic: {basic_timestamp}")
-            self.timestamp_full_label.config(text=f"Full: {full_timestamp}")
-            
-            # Components - POBOLJŠANO
-            self.dies_label.config(text=f"Dies: {data['dies']}")
-            self.milides_label.config(text=f"miliDies: {data['milides']}")
-            self.mikrodiet_label.config(text=f"mikroDies: {data['mikrodiet']}")
-            self.mikro_fraction_label.config(text=f"μDies Fraction: {data['mikro_fraction']:.3f}")
-            
-            # Time references - PROŠIRENO
-            utc_str = data['utc'].strftime('%H:%M:%S UTC')
-            self.utc_label.config(text=f"UTC: {utc_str}")
-            
-            # UTC ISO format - kao web API
-            utc_iso = data['utc'].isoformat().replace("+00:00", "Z")
-            # Skrati ISO da stane u prikaz
-            if len(utc_iso) > 20:
-                utc_iso = utc_iso[:19] + "Z"
-            self.utc_iso_label.config(text=f"UTC ISO: {utc_iso}")
-            
-            try:
-                local_time = data['utc'].replace(tzinfo=timezone.utc).astimezone()
-                local_str = local_time.strftime('%H:%M:%S')
-                self.local_label.config(text=f"Local: {local_str}")
-            except:
-                self.local_label.config(text="Local: --:--:--")
-            
-            # Equinox information - NOVO
-            current_eq_str = data['current_equinox'].strftime('%Y-%m-%dT%H:%M:%SZ')
-            next_eq_str = data['next_equinox'].strftime('%Y-%m-%dT%H:%M:%SZ')
-            
-            self.current_equinox_label.config(text=f"Current: {current_eq_str}")
-            self.next_equinox_label.config(text=f"Next: {next_eq_str}")
-            
-            # Progress - POBOLJŠANO
+            # 3. Progress bar za mikroDies
             self.main_progress_var.set(data['mikrodiet'])
-            self.progress_label.config(text=f"mikroDies: {data['mikrodiet']} / 1000 ({data['mikrodiet']/10:.1f}%)")
+            self.progress_label.config(text=f"{data['mikrodiet']} / 1000 ({data['mikrodiet']/10:.1f}%)")
+            
+            # 4. Standardno vreme - UTC+timezone DD/MM/YYYY hh:mm:ss
+            utc_time = data['utc']
+            
+            # Pokušaj da izračunaš lokalnu timezone offset
+            try:
+                local_time = utc_time.replace(tzinfo=timezone.utc).astimezone()
+                # Izračunaj offset u satima
+                offset_seconds = local_time.utcoffset().total_seconds()
+                offset_hours = int(offset_seconds / 3600)
+                
+                # Format timezone
+                if offset_hours >= 0:
+                    timezone_str = f"UTC+{offset_hours}"
+                else:
+                    timezone_str = f"UTC{offset_hours}"
+                
+                # Format datum i vreme
+                date_str = local_time.strftime("%d/%m/%Y")
+                time_str = local_time.strftime("%H:%M:%S")
+                
+                standard_time_text = f"{timezone_str}  {date_str}  {time_str}"
+                
+            except:
+                # Fallback na UTC
+                date_str = utc_time.strftime("%d/%m/%Y")
+                time_str = utc_time.strftime("%H:%M:%S")
+                standard_time_text = f"UTC+0  {date_str}  {time_str}"
+            
+            self.standard_time_label.config(text=standard_time_text)
             
         except Exception as e:
-            self.main_time_label.config(text="ERROR")
+            # Error handling
+            self.dies_number_label.config(text="ERR")
+            self.milides_number_label.config(text="ERR")
+            self.standard_time_label.config(text="ERROR")
             print(f"Normal mode update error: {e}")
         
         # Schedule next update
         self.parent.after(100, self.update_normal)
+    
+    def show_language_menu(self):
+        """Prikaži meni za izbor jezika"""
+        # Placeholder - može se implementirati kasnije
+        print("Language menu - to be implemented")
+    
+    def show_explanation(self):
+        """Prikaži explanation karticu"""
+        # Placeholder - može se implementirati kasnije
+        print("Explanation card - to be implemented")
+    
+    def show_comparison(self):
+        """Prikaži comparison karticu"""
+        # Placeholder - može se implementirati kasnije
+        print("Comparison card - to be implemented")
+    
+    def show_calculation(self):
+        """Prikaži calculation karticu"""
+        # Placeholder - može se implementirati kasnije
+        print("Calculation card - to be implemented")
+    
+    def show_settings(self):
+        """Prikaži settings karticu"""
+        # Placeholder - može se implementirati kasnije
+        print("Settings card - to be implemented")
 
 class AstronomicalWatchApp:
     """Glavna aplikacija - widget/normal mode manager"""
