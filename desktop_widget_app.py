@@ -154,124 +154,81 @@ class WidgetMode:
                 fill=color, width=1, tags="gradient"
             )
         
-        # Create rounded corners effect
-        self.create_rounded_corners()
-    
-    def create_rounded_corners(self):
-        """Kreiraj pravi zaobljeni uglovi efekat"""
-        corner_radius = 12
-        
-        # Get system background color for masking
-        try:
-            bg_rgb = self.parent.winfo_rgb(self.parent.cget('bg'))
-            bg_color = f"#{bg_rgb[0]//256:02x}{bg_rgb[1]//256:02x}{bg_rgb[2]//256:02x}"
-        except:
-            bg_color = "#f0f0f0"  # Default system color
-        
-        # Clear previous corners
-        self.canvas.delete("corners")
-        
-        # Create rounded corner arcs (not triangles)
-        # Top-left corner
-        self.canvas.create_arc(
-            0, 0, corner_radius * 2, corner_radius * 2,
-            start=90, extent=90, style='pieslice',
-            fill=bg_color, outline=bg_color, tags="corners"
-        )
-        
-        # Top-right corner  
-        self.canvas.create_arc(
-            self.widget_width - corner_radius * 2, 0,
-            self.widget_width, corner_radius * 2,
-            start=0, extent=90, style='pieslice',
-            fill=bg_color, outline=bg_color, tags="corners"
-        )
-        
-        # Bottom-left corner
-        self.canvas.create_arc(
-            0, self.widget_height - corner_radius * 2,
-            corner_radius * 2, self.widget_height,
-            start=180, extent=90, style='pieslice',
-            fill=bg_color, outline=bg_color, tags="corners"
-        )
-        
-        # Bottom-right corner
-        self.canvas.create_arc(
-            self.widget_width - corner_radius * 2, self.widget_height - corner_radius * 2,
-            self.widget_width, self.widget_height,
-            start=270, extent=90, style='pieslice',
-            fill=bg_color, outline=bg_color, tags="corners"
-        )
+        # UKLONJEN rounded corners - ostaju normalni uglovi
     
     def get_contrast_color(self, background_theme):
-        """Dobij kontrastnu boju za text i progress bar na osnovu pozadine"""
-        if not background_theme:
-            return "#ffffff"
+        """Uvek vrati belu boju za bolju vidljivost"""
+        return "#ffffff"
+    
+    def create_text_with_outline(self, x, y, text, font, fill_color="#ffffff", outline_color="#000000", outline_width=1, tags="content"):
+        """Kreira tekst sa crnom ivicom za bolju vidljivost"""
+        # Kreiraj crnu ivicu sa offset-ima
+        offsets = [
+            (-outline_width, -outline_width), (-outline_width, 0), (-outline_width, outline_width),
+            (0, -outline_width), (0, outline_width),
+            (outline_width, -outline_width), (outline_width, 0), (outline_width, outline_width)
+        ]
         
-        # Parse background color za luminosity
-        bg_color = background_theme.bottom_color.lstrip('#')
-        r = int(bg_color[0:2], 16)
-        g = int(bg_color[2:4], 16) 
-        b = int(bg_color[4:6], 16)
+        # Kreiraj outline (crnu ivicu)
+        outline_texts = []
+        for dx, dy in offsets:
+            outline_text = self.canvas.create_text(
+                x + dx, y + dy, text=text, font=font, fill=outline_color, tags=tags
+            )
+            outline_texts.append(outline_text)
         
-        # Calculate relative luminance
-        luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+        # Kreiraj glavni tekst (beli) preko outline-a
+        main_text = self.canvas.create_text(
+            x, y, text=text, font=font, fill=fill_color, tags=tags
+        )
         
-        # Return white for dark backgrounds, black for light backgrounds
-        return "#ffffff" if luminance < 0.5 else "#000000"
+        return main_text, outline_texts
     
     def create_content(self):
-        """Kreiraj sadržaj widget-a na canvas-u - kompaktan dizajn"""
-        # Dobij kontrastnu boju
-        contrast_color = self.get_contrast_color(self.current_theme)
-        
+        """Kreiraj sadržaj widget-a na canvas-u - kompaktan dizajn sa outline textom"""
         # Clear previous content
         self.canvas.delete("content")
         
-        # 1. Naslov malim fontom
-        self.title_text = self.canvas.create_text(
+        # 1. Naslov malim fontom sa crnom ivicom
+        self.title_text, self.title_outline = self.create_text_with_outline(
             self.widget_width // 2, 12,
-            text="Astronomical Watch",
-            font=("Segoe UI", 8, "normal"),
-            fill=contrast_color,
+            "Astronomical Watch",
+            ("Segoe UI", 8, "normal"),
             tags="content"
         )
         
-        # 2. Brojevi koji pokazuju Dies i miliDies razdvojeni tackom
-        self.time_text = self.canvas.create_text(
+        # 2. Brojevi koji pokazuju Dies i miliDies razdvojeni tackom sa crnom ivicom
+        self.time_text, self.time_outline = self.create_text_with_outline(
             self.widget_width // 2, 35,
-            text="000.000",
-            font=("Consolas", 16, "bold"),
-            fill=contrast_color,
+            "000.000",
+            ("Consolas", 16, "bold"),
             tags="content"
         )
         
-        # 3. Label na kome pise "Dies . miliDies"
-        self.format_text = self.canvas.create_text(
+        # 3. Label na kome pise "Dies . miliDies" sa crnom ivicom
+        self.format_text, self.format_outline = self.create_text_with_outline(
             self.widget_width // 2, 52,
-            text="Dies . miliDies",
-            font=("Segoe UI", 7, "normal"),
-            fill=contrast_color,
+            "Dies . miliDies",
+            ("Segoe UI", 7, "normal"),
             tags="content"
         )
         
-        # 4. Progress bar za mikroDies (0-1000) - samo jednostavna boja
+        # 4. Progress bar za mikroDies (0-1000) - jednostavna bela boja
         bar_y = 67
         bar_height = 6
         bar_margin = 15
         
-        # Progress bar background
+        # Progress bar background - tamna za kontrast sa belom
         self.progress_bg = self.canvas.create_rectangle(
             bar_margin, bar_y, self.widget_width - bar_margin, bar_y + bar_height,
-            fill="#333333" if contrast_color == "#ffffff" else "#cccccc", 
-            outline="",
+            fill="#333333", outline="",
             tags="content"
         )
         
-        # Progress bar fill - jednostavna bela ili crna boja
+        # Progress bar fill - bela boja
         self.progress_fill = self.canvas.create_rectangle(
             bar_margin + 1, bar_y + 1, bar_margin + 1, bar_y + bar_height - 1,
-            fill=contrast_color, outline="",
+            fill="#ffffff", outline="",
             tags="content"
         )
         
@@ -296,9 +253,35 @@ class WidgetMode:
         """Zaustavi update-ove"""
         self.update_running = False
     
+    def update_text_with_outline(self, main_text_id, outline_ids, new_text):
+        """Update tekst sa outline-om"""
+        # Proveri da atributi postoje
+        if not hasattr(self, 'canvas') or main_text_id is None or outline_ids is None:
+            return
+            
+        # Update outline tekstove
+        for outline_id in outline_ids:
+            try:
+                self.canvas.itemconfig(outline_id, text=new_text)
+            except:
+                pass
+        
+        # Update glavni tekst
+        try:
+            self.canvas.itemconfig(main_text_id, text=new_text)
+        except:
+            pass
+    
     def update_widget(self):
         """Update widget data sa gradientom i vizuelima"""
         if not self.update_running:
+            return
+        
+        # Proveri da su svi potrebni atributi inicijalizovani
+        if not hasattr(self, 'canvas') or not hasattr(self, 'time_text'):
+            # Schedule retry
+            if self.update_running:
+                self.parent.after(100, self.update_widget)
             return
             
         try:
@@ -330,39 +313,36 @@ class WidgetMode:
                 self.create_content()  # Recreate content with new colors
                 self._last_gradient_update = time.time()
             
-            # Get current contrast color
-            contrast_color = self.get_contrast_color(self.current_theme)
-            
-            # Update text displays
+            # Update text displays sa outline
             # Dies i miliDies razdvojeni tackom
             time_str = "{:03d}.{:03d}".format(data['dies'], data['milides'])
-            self.canvas.itemconfig(self.time_text, text=time_str, fill=contrast_color)
+            if hasattr(self, 'time_text') and hasattr(self, 'time_outline'):
+                self.update_text_with_outline(self.time_text, self.time_outline, time_str)
             
-            # Update progress bar za mikroDies (0-1000) - jednostavna boja
+            # Update progress bar za mikroDies (0-1000) - bela boja
             mikro_value = data['mikrodiet']
-            bar_margin = 15
-            bar_width = self.widget_width - (2 * bar_margin) - 2  # Account for border
-            progress_width = (mikro_value / 1000.0) * bar_width
+            if hasattr(self, 'progress_fill'):
+                bar_margin = 15
+                bar_width = self.widget_width - (2 * bar_margin) - 2  # Account for border
+                progress_width = (mikro_value / 1000.0) * bar_width
+                
+                # Update progress fill
+                self.canvas.coords(
+                    self.progress_fill,
+                    bar_margin + 1, 68, 
+                    bar_margin + 1 + progress_width, 72
+                )
+                
+                # Keep progress bar white
+                self.canvas.itemconfig(self.progress_fill, fill="#ffffff")
             
-            # Update progress fill
-            self.canvas.coords(
-                self.progress_fill,
-                bar_margin + 1, 68, 
-                bar_margin + 1 + progress_width, 72
-            )
-            
-            # Keep progress bar same color as text (contrast color)
-            self.canvas.itemconfig(self.progress_fill, fill=contrast_color)
-            
-            # Update other text colors
-            self.canvas.itemconfig(self.title_text, fill=contrast_color)
-            self.canvas.itemconfig(self.format_text, fill=contrast_color)
+            # Outline tekstovi se ne menjaju jer su statični
             
         except Exception as e:
-            # Error handling - show fallback
+            # Error handling - show fallback sa outline textom
             try:
-                contrast_color = self.get_contrast_color(self.current_theme)
-                self.canvas.itemconfig(self.time_text, text="ERR.ERR")
+                if hasattr(self, 'time_text') and hasattr(self, 'time_outline'):
+                    self.update_text_with_outline(self.time_text, self.time_outline, "ERR.ERR")
                 # UKLONJEN mikroDies error display
             except:
                 pass

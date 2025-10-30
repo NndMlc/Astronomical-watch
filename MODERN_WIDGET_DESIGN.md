@@ -27,10 +27,10 @@
 - **Visina**: 85px (smanjeno sa 110px)
 - Bolje se uklapa u ugao ekrana
 
-#### 3. **Pravi zaobljeni uglovi** ✓
-- `create_arc()` sa `pieslice` style umesto sečenih trouglova
-- Corner radius: 12px
-- Stvarni zaobljeni efekat
+#### 3. **Normalni uglovi** ✓
+- Uklonjen rounded corners zbog problema sa prikazom
+- Čisti, jednostavni pravougaoni dizajn
+- Fokus na funkcionalnost a ne vizuelne efekte
 
 #### 4. **Gradient pozadina** ✓
 - **Dynamic sky theme** na osnovu trenutnog vremena
@@ -38,10 +38,11 @@
 - **Fallback** na solid color ako gradient nije dostupan
 - **Refresh svakih 60 sekundi** za dynamic promene
 
-#### 5. **Pojednostavljene boje** ✓
-- **Kontrastne boje**: samo bela ili crna na osnovu pozadine
-- **Progress bar**: jednostavna bela/crna boja (bez color coding)
+#### 5. **Optimizovane boje** ✓
+- **Uvek bela boja** za text i progress bar
+- **Tamna pozadina** za progress bar (#333333)  
 - **Optimalna vidljivost** na svim gradient pozadinama
+- **Jednostavno i čitljivo**
 
 #### 6. **Uklonjen mikroDies label** ✓
 - Kompaktniji dizajn
@@ -63,12 +64,12 @@ theme = get_sky_theme(current_time)
 
 ### Visual Hierarchy:
 
-1. **Naslov**: Diskretno, 8px font
-2. **Dies.miliDies**: **Prominentno**, 16px bold
-3. **Format label**: Objašnjenje, 7px
-4. **Progress bar**: **Vizuelni indicator**, jednostavna bela/crna boja
-   - Automatski contrast sa pozadinom
-   - Bolja vidljivost na svim gradient bojama
+1. **Naslov**: Diskretno, 8px font, bela boja
+2. **Dies.miliDies**: **Prominentno**, 16px bold, bela boja
+3. **Format label**: Objašnjenje, 7px, bela boja
+4. **Progress bar**: **Vizuelni indicator**, bela boja na tamnoj pozadini
+   - Jednostavno i čitljivo na svim gradient bojama
+   - Tamna pozadina (#333333) za kontrast
 
 ### Interaction:
 
