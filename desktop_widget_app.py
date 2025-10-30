@@ -106,11 +106,13 @@ class WidgetMode:
         
         # Always on top and corner positioning
         try:
-            self.parent.attributes('-topmost', True)
-            # Position u desni gornji ugao sa minimalnim margin
+            # NE STAVLJA always on top - widget ostaje na desktopu
+            # self.parent.attributes('-topmost', True)  # Uklonjeno
+            
+            # Position u desni gornji ugao sa minimalnim margin (default pozicija)
             screen_width = self.parent.winfo_screenwidth()
-            x_pos = screen_width - self.widget_width - 5  # Minimalni margin 5px
-            y_pos = 5  # Minimalni margin 5px
+            x_pos = screen_width - self.widget_width - 10  # Malo veći margin za desktop
+            y_pos = 10  # Malo veći margin za desktop
             self.parent.geometry(f"+{x_pos}+{y_pos}")
         except:
             pass
@@ -201,7 +203,7 @@ class WidgetMode:
         # 2. Brojevi koji pokazuju Dies i miliDies - SKORO DUPLO VEĆI
         self.time_text, self.time_outline = self.create_text_with_outline(
             self.widget_width // 2, 35,  # Spušteno sa 25 na 35
-            "000.000",
+            "0.000",  # Dies bez padding, miliDies trocifreni
             ("Consolas", 28, "bold"),
             tags="content"
         )
@@ -316,8 +318,8 @@ class WidgetMode:
                 self._last_gradient_update = time.time()
             
             # Update text displays sa outline
-            # Dies i miliDies razdvojeni tackom
-            time_str = "{:03d}.{:03d}".format(data['dies'], data['milides'])
+            # Dies bez fiksne širine, miliDies uvek trocifreni, tačka na istoj poziciji
+            time_str = "{}.{:03d}".format(data['dies'], data['milides'])
             if hasattr(self, 'time_text') and hasattr(self, 'time_outline'):
                 self.update_text_with_outline(self.time_text, self.time_outline, time_str)
             
