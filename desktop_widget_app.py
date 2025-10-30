@@ -97,9 +97,9 @@ class WidgetMode:
         # Remove window decorations (title bar)
         self.parent.overrideredirect(True)
         
-        # Povećana širina za margine brojeva, smanjena visina
+        # Povećana širina za margine brojeva, optimalna visina za sve elemente
         self.widget_width = 160  # Povećano sa 140 na 160
-        self.widget_height = 70  # Smanjeno sa 80 na 70
+        self.widget_height = 78  # Povećano sa 70 na 78 za prostor progress bar-a
         
         self.parent.geometry(f"{self.widget_width}x{self.widget_height}")
         self.parent.resizable(False, False)
@@ -208,15 +208,15 @@ class WidgetMode:
         
         # 3. Label veći font - PRIBLIŽEN BROJEVIMA
         self.format_text = self.canvas.create_text(
-            self.widget_width // 2, 55,  # Spušteno sa 45 na 55
+            self.widget_width // 2, 57,  # Podesio sa 55 na 57
             text="Dies . miliDies",
             font=("Segoe UI", 10, "normal"),
             fill="#ffffff",
             tags="content"
         )
         
-        # 4. Progress bar PRIBLIŽEN LABELI
-        bar_y = 65  # Spušteno sa 55 na 65
+        # 4. Progress bar ISPOD LABELA
+        bar_y = 68  # Spušteno sa 65 na 68 za prostor ispod labela
         bar_height = 5
         bar_margin = 3
         
