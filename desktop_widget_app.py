@@ -325,14 +325,16 @@ class WidgetMode:
             mikro_value = data['mikrodiet']
             if hasattr(self, 'progress_fill'):
                 bar_margin = 3  # Usklađeno sa create_content
+                bar_y = 75  # Ista pozicija kao u create_content
+                bar_height = 5  # Ista visina kao u create_content
                 bar_width = self.widget_width - (2 * bar_margin) - 2  # Account for border
                 progress_width = (mikro_value / 1000.0) * bar_width
                 
-                # Update progress fill - nove koordinate (približeno)
+                # Update progress fill - koordinate usklađene sa background
                 self.canvas.coords(
                     self.progress_fill,
-                    bar_margin + 1, 56,  # y=56 (bar_y + 1)
-                    bar_margin + 1 + progress_width, 59  # y=59 (bar_y + height - 1)
+                    bar_margin + 1, bar_y + 1,  # y=76 (bar_y + 1)
+                    bar_margin + 1 + progress_width, bar_y + bar_height - 1  # y=79 (bar_y + height - 1)
                 )
                 
                 # Keep progress bar white
