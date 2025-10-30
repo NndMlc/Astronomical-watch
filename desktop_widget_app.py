@@ -97,9 +97,9 @@ class WidgetMode:
         # Remove window decorations (title bar)
         self.parent.overrideredirect(True)
         
-        # Kompaktne dimenzije sa minimalnim marginima
-        self.widget_width = 140
-        self.widget_height = 80
+        # Povećana širina za margine brojeva, smanjena visina
+        self.widget_width = 160  # Povećano sa 140 na 160
+        self.widget_height = 70  # Smanjeno sa 80 na 70
         
         self.parent.geometry(f"{self.widget_width}x{self.widget_height}")
         self.parent.resizable(False, False)
@@ -200,25 +200,25 @@ class WidgetMode:
         
         # 2. Brojevi koji pokazuju Dies i miliDies - SKORO DUPLO VEĆI
         self.time_text, self.time_outline = self.create_text_with_outline(
-            self.widget_width // 2, 30,
+            self.widget_width // 2, 25,  # Malo više gore zbog smanjene visine
             "000.000",
-            ("Consolas", 28, "bold"),  # Povećano sa 16 na 28 (skoro duplo)
+            ("Consolas", 28, "bold"),
             tags="content"
         )
         
-        # 3. Label veći font - SPUŠTEN BLIZU DONJE GRANICE
+        # 3. Label veći font - PRIBLIŽEN BROJEVIMA
         self.format_text = self.canvas.create_text(
-            self.widget_width // 2, 60,  # Spušten sa 44 na 60
+            self.widget_width // 2, 45,  # Približeno sa 60 na 45
             text="Dies . miliDies",
             font=("Segoe UI", 10, "normal"),
             fill="#ffffff",
             tags="content"
         )
         
-        # 4. Progress bar NA SAMOM DNU sa malom marginom
-        bar_y = 72  # Spušten sa 58 na 72 (blizu dna)
-        bar_height = 5  # Smanjeno sa 6 na 5 za više mesta
-        bar_margin = 3  # Minimalni margin
+        # 4. Progress bar PRIBLIŽEN LABELI
+        bar_y = 55  # Približeno sa 72 na 55
+        bar_height = 5
+        bar_margin = 3
         
         # Progress bar background - tamna za kontrast sa belom
         self.progress_bg = self.canvas.create_rectangle(
@@ -328,11 +328,11 @@ class WidgetMode:
                 bar_width = self.widget_width - (2 * bar_margin) - 2  # Account for border
                 progress_width = (mikro_value / 1000.0) * bar_width
                 
-                # Update progress fill - nove koordinate (dno)
+                # Update progress fill - nove koordinate (približeno)
                 self.canvas.coords(
                     self.progress_fill,
-                    bar_margin + 1, 73,  # y=73 (bar_y + 1)
-                    bar_margin + 1 + progress_width, 76  # y=76 (bar_y + height - 1)
+                    bar_margin + 1, 56,  # y=56 (bar_y + 1)
+                    bar_margin + 1 + progress_width, 59  # y=59 (bar_y + height - 1)
                 )
                 
                 # Keep progress bar white
