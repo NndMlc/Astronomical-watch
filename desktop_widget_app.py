@@ -97,9 +97,9 @@ class WidgetMode:
         # Remove window decorations (title bar)
         self.parent.overrideredirect(True)
         
-        # Compact modern size - smanjeno zbog uklanjanja mikroDies label
+        # Compact modern size - povećano za veće brojeve
         self.widget_width = 160
-        self.widget_height = 85
+        self.widget_height = 95
         
         self.parent.geometry(f"{self.widget_width}x{self.widget_height}")
         self.parent.resizable(False, False)
@@ -189,34 +189,34 @@ class WidgetMode:
         # Clear previous content
         self.canvas.delete("content")
         
-        # 1. Naslov malim fontom sa crnom ivicom
+        # 1. Naslov malim fontom sa crnom ivicom - gore
         self.title_text, self.title_outline = self.create_text_with_outline(
-            self.widget_width // 2, 12,
+            self.widget_width // 2, 10,
             "Astronomical Watch",
-            ("Segoe UI", 8, "normal"),
-            tags="content"
-        )
-        
-        # 2. Brojevi koji pokazuju Dies i miliDies razdvojeni tackom sa crnom ivicom
-        self.time_text, self.time_outline = self.create_text_with_outline(
-            self.widget_width // 2, 35,
-            "000.000",
-            ("Consolas", 16, "bold"),
-            tags="content"
-        )
-        
-        # 3. Label na kome pise "Dies . miliDies" sa crnom ivicom
-        self.format_text, self.format_outline = self.create_text_with_outline(
-            self.widget_width // 2, 52,
-            "Dies . miliDies",
             ("Segoe UI", 7, "normal"),
             tags="content"
         )
         
-        # 4. Progress bar za mikroDies (0-1000) - jednostavna bela boja
-        bar_y = 67
+        # 2. Brojevi koji pokazuju Dies i miliDies - VELIKI i prominentni
+        self.time_text, self.time_outline = self.create_text_with_outline(
+            self.widget_width // 2, 35,
+            "000.000",
+            ("Consolas", 20, "bold"),  # Povećano sa 16 na 20
+            tags="content"
+        )
+        
+        # 3. Label na kome pise "Dies . miliDies" - ispod brojeva, veći
+        self.format_text, self.format_outline = self.create_text_with_outline(
+            self.widget_width // 2, 55,
+            "Dies . miliDies",
+            ("Segoe UI", 9, "normal"),  # Povećano sa 7 na 9
+            tags="content"
+        )
+        
+        # 4. Progress bar za mikroDies - POMERENO NA SAMO DNO
+        bar_y = 85  # Pomereno sa 67 na 85 (skoro dno)
         bar_height = 6
-        bar_margin = 15
+        bar_margin = 8  # Smanjeno sa 15 na 8 - skoro do granica širine
         
         # Progress bar background - tamna za kontrast sa belom
         self.progress_bg = self.canvas.create_rectangle(
@@ -322,15 +322,15 @@ class WidgetMode:
             # Update progress bar za mikroDies (0-1000) - bela boja
             mikro_value = data['mikrodiet']
             if hasattr(self, 'progress_fill'):
-                bar_margin = 15
+                bar_margin = 8  # Usklađeno sa create_content
                 bar_width = self.widget_width - (2 * bar_margin) - 2  # Account for border
                 progress_width = (mikro_value / 1000.0) * bar_width
                 
-                # Update progress fill
+                # Update progress fill - nove koordinate
                 self.canvas.coords(
                     self.progress_fill,
-                    bar_margin + 1, 68, 
-                    bar_margin + 1 + progress_width, 72
+                    bar_margin + 1, 86,  # y pomereno sa 68 na 86
+                    bar_margin + 1 + progress_width, 90  # y pomereno sa 72 na 90
                 )
                 
                 # Keep progress bar white

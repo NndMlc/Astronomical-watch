@@ -18,22 +18,25 @@
 - **Progress bar**: beli na tamnoj pozadini (#333333)
 - **Savršena vidljivost** na svim pozadinama
 
-### 3. 📏 **Optimizovane dimenzije**
+### 3. 📏 **Optimizovane dimenzije za veću vidljivost**
 - **Širina**: 160px
-- **Visina**: 85px (smanjeno)  
-- **Bez mikroDies label-a** - kompaktniji
+- **Visina**: 95px (povećano sa 85px)  
+- **Veći brojevi**: 20px font (povećano sa 16px)
+- **Veći label**: 9px font (povećano sa 7px)
+- **Progress bar**: na dnu, širok do granica (margin=8px)
 
 ## Finalni widget layout:
 
 ```
-┌─────────────────────────────┐  160x85px
-│    Astronomical Watch       │  <- 8px font, bela sa crnom ivicom
+┌─────────────────────────────┐  160x95px
+│    Astronomical Watch       │  <- 7px font, bela sa crnom ivicom
 │                             │
-│        224.567              │  <- 16px bold, bela sa crnom ivicom
+│        224.567              │  <- 20px bold, bela sa crnom ivicom (VELIKO)
 │                             │  
-│     Dies . miliDies         │  <- 7px font, bela sa crnom ivicom
+│     Dies . miliDies         │  <- 9px font, bela sa crnom ivicom (VEĆE)
 │                             │
-│ ██████████░░░░░░░░░░░░░░░   │  <- Progress bar: bela/tamna
+│                             │
+│ ██████████░░░░░░░░░░░░░░░   │  <- Progress bar na dnu (širok)
 └─────────────────────────────┘
 ```
 
@@ -55,10 +58,10 @@ def create_text_with_outline(self, x, y, text, font, fill_color="#ffffff", outli
 ```
 
 ### Layout Positioning:
-- **Naslov**: y=12
-- **Dies.miliDies**: y=35 
-- **Format label**: y=52
-- **Progress bar**: y=67 (visina=6)
+- **Naslov**: y=10 (7px font)
+- **Dies.miliDies**: y=35 (20px bold - PROMINENTNO)
+- **Format label**: y=55 (9px - VEĆE)
+- **Progress bar**: y=85 (na dnu, širok margin=8px)
 
 ### Features Retained:
 ✅ **Dynamic gradient pozadina**  
