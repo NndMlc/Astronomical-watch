@@ -19,20 +19,34 @@ Desktop aplikacija sa widget/normal mode funkcionalnostima.
 ### Features
 
 #### Widget Mode:
-- **Pozicija**: Gornji desni ugao ekrana
+- **Pozicija**: Gornji desni ugao ekrana (20px margin)
 - **Always on Top**: Da, uvek vidljiv
+- **Modernizovan dizajn**:
+  - **Bez title bar-a** (overrideredirect=True)
+  - **Kompaktne dimenzije**: 160x110px  
+  - **Zaobljeni uglovi** (12px radius)
+  - **Dynamic gradient pozadina** iz astronomical data
+  - **Canvas-based rendering** za smooth updates
 - **Sadržaj**:
-  - Naslov "Astronomical Watch" (mali font)
-  - Dies.miliDies brojevi (veliki font)
-  - Label "Dies . miliDies" (srednji font)  
-  - Progress bar za mikroDies (0-1000)
+  - Naslov "Astronomical Watch" (8px font)
+  - Dies.miliDies brojevi (16px bold font)
+  - Label "Dies . miliDies" (7px font)  
+  - **Color-coded progress bar** za mikroDies (0-1000):
+    - 0-250: Zelena
+    - 250-500: Žuta
+    - 500-750: Narandžasta  
+    - 750-1000: Pink/Crvena
+  - μDies status (7px font)
 - **Interakcija**: Dupli klik → Normal Mode
 
 #### Normal Mode:
-- **Full aplikacija** sa svim podacima
+- **Full aplikacija** sa gradientom pozadinom
+- **Canvas-based rendering** sa sky theme integration
 - **Tabbed interface**: Current, Solar, About
+- **Semi-transparent cards** over gradient
 - **"Minimize to Widget"** dugme → vraća u Widget Mode
 - **Real-time updates** svakih 100ms
+- **Modern typography**: Segoe UI, Consolas fonts
 
 ### Technical Details
 
@@ -41,6 +55,8 @@ Desktop aplikacija sa widget/normal mode funkcionalnostima.
 - **Fallback**: Embedded calculator (za dev/testing)
 - **Updates**: Real-time svakih 100ms
 - **Precision**: VSOP87 calculations
+- **Sky Theme**: Dynamic gradient based on solar position
+- **Auto-refresh**: Gradient updates svakih 60 sekundi
 
 #### UI Architecture:
 ```python

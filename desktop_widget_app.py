@@ -1,14 +1,38 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Astronomical Watch Desktop - Finalna aplikacija
-Widget mode + Normal mode sa duplim klikom
-Implementira sve zahteve: minimalisticki widget, dupli klik za normal mode
+Astronomical Watch Desktop Widget Application
+Modern widget + normal mode with astronomical time display
 """
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Canvas
+import math
+from datetime import datetime, timezone
+import threading
+import time
 import sys
 import os
-from datetime import datetime, timezone, timedelta
+
+# Add src to path for gradient access
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
+try:
+    from astronomical_watch.ui.gradient import get_sky_theme, create_gradient_colors, SkyTheme
+    GRADIENT_AVAILABLE = True
+except ImportError:
+    GRADIENT_AVAILABLE = False
+    # Fallback theme
+    class SkyTheme:
+        def __init__(self, top_color, bottom_color, text_color):
+            self.top_color = top_color
+            self.bottom_color = bottom_color
+            self.text_color = text_color
+    
+    def get_sky_theme(dt=None):
+        return SkyTheme("#1e3a8a", "#3b82f6", "#ffffff")
+    
+    def create_gradient_colors(theme, steps=256):
+        return [theme.top_color] * steps
 
 # Dodaj src u path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
@@ -49,127 +73,223 @@ class AstronomicalCalculator:
         }
 
 class WidgetMode:
-    """Minimalisticki widget mode prema zahtevima"""
+    """Modern widget mode sa gradientom i zaobljenim uglovima"""
     
     def __init__(self, parent, on_double_click=None):
         self.parent = parent
         self.on_double_click = on_double_click
+        self.current_theme = None
+        self.update_running = False
         
-        # Setup widget window
-        self.setup_widget()
-        self.create_widget_ui()
+        # Setup modern widget window
+        self.setup_modern_widget()
+        self.create_gradient_canvas()
+        self.create_content()
         
         # Bind double click na sve komponente
         self.bind_double_click()
         
         # Start updates
-        self.update_widget()
+        self.start_updates()
         
-    def setup_widget(self):
-        """Setup widget window properties"""
-        self.parent.title("Astronomical Watch")
-        self.parent.geometry("180x120")
+    def setup_modern_widget(self):
+        """Setup modern widget window properties"""
+        # Remove window decorations (title bar)
+        self.parent.overrideredirect(True)
+        
+        # Compact modern size
+        self.widget_width = 160
+        self.widget_height = 110
+        
+        self.parent.geometry(f"{self.widget_width}x{self.widget_height}")
         self.parent.resizable(False, False)
         
         # Always on top and corner positioning
         try:
             self.parent.attributes('-topmost', True)
-            # Position u desni gornji ugao
+            # Position u desni gornji ugao sa margin
             screen_width = self.parent.winfo_screenwidth()
-            self.parent.geometry(f"+{screen_width - 230}+50")
+            x_pos = screen_width - self.widget_width - 20
+            y_pos = 20
+            self.parent.geometry(f"+{x_pos}+{y_pos}")
         except:
             pass
+    
+    def create_gradient_canvas(self):
+        """Kreiraj canvas sa gradientom"""
+        self.canvas = tk.Canvas(
+            self.parent, 
+            width=self.widget_width, 
+            height=self.widget_height,
+            highlightthickness=0,
+            bd=0
+        )
+        self.canvas.pack(fill='both', expand=True)
         
-        # Dark theme colors
-        self.bg_color = '#1a1a2e'
-        self.text_color = '#ffffff'
-        self.accent_color = '#89cff0'
-        self.progress_color = '#4a90e2'
+        # Update gradient initially
+        self.update_gradient()
+    
+    def update_gradient(self):
+        """Update gradient pozadinu na osnovu trenutnog vremena"""
+        if not GRADIENT_AVAILABLE:
+            # Fallback solid color
+            self.canvas.configure(bg="#1e3a8a")
+            self.current_theme = SkyTheme("#1e3a8a", "#3b82f6", "#ffffff")
+            return
+            
+        # Get current sky theme
+        current_time = datetime.now(timezone.utc)
+        self.current_theme = get_sky_theme(current_time)
         
-        self.parent.configure(bg=self.bg_color)
+        # Create gradient
+        gradient_colors = create_gradient_colors(self.current_theme, steps=self.widget_height)
         
-    def create_widget_ui(self):
-        """Kreiraj minimalisticki UI prema zahtevima"""
+        # Clear previous gradient
+        self.canvas.delete("gradient")
         
-        # Main frame
-        main_frame = tk.Frame(self.parent, bg=self.bg_color)
-        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=8)
+        # Draw gradient lines
+        for i, color in enumerate(gradient_colors):
+            self.canvas.create_line(
+                0, i, self.widget_width, i,
+                fill=color, width=1, tags="gradient"
+            )
+        
+        # Create rounded corners effect
+        self.create_rounded_corners()
+    
+    def create_rounded_corners(self):
+        """Kreiraj zaobljene uglove efekt"""
+        corner_radius = 12
+        
+        # Get system background color for masking
+        try:
+            bg_rgb = self.parent.winfo_rgb(self.parent.cget('bg'))
+            bg_color = f"#{bg_rgb[0]//256:02x}{bg_rgb[1]//256:02x}{bg_rgb[2]//256:02x}"
+        except:
+            bg_color = "#f0f0f0"  # Default system color
+        
+        # Clear previous corners
+        self.canvas.delete("corners")
+        
+        # Create corner masks (small triangles)
+        # Top-left corner
+        self.canvas.create_polygon(
+            0, 0, corner_radius, 0, 0, corner_radius,
+            fill=bg_color, outline=bg_color, tags="corners"
+        )
+        
+        # Top-right corner  
+        self.canvas.create_polygon(
+            self.widget_width, 0, self.widget_width - corner_radius, 0, 
+            self.widget_width, corner_radius,
+            fill=bg_color, outline=bg_color, tags="corners"
+        )
+        
+        # Bottom-left corner
+        self.canvas.create_polygon(
+            0, self.widget_height, 0, self.widget_height - corner_radius,
+            corner_radius, self.widget_height,
+            fill=bg_color, outline=bg_color, tags="corners"
+        )
+        
+        # Bottom-right corner
+        self.canvas.create_polygon(
+            self.widget_width, self.widget_height,
+            self.widget_width, self.widget_height - corner_radius,
+            self.widget_width - corner_radius, self.widget_height,
+            fill=bg_color, outline=bg_color, tags="corners"
+        )
+    
+    def create_content(self):
+        """Kreiraj sadržaj widget-a na canvas-u"""
+        # Dobij boju teksta iz trenutne teme
+        text_color = self.current_theme.text_color if self.current_theme else "#ffffff"
+        
+        # Clear previous content
+        self.canvas.delete("content")
         
         # 1. Naslov malim fontom
-        self.title_label = tk.Label(main_frame,
-                                   text="Astronomical Watch",
-                                   font=("Arial", 9),
-                                   bg=self.bg_color,
-                                   fg=self.text_color)
-        self.title_label.pack(pady=(0, 5))
+        self.title_text = self.canvas.create_text(
+            self.widget_width // 2, 12,
+            text="Astronomical Watch",
+            font=("Segoe UI", 8, "normal"),
+            fill=text_color,
+            tags="content"
+        )
         
         # 2. Brojevi koji pokazuju Dies i miliDies razdvojeni tackom
-        self.time_label = tk.Label(main_frame,
-                                  text="000.000",
-                                  font=("Courier New", 18, "bold"),
-                                  bg=self.bg_color,
-                                  fg=self.accent_color)
-        self.time_label.pack(pady=2)
+        self.time_text = self.canvas.create_text(
+            self.widget_width // 2, 40,
+            text="000.000",
+            font=("Consolas", 16, "bold"),
+            fill=text_color,
+            tags="content"
+        )
         
         # 3. Label na kome pise "Dies . miliDies"
-        self.format_label = tk.Label(main_frame,
-                                    text="Dies . miliDies",
-                                    font=("Arial", 8),
-                                    bg=self.bg_color,
-                                    fg='#aaaaaa')
-        self.format_label.pack(pady=(0, 5))
+        self.format_text = self.canvas.create_text(
+            self.widget_width // 2, 58,
+            text="Dies . miliDies",
+            font=("Segoe UI", 7, "normal"),
+            fill=text_color,
+            tags="content"
+        )
         
-        # 4. Progress bar koji se menja u mikroDies od 0 do 1000
-        style = ttk.Style()
-        style.theme_use('clam')
-        style.configure("Widget.Horizontal.TProgressbar",
-                       background=self.progress_color,
-                       troughcolor='#333333',
-                       borderwidth=1,
-                       lightcolor=self.progress_color,
-                       darkcolor=self.progress_color)
+        # 4. Progress bar za mikroDies (0-1000)
+        bar_y = 75
+        bar_height = 6
+        bar_margin = 15
         
-        self.progress_var = tk.IntVar(value=0)
-        self.progress_bar = ttk.Progressbar(main_frame,
-                                          style="Widget.Horizontal.TProgressbar",
-                                          variable=self.progress_var,
-                                          maximum=1000,
-                                          length=140,
-                                          mode='determinate')
-        self.progress_bar.pack(pady=(0, 5))
+        # Progress bar background
+        self.progress_bg = self.canvas.create_rectangle(
+            bar_margin, bar_y, self.widget_width - bar_margin, bar_y + bar_height,
+            fill="#000000", outline="#555555", width=1,
+            tags="content"
+        )
         
-        # Opcionalno: mikroDies status (mali tekst)
-        self.mikro_label = tk.Label(main_frame,
-                                   text="μDies: 0",
-                                   font=("Arial", 7),
-                                   bg=self.bg_color,
-                                   fg='#cccccc')
-        self.mikro_label.pack()
+        # Progress bar fill (will be updated)
+        self.progress_fill = self.canvas.create_rectangle(
+            bar_margin + 1, bar_y + 1, bar_margin + 1, bar_y + bar_height - 1,
+            fill="#00ff88", outline="",
+            tags="content"
+        )
+        
+        # mikroDies status
+        self.mikro_text = self.canvas.create_text(
+            self.widget_width // 2, 95,
+            text="μDies: 0",
+            font=("Segoe UI", 7, "normal"),
+            fill=text_color,
+            tags="content"
+        )
         
     def bind_double_click(self):
-        """Bind double click event na sve komponente"""
-        widgets = [
-            self.parent, main_frame := self.parent.winfo_children()[0],
-            self.title_label, self.time_label, 
-            self.format_label, self.progress_bar, self.mikro_label
-        ]
+        """Bind double click event na canvas i sve elemente"""
+        def handle_double_click(event=None):
+            if self.on_double_click:
+                self.on_double_click()
         
-        for widget in widgets:
-            try:
-                widget.bind("<Double-Button-1>", self.handle_double_click)
-            except:
-                pass
-                
-    def handle_double_click(self, event=None):
-        """Handle double click - otvori normal mode"""
-        if self.on_double_click:
-            self.on_double_click()
+        # Bind na canvas i parent window
+        self.canvas.bind("<Double-Button-1>", handle_double_click)
+        self.parent.bind("<Double-Button-1>", handle_double_click)
+    
+    def start_updates(self):
+        """Pokreni redovne update-ove"""
+        self.update_running = True
+        self.update_widget()
+    
+    def stop_updates(self):
+        """Zaustavi update-ove"""
+        self.update_running = False
     
     def update_widget(self):
-        """Update widget data"""
+        """Update widget data sa gradientom i vizuelima"""
+        if not self.update_running:
+            return
+            
         try:
+            # Get astronomical data
             if HAS_CORE:
-                # Koristi pravi core
                 try:
                     current_eq = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
                     next_eq = datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
@@ -189,24 +309,65 @@ class WidgetMode:
                 # Koristi embedded calculator
                 data = AstronomicalCalculator.calculate_time()
             
-            # Update displays prema zahtevima
+            # Update gradient (periodically)
+            import time
+            if not hasattr(self, '_last_gradient_update') or time.time() - self._last_gradient_update > 60:
+                self.update_gradient()
+                self.create_content()  # Recreate content with new colors
+                self._last_gradient_update = time.time()
             
+            # Get current theme text color
+            text_color = self.current_theme.text_color if self.current_theme else "#ffffff"
+            
+            # Update text displays
             # Dies i miliDies razdvojeni tackom
             time_str = "{:03d}.{:03d}".format(data['dies'], data['milides'])
-            self.time_label.config(text=time_str)
+            self.canvas.itemconfig(self.time_text, text=time_str, fill=text_color)
             
-            # Progress bar 0-1000 za mikroDies
-            self.progress_var.set(data['mikrodiet'])
+            # Update progress bar za mikroDies (0-1000)
+            mikro_value = data['mikrodiet']
+            bar_margin = 15
+            bar_width = self.widget_width - (2 * bar_margin) - 2  # Account for border
+            progress_width = (mikro_value / 1000.0) * bar_width
             
-            # mikroDies label
-            self.mikro_label.config(text=f"μDies: {data['mikrodiet']}")
+            # Update progress fill
+            self.canvas.coords(
+                self.progress_fill,
+                bar_margin + 1, 76, 
+                bar_margin + 1 + progress_width, 80
+            )
+            
+            # Color progress bar based on value
+            if mikro_value < 250:
+                progress_color = "#00ff88"  # Green
+            elif mikro_value < 500:
+                progress_color = "#ffff00"  # Yellow  
+            elif mikro_value < 750:
+                progress_color = "#ff8800"  # Orange
+            else:
+                progress_color = "#ff0088"  # Pink/Red
+                
+            self.canvas.itemconfig(self.progress_fill, fill=progress_color)
+            
+            # Update mikroDies status
+            mikro_text = f"μDies: {mikro_value}"
+            self.canvas.itemconfig(self.mikro_text, text=mikro_text, fill=text_color)
+            
+            # Update other text colors
+            self.canvas.itemconfig(self.title_text, fill=text_color)
+            self.canvas.itemconfig(self.format_text, fill=text_color)
             
         except Exception as e:
-            self.time_label.config(text="ERROR")
-            print(f"Widget update error: {e}")
+            # Error handling - show fallback
+            try:
+                self.canvas.itemconfig(self.time_text, text="ERR.ERR")
+                self.canvas.itemconfig(self.mikro_text, text="μDies: ?")
+            except:
+                pass
         
-        # Schedule next update (every 100ms for smooth mikroDies)
-        self.parent.after(100, self.update_widget)
+        # Schedule next update
+        if self.update_running:
+            self.parent.after(100, self.update_widget)  # Update every 100ms
 
 class NormalMode:
     """Prošireni normal mode aplikacije"""
@@ -220,71 +381,130 @@ class NormalMode:
         self.update_normal()
         
     def setup_normal_window(self):
-        """Setup normal mode window"""
+        """Setup normal mode window sa gradientom"""
         self.parent.title("Astronomical Watch - Full Display")
-        self.parent.geometry("450x400")
+        self.parent.geometry("480x420")
         self.parent.resizable(True, True)
+        
+        # Restore normal decorations
+        self.parent.overrideredirect(False)
         
         # Center window
         screen_width = self.parent.winfo_screenwidth()
         screen_height = self.parent.winfo_screenheight()
-        x = (screen_width // 2) - 225
-        y = (screen_height // 2) - 200
+        x = (screen_width // 2) - 240
+        y = (screen_height // 2) - 210
         self.parent.geometry(f"+{x}+{y}")
         
-        # Colors
-        self.bg_color = '#0f0f23'
-        self.card_color = '#1a1a3a'
-        self.text_color = '#ffffff'
-        self.accent_color = '#89cff0'
+        # Get current sky theme
+        if GRADIENT_AVAILABLE:
+            current_time = datetime.now(timezone.utc)
+            self.current_theme = get_sky_theme(current_time)
+        else:
+            self.current_theme = SkyTheme("#1e3a8a", "#3b82f6", "#ffffff")
         
-        self.parent.configure(bg=self.bg_color)
+        # Apply gradient background
+        self.parent.configure(bg=self.current_theme.bottom_color)
+    
+    def draw_normal_gradient(self):
+        """Draw gradient background for normal mode"""
+        if not GRADIENT_AVAILABLE:
+            self.main_canvas.configure(bg=self.current_theme.bottom_color)
+            return
         
+        # Get canvas dimensions
+        self.parent.update_idletasks()
+        canvas_width = self.main_canvas.winfo_width()
+        canvas_height = self.main_canvas.winfo_height()
+        
+        if canvas_width < 100 or canvas_height < 100:  # Default size
+            canvas_width = 480
+            canvas_height = 420
+        
+        # Create gradient
+        gradient_colors = create_gradient_colors(self.current_theme, steps=canvas_height)
+        
+        # Clear canvas
+        self.main_canvas.delete("gradient")
+        
+        # Draw gradient lines
+        for i, color in enumerate(gradient_colors):
+            if i < canvas_height:
+                self.main_canvas.create_line(
+                    0, i, canvas_width, i,
+                    fill=color, width=1, tags="gradient"
+                )
+    
     def create_normal_ui(self):
-        """Kreiraj full UI"""
+        """Kreiraj full UI sa gradientom"""
+        
+        # Main canvas for gradient background
+        self.main_canvas = tk.Canvas(
+            self.parent,
+            highlightthickness=0,
+            bd=0
+        )
+        self.main_canvas.pack(fill='both', expand=True)
+        
+        # Draw gradient background
+        self.draw_normal_gradient()
+        
+        # Main frame over canvas
+        self.main_frame = tk.Frame(self.main_canvas, bg='', highlightthickness=0, bd=0)
+        self.main_frame.configure(bg=self.current_theme.bottom_color)
+        
+        canvas_frame = self.main_canvas.create_window(0, 0, anchor='nw', window=self.main_frame)
+        
+        # Configure canvas scrolling
+        def configure_canvas(event):
+            self.main_canvas.configure(scrollregion=self.main_canvas.bbox("all"))
+            canvas_width = event.width
+            self.main_canvas.itemconfig(canvas_frame, width=canvas_width)
+        
+        self.main_canvas.bind('<Configure>', configure_canvas)
         
         # Header
-        header_frame = tk.Frame(self.parent, bg=self.bg_color)
+        header_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
         header_frame.pack(fill=tk.X, padx=20, pady=15)
         
         title = tk.Label(header_frame,
                         text="ASTRONOMICAL WATCH",
-                        font=("Arial", 16, "bold"),
-                        bg=self.bg_color,
-                        fg=self.accent_color)
+                        font=("Segoe UI", 16, "bold"),
+                        bg=self.current_theme.bottom_color,
+                        fg=self.current_theme.text_color)
         title.pack()
         
         subtitle = tk.Label(header_frame,
                            text="mikroDies Precision Timekeeping",
-                           font=("Arial", 11),
-                           bg=self.bg_color,
-                           fg=self.text_color)
+                           font=("Segoe UI", 11),
+                           bg=self.current_theme.bottom_color,
+                           fg=self.current_theme.text_color)
         subtitle.pack()
         
-        # Main time card
-        time_frame = tk.Frame(self.parent, bg=self.card_color, relief='raised', bd=2)
+        # Main time card with semi-transparent background
+        time_frame = tk.Frame(self.main_frame, bg=self.current_theme.top_color, relief='raised', bd=1)
         time_frame.pack(fill=tk.X, padx=20, pady=(0, 15))
         
         self.main_time_label = tk.Label(time_frame,
                                        text="000.000.000",
-                                       font=("Courier New", 24, "bold"),
-                                       bg=self.card_color,
-                                       fg=self.text_color)
+                                       font=("Consolas", 24, "bold"),
+                                       bg=self.current_theme.top_color,
+                                       fg=self.current_theme.text_color)
         self.main_time_label.pack(pady=15)
         
         format_desc = tk.Label(time_frame,
                               text="Dies . miliDies . mikroDies",
-                              font=("Arial", 10),
-                              bg=self.card_color,
-                              fg='#cccccc')
+                              font=("Segoe UI", 10),
+                              bg=self.current_theme.top_color,
+                              fg=self.current_theme.text_color)
         format_desc.pack(pady=(0, 10))
         
         # Info grid
-        info_frame = tk.Frame(self.parent, bg=self.bg_color)
+        info_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
         info_frame.pack(fill=tk.X, padx=20, pady=(0, 15))
         
         # Left column
-        left_col = tk.Frame(info_frame, bg=self.bg_color)
+        left_col = tk.Frame(info_frame, bg=self.current_theme.bottom_color)
         left_col.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         tk.Label(left_col, text="ASTRONOMICAL COMPONENTS",
