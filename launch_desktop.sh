@@ -16,8 +16,14 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
-# Try to run the main desktop app first  
-if [ -f "desktop_app.py" ]; then
+# Try to run the most compatible version first  
+if [ -f "instant_awatch.py" ]; then
+    echo "✓ Running instant console version..."
+    python3 instant_awatch.py
+elif [ -f "awatch_console.py" ]; then
+    echo "✓ Running console version..."
+    python3 awatch_console.py
+elif [ -f "desktop_app.py" ]; then
     echo "✓ Running main desktop application..."
     python3 desktop_app.py
 elif [ -f "standalone_desktop.py" ]; then
@@ -25,7 +31,11 @@ elif [ -f "standalone_desktop.py" ]; then
     python3 standalone_desktop.py
 else
     echo "❌ Error: No desktop application found!"
-    echo "Please ensure desktop_app.py or standalone_desktop.py exists."
+    echo "Please ensure one of these files exists:"
+    echo "- instant_awatch.py (most compatible)"
+    echo "- awatch_console.py"
+    echo "- desktop_app.py"
+    echo "- standalone_desktop.py"
     exit 1
 fi
 

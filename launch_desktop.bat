@@ -10,8 +10,14 @@ echo.
 
 cd /d "%~dp0"
 
-REM Try to run the main desktop app first
-if exist "desktop_app.py" (
+REM Try to run the most compatible version first
+if exist "instant_awatch.py" (
+    echo Running instant console version...
+    python instant_awatch.py
+) else if exist "awatch_console.py" (
+    echo Running console version...
+    python awatch_console.py
+) else if exist "desktop_app.py" (
     echo Running main desktop application...
     python desktop_app.py
 ) else if exist "standalone_desktop.py" (
@@ -19,7 +25,11 @@ if exist "desktop_app.py" (
     python standalone_desktop.py
 ) else (
     echo Error: No desktop application found!
-    echo Please ensure desktop_app.py or standalone_desktop.py exists.
+    echo Please ensure one of these files exists:
+    echo - instant_awatch.py (most compatible)
+    echo - awatch_console.py
+    echo - desktop_app.py
+    echo - standalone_desktop.py
     pause
     exit /b 1
 )

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Astronomical Watch Desktop Application
 Kompaktni desktop widget sa mikroDies preciznosću

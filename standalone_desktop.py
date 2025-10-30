@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Astronomical Watch Desktop - Standalone verzija
 Može biti kompajlovan u .exe sa PyInstaller
