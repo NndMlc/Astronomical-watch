@@ -1,0 +1,510 @@
+# -*- coding: utf-8 -*-
+"""
+Astronomical Watch Desktop - Finalna aplikacija
+Widget mode + Normal mode sa duplim klikom
+Implementira sve zahteve: minimalisticki widget, dupli klik za normal mode
+"""
+import tkinter as tk
+from tkinter import ttk
+import sys
+import os
+from datetime import datetime, timezone, timedelta
+
+# Dodaj src u path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
+try:
+    from astronomical_watch.core.astro_time_core import AstroYear
+    HAS_CORE = True
+except ImportError:
+    HAS_CORE = False
+
+class AstronomicalCalculator:
+    """Embedded calculator ako core nije dostupan"""
+    
+    @staticmethod
+    def calculate_time():
+        now = datetime.now(timezone.utc)
+        equinox = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
+        
+        delta_seconds = (now - equinox).total_seconds()
+        boundary_offset = 23*3600 + 15*60 + 54
+        adjusted_seconds = delta_seconds + boundary_offset
+        
+        total_days = adjusted_seconds / 86400.0
+        dies = max(0, int(total_days))
+        day_fraction = total_days - dies
+        
+        milides_total = day_fraction * 1000.0
+        milides = int(milides_total)
+        milides_fraction = milides_total - milides
+        
+        mikrodiet = int(milides_fraction * 1000.0)
+        
+        return {
+            'dies': dies,
+            'milides': milides,
+            'mikrodiet': mikrodiet,
+            'utc': now
+        }
+
+class WidgetMode:
+    """Minimalisticki widget mode prema zahtevima"""
+    
+    def __init__(self, parent, on_double_click=None):
+        self.parent = parent
+        self.on_double_click = on_double_click
+        
+        # Setup widget window
+        self.setup_widget()
+        self.create_widget_ui()
+        
+        # Bind double click na sve komponente
+        self.bind_double_click()
+        
+        # Start updates
+        self.update_widget()
+        
+    def setup_widget(self):
+        """Setup widget window properties"""
+        self.parent.title("Astronomical Watch")
+        self.parent.geometry("180x120")
+        self.parent.resizable(False, False)
+        
+        # Always on top and corner positioning
+        try:
+            self.parent.attributes('-topmost', True)
+            # Position u desni gornji ugao
+            screen_width = self.parent.winfo_screenwidth()
+            self.parent.geometry(f"+{screen_width - 230}+50")
+        except:
+            pass
+        
+        # Dark theme colors
+        self.bg_color = '#1a1a2e'
+        self.text_color = '#ffffff'
+        self.accent_color = '#89cff0'
+        self.progress_color = '#4a90e2'
+        
+        self.parent.configure(bg=self.bg_color)
+        
+    def create_widget_ui(self):
+        """Kreiraj minimalisticki UI prema zahtevima"""
+        
+        # Main frame
+        main_frame = tk.Frame(self.parent, bg=self.bg_color)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=8)
+        
+        # 1. Naslov malim fontom
+        self.title_label = tk.Label(main_frame,
+                                   text="Astronomical Watch",
+                                   font=("Arial", 9),
+                                   bg=self.bg_color,
+                                   fg=self.text_color)
+        self.title_label.pack(pady=(0, 5))
+        
+        # 2. Brojevi koji pokazuju Dies i miliDies razdvojeni tackom
+        self.time_label = tk.Label(main_frame,
+                                  text="000.000",
+                                  font=("Courier New", 18, "bold"),
+                                  bg=self.bg_color,
+                                  fg=self.accent_color)
+        self.time_label.pack(pady=2)
+        
+        # 3. Label na kome pise "Dies . miliDies"
+        self.format_label = tk.Label(main_frame,
+                                    text="Dies . miliDies",
+                                    font=("Arial", 8),
+                                    bg=self.bg_color,
+                                    fg='#aaaaaa')
+        self.format_label.pack(pady=(0, 5))
+        
+        # 4. Progress bar koji se menja u mikroDies od 0 do 1000
+        style = ttk.Style()
+        style.theme_use('clam')
+        style.configure("Widget.Horizontal.TProgressbar",
+                       background=self.progress_color,
+                       troughcolor='#333333',
+                       borderwidth=1,
+                       lightcolor=self.progress_color,
+                       darkcolor=self.progress_color)
+        
+        self.progress_var = tk.IntVar(value=0)
+        self.progress_bar = ttk.Progressbar(main_frame,
+                                          style="Widget.Horizontal.TProgressbar",
+                                          variable=self.progress_var,
+                                          maximum=1000,
+                                          length=140,
+                                          mode='determinate')
+        self.progress_bar.pack(pady=(0, 5))
+        
+        # Opcionalno: mikroDies status (mali tekst)
+        self.mikro_label = tk.Label(main_frame,
+                                   text="μDies: 0",
+                                   font=("Arial", 7),
+                                   bg=self.bg_color,
+                                   fg='#cccccc')
+        self.mikro_label.pack()
+        
+    def bind_double_click(self):
+        """Bind double click event na sve komponente"""
+        widgets = [
+            self.parent, main_frame := self.parent.winfo_children()[0],
+            self.title_label, self.time_label, 
+            self.format_label, self.progress_bar, self.mikro_label
+        ]
+        
+        for widget in widgets:
+            try:
+                widget.bind("<Double-Button-1>", self.handle_double_click)
+            except:
+                pass
+                
+    def handle_double_click(self, event=None):
+        """Handle double click - otvori normal mode"""
+        if self.on_double_click:
+            self.on_double_click()
+    
+    def update_widget(self):
+        """Update widget data"""
+        try:
+            if HAS_CORE:
+                # Koristi pravi core
+                try:
+                    current_eq = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
+                    next_eq = datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
+                    
+                    ay = AstroYear(current_eq, next_eq)
+                    reading = ay.reading(datetime.now(timezone.utc))
+                    
+                    data = {
+                        'dies': reading.day_index,
+                        'milides': reading.miliDies,
+                        'mikrodiet': reading.mikroDies
+                    }
+                except:
+                    # Fallback na embedded calculator
+                    data = AstronomicalCalculator.calculate_time()
+            else:
+                # Koristi embedded calculator
+                data = AstronomicalCalculator.calculate_time()
+            
+            # Update displays prema zahtevima
+            
+            # Dies i miliDies razdvojeni tackom
+            time_str = "{:03d}.{:03d}".format(data['dies'], data['milides'])
+            self.time_label.config(text=time_str)
+            
+            # Progress bar 0-1000 za mikroDies
+            self.progress_var.set(data['mikrodiet'])
+            
+            # mikroDies label
+            self.mikro_label.config(text=f"μDies: {data['mikrodiet']}")
+            
+        except Exception as e:
+            self.time_label.config(text="ERROR")
+            print(f"Widget update error: {e}")
+        
+        # Schedule next update (every 100ms for smooth mikroDies)
+        self.parent.after(100, self.update_widget)
+
+class NormalMode:
+    """Prošireni normal mode aplikacije"""
+    
+    def __init__(self, parent, on_minimize=None):
+        self.parent = parent
+        self.on_minimize = on_minimize
+        
+        self.setup_normal_window()
+        self.create_normal_ui()
+        self.update_normal()
+        
+    def setup_normal_window(self):
+        """Setup normal mode window"""
+        self.parent.title("Astronomical Watch - Full Display")
+        self.parent.geometry("450x400")
+        self.parent.resizable(True, True)
+        
+        # Center window
+        screen_width = self.parent.winfo_screenwidth()
+        screen_height = self.parent.winfo_screenheight()
+        x = (screen_width // 2) - 225
+        y = (screen_height // 2) - 200
+        self.parent.geometry(f"+{x}+{y}")
+        
+        # Colors
+        self.bg_color = '#0f0f23'
+        self.card_color = '#1a1a3a'
+        self.text_color = '#ffffff'
+        self.accent_color = '#89cff0'
+        
+        self.parent.configure(bg=self.bg_color)
+        
+    def create_normal_ui(self):
+        """Kreiraj full UI"""
+        
+        # Header
+        header_frame = tk.Frame(self.parent, bg=self.bg_color)
+        header_frame.pack(fill=tk.X, padx=20, pady=15)
+        
+        title = tk.Label(header_frame,
+                        text="ASTRONOMICAL WATCH",
+                        font=("Arial", 16, "bold"),
+                        bg=self.bg_color,
+                        fg=self.accent_color)
+        title.pack()
+        
+        subtitle = tk.Label(header_frame,
+                           text="mikroDies Precision Timekeeping",
+                           font=("Arial", 11),
+                           bg=self.bg_color,
+                           fg=self.text_color)
+        subtitle.pack()
+        
+        # Main time card
+        time_frame = tk.Frame(self.parent, bg=self.card_color, relief='raised', bd=2)
+        time_frame.pack(fill=tk.X, padx=20, pady=(0, 15))
+        
+        self.main_time_label = tk.Label(time_frame,
+                                       text="000.000.000",
+                                       font=("Courier New", 24, "bold"),
+                                       bg=self.card_color,
+                                       fg=self.text_color)
+        self.main_time_label.pack(pady=15)
+        
+        format_desc = tk.Label(time_frame,
+                              text="Dies . miliDies . mikroDies",
+                              font=("Arial", 10),
+                              bg=self.card_color,
+                              fg='#cccccc')
+        format_desc.pack(pady=(0, 10))
+        
+        # Info grid
+        info_frame = tk.Frame(self.parent, bg=self.bg_color)
+        info_frame.pack(fill=tk.X, padx=20, pady=(0, 15))
+        
+        # Left column
+        left_col = tk.Frame(info_frame, bg=self.bg_color)
+        left_col.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        tk.Label(left_col, text="ASTRONOMICAL COMPONENTS",
+                font=("Arial", 10, "bold"), bg=self.bg_color, fg=self.accent_color).pack(anchor='w')
+        
+        self.dies_label = tk.Label(left_col,
+                                  text="Dies: ---",
+                                  font=("Arial", 10),
+                                  bg=self.bg_color,
+                                  fg=self.text_color)
+        self.dies_label.pack(anchor='w', pady=2)
+        
+        self.milides_label = tk.Label(left_col,
+                                     text="miliDies: ---",
+                                     font=("Arial", 10),
+                                     bg=self.bg_color,
+                                     fg=self.text_color)
+        self.milides_label.pack(anchor='w', pady=2)
+        
+        self.mikrodiet_label = tk.Label(left_col,
+                                       text="mikroDies: ---",
+                                       font=("Arial", 10),
+                                       bg=self.bg_color,
+                                       fg=self.text_color)
+        self.mikrodiet_label.pack(anchor='w', pady=2)
+        
+        # Right column  
+        right_col = tk.Frame(info_frame, bg=self.bg_color)
+        right_col.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        
+        tk.Label(right_col, text="REFERENCE TIME",
+                font=("Arial", 10, "bold"), bg=self.bg_color, fg=self.accent_color).pack(anchor='e')
+        
+        self.utc_label = tk.Label(right_col,
+                                 text="UTC: ---",
+                                 font=("Arial", 10),
+                                 bg=self.bg_color,
+                                 fg=self.text_color)
+        self.utc_label.pack(anchor='e', pady=2)
+        
+        self.local_label = tk.Label(right_col,
+                                   text="Local: ---",
+                                   font=("Arial", 10),
+                                   bg=self.bg_color,
+                                   fg=self.text_color)
+        self.local_label.pack(anchor='e', pady=2)
+        
+        self.period_label = tk.Label(right_col,
+                                    text="Period: 2025-26",
+                                    font=("Arial", 10),
+                                    bg=self.bg_color,
+                                    fg=self.text_color)
+        self.period_label.pack(anchor='e', pady=2)
+        
+        # Progress section
+        progress_frame = tk.Frame(self.parent, bg=self.card_color, relief='sunken', bd=2)
+        progress_frame.pack(fill=tk.X, padx=20, pady=(0, 15))
+        
+        tk.Label(progress_frame,
+                text="mikroDies Progress (0-1000)",
+                font=("Arial", 10, "bold"),
+                bg=self.card_color,
+                fg=self.text_color).pack(pady=(10, 5))
+        
+        self.main_progress_var = tk.IntVar(value=0)
+        self.main_progress_bar = ttk.Progressbar(progress_frame,
+                                               variable=self.main_progress_var,
+                                               maximum=1000,
+                                               length=380,
+                                               mode='determinate')
+        self.main_progress_bar.pack(pady=(0, 5))
+        
+        self.progress_label = tk.Label(progress_frame,
+                                      text="0 / 1000 mikroDies",
+                                      font=("Arial", 9),
+                                      bg=self.card_color,
+                                      fg='#cccccc')
+        self.progress_label.pack(pady=(0, 10))
+        
+        # Control buttons
+        button_frame = tk.Frame(self.parent, bg=self.bg_color)
+        button_frame.pack(fill=tk.X, padx=20, pady=10)
+        
+        minimize_btn = tk.Button(button_frame,
+                               text="Minimize to Widget",
+                               command=self.minimize_to_widget,
+                               bg=self.card_color,
+                               fg=self.text_color,
+                               relief='raised',
+                               bd=2,
+                               padx=20)
+        minimize_btn.pack(side=tk.LEFT)
+        
+        close_btn = tk.Button(button_frame,
+                            text="Close Application",
+                            command=self.parent.quit,
+                            bg='#8b0000',
+                            fg=self.text_color,
+                            relief='raised',
+                            bd=2,
+                            padx=20)
+        close_btn.pack(side=tk.RIGHT)
+        
+    def minimize_to_widget(self):
+        """Minimize to widget mode"""
+        if self.on_minimize:
+            self.on_minimize()
+    
+    def update_normal(self):
+        """Update normal mode display"""
+        try:
+            if HAS_CORE:
+                try:
+                    current_eq = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
+                    next_eq = datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
+                    
+                    ay = AstroYear(current_eq, next_eq)
+                    reading = ay.reading(datetime.now(timezone.utc))
+                    
+                    data = {
+                        'dies': reading.day_index,
+                        'milides': reading.miliDies,
+                        'mikrodiet': reading.mikroDies,
+                        'utc': reading.utc
+                    }
+                except:
+                    data = AstronomicalCalculator.calculate_time()
+            else:
+                data = AstronomicalCalculator.calculate_time()
+            
+            # Main time display
+            time_str = "{:03d}.{:03d}.{:03d}".format(
+                data['dies'], data['milides'], data['mikrodiet']
+            )
+            self.main_time_label.config(text=time_str)
+            
+            # Components
+            self.dies_label.config(text=f"Dies: {data['dies']}")
+            self.milides_label.config(text=f"miliDies: {data['milides']}")
+            self.mikrodiet_label.config(text=f"mikroDies: {data['mikrodiet']}")
+            
+            # Time references
+            utc_str = data['utc'].strftime('%H:%M:%S UTC')
+            self.utc_label.config(text=f"UTC: {utc_str}")
+            
+            try:
+                local_time = data['utc'].replace(tzinfo=timezone.utc).astimezone()
+                local_str = local_time.strftime('%H:%M:%S')
+                self.local_label.config(text=f"Local: {local_str}")
+            except:
+                self.local_label.config(text="Local: --:--:--")
+            
+            # Progress
+            self.main_progress_var.set(data['mikrodiet'])
+            self.progress_label.config(text=f"{data['mikrodiet']} / 1000 mikroDies ({data['mikrodiet']/10:.1f}%)")
+            
+        except Exception as e:
+            self.main_time_label.config(text="ERROR")
+            print(f"Normal mode update error: {e}")
+        
+        # Schedule next update
+        self.parent.after(100, self.update_normal)
+
+class AstronomicalWatchApp:
+    """Glavna aplikacija - widget/normal mode manager"""
+    
+    def __init__(self):
+        self.root = tk.Tk()
+        self.current_mode = None
+        self.widget_mode = None
+        self.normal_mode = None
+        
+        # Start in widget mode
+        self.show_widget_mode()
+        
+    def show_widget_mode(self):
+        """Prikaži widget mode"""
+        # Clear current mode
+        if self.current_mode:
+            for widget in self.root.winfo_children():
+                widget.destroy()
+        
+        # Create widget mode
+        self.widget_mode = WidgetMode(self.root, on_double_click=self.show_normal_mode)
+        self.current_mode = 'widget'
+        
+    def show_normal_mode(self):
+        """Prikaži normal mode"""
+        # Clear current mode
+        if self.current_mode:
+            for widget in self.root.winfo_children():
+                widget.destroy()
+        
+        # Create normal mode
+        self.normal_mode = NormalMode(self.root, on_minimize=self.show_widget_mode)
+        self.current_mode = 'normal'
+        
+    def run(self):
+        """Pokreni aplikaciju"""
+        print("=== ASTRONOMICAL WATCH DESKTOP ===")
+        print("Starts in WIDGET MODE:")
+        print("- Minimalistic widget in corner")
+        print("- Shows Dies.miliDies with progress bar")
+        print("- DOUBLE-CLICK anywhere to open Normal Mode")
+        print()
+        print("Normal Mode features:")
+        print("- Full astronomical display")
+        print("- Complete mikroDies precision")
+        print("- Click 'Minimize to Widget' to return")
+        print()
+        
+        try:
+            self.root.mainloop()
+        except KeyboardInterrupt:
+            print("Application closed")
+
+def main():
+    """Glavna funkcija"""
+    app = AstronomicalWatchApp()
+    app.run()
+
+if __name__ == "__main__":
+    main()
