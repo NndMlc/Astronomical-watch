@@ -200,7 +200,7 @@ class WidgetMode:
         
         # 2. Brojevi koji pokazuju Dies i miliDies - SKORO DUPLO VEĆI
         self.time_text, self.time_outline = self.create_text_with_outline(
-            self.widget_width // 2, 25,  # Malo više gore zbog smanjene visine
+            self.widget_width // 2, 35,  # Spušteno sa 25 na 35
             "000.000",
             ("Consolas", 28, "bold"),
             tags="content"
@@ -208,7 +208,7 @@ class WidgetMode:
         
         # 3. Label veći font - PRIBLIŽEN BROJEVIMA
         self.format_text = self.canvas.create_text(
-            self.widget_width // 2, 45,  # Približeno sa 60 na 45
+            self.widget_width // 2, 55,  # Spušteno sa 45 na 55
             text="Dies . miliDies",
             font=("Segoe UI", 10, "normal"),
             fill="#ffffff",
@@ -216,7 +216,7 @@ class WidgetMode:
         )
         
         # 4. Progress bar PRIBLIŽEN LABELI
-        bar_y = 55  # Približeno sa 72 na 55
+        bar_y = 65  # Spušteno sa 55 na 65
         bar_height = 5
         bar_margin = 3
         
