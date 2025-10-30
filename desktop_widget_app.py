@@ -378,6 +378,15 @@ class NormalMode:
         # Restore normal decorations
         self.parent.overrideredirect(False)
         
+        # Onemogući maximize dugme
+        try:
+            self.parent.attributes('-toolwindow', True)  # Windows
+        except:
+            try:
+                self.parent.maxsize(800, 800)  # Ograniči maksimalnu veličinu
+            except:
+                pass
+        
         # Center window
         screen_width = self.parent.winfo_screenwidth()
         screen_height = self.parent.winfo_screenheight()
@@ -440,21 +449,25 @@ class NormalMode:
         
         self.main_canvas.bind('<Configure>', configure_canvas)
         
-        # 1. HEADER sa dugmićima
+        # 1. HEADER sa dugmićima - OKRUGLI DIZAJN
         header_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
         header_frame.pack(fill=tk.X, padx=20, pady=15)
         
-        # Levo dugme - povratak na widget
+        # Levo dugme - povratak na widget (okrugli)
         back_btn = tk.Button(header_frame,
                            text="←",
-                           font=("Arial", 16, "bold"),
+                           font=("Arial", 18, "bold"),
                            bg=self.current_theme.top_color,
                            fg=self.current_theme.text_color,
-                           bd=1,
+                           bd=3,
                            relief='raised',
                            width=3,
+                           height=1,
+                           highlightthickness=2,
+                           highlightbackground=self.current_theme.text_color,
                            command=self.minimize_to_widget)
         back_btn.pack(side=tk.LEFT)
+        self.add_button_hover_effect(back_btn)
         
         # Naslov u centru
         title = tk.Label(header_frame,
@@ -464,17 +477,21 @@ class NormalMode:
                         fg=self.current_theme.text_color)
         title.pack(side=tk.LEFT, expand=True)
         
-        # Desno dugme - izbor jezika
+        # Desno dugme - izbor jezika (okrugli)
         lang_btn = tk.Button(header_frame,
                            text="🌐",
                            font=("Arial", 16),
                            bg=self.current_theme.top_color,
                            fg=self.current_theme.text_color,
-                           bd=1,
+                           bd=3,
                            relief='raised',
                            width=3,
+                           height=1,
+                           highlightthickness=2,
+                           highlightbackground=self.current_theme.text_color,
                            command=self.show_language_menu)
         lang_btn.pack(side=tk.RIGHT)
+        self.add_button_hover_effect(lang_btn)
         
         # 2. DIES broj + label
         dies_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
@@ -544,69 +561,54 @@ class NormalMode:
                                            fg=self.current_theme.text_color)
         self.standard_time_label.pack()
         
-        # 6. DUGMAD sa slikama u jednom nizu
+        # 6. DUGMAD sa slikama u jednom nizu - OKRUGLI I JEDNAKI
         buttons_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
         buttons_frame.pack(pady=(20, 30))
         
-        # Jedan red dugmadi sa slikama
+        # Jedan red dugmadi sa slikama - jednake veličine
         button_row = tk.Frame(buttons_frame, bg=self.current_theme.bottom_color)
         button_row.pack()
         
+        # Definišemo jedinstvene parametre za sve dugmad
+        button_config = {
+            'font': ("Arial", 18, "bold"),
+            'bg': self.current_theme.top_color,
+            'fg': self.current_theme.text_color,
+            'bd': 3,
+            'relief': 'raised',
+            'width': 3,  # Smanjena širina za okrugliji oblik
+            'height': 1,  # Smanjena visina za okrugliji oblik
+            'highlightthickness': 2,
+            'highlightbackground': self.current_theme.text_color
+        }
+        
         # Explanation - slovo "i"
-        explanation_btn = tk.Button(button_row,
-                                   text="i",
-                                   font=("Arial", 20, "bold"),
-                                   bg=self.current_theme.top_color,
-                                   fg=self.current_theme.text_color,
-                                   bd=2,
-                                   relief='raised',
-                                   width=4,
-                                   height=2,
-                                   command=self.show_explanation)
-        explanation_btn.pack(side=tk.LEFT, padx=8)
+        explanation_btn = tk.Button(button_row, text="i", 
+                                   command=self.show_explanation, **button_config)
+        explanation_btn.pack(side=tk.LEFT, padx=10)
         self.create_tooltip(explanation_btn, "Explanation")
         
         # Comparison - "<>"
-        comparison_btn = tk.Button(button_row,
-                                  text="<>",
-                                  font=("Arial", 16, "bold"),
-                                  bg=self.current_theme.top_color,
-                                  fg=self.current_theme.text_color,
-                                  bd=2,
-                                  relief='raised',
-                                  width=4,
-                                  height=2,
-                                  command=self.show_comparison)
-        comparison_btn.pack(side=tk.LEFT, padx=8)
+        comparison_btn = tk.Button(button_row, text="<>", 
+                                  command=self.show_comparison, **button_config)
+        comparison_btn.pack(side=tk.LEFT, padx=10)
         self.create_tooltip(comparison_btn, "Comparison")
         
         # Calculation - kalkulator
-        calculation_btn = tk.Button(button_row,
-                                   text="🧮",
-                                   font=("Arial", 16),
-                                   bg=self.current_theme.top_color,
-                                   fg=self.current_theme.text_color,
-                                   bd=2,
-                                   relief='raised',
-                                   width=4,
-                                   height=2,
-                                   command=self.show_calculation)
-        calculation_btn.pack(side=tk.LEFT, padx=8)
+        calculation_btn = tk.Button(button_row, text="🧮", 
+                                   command=self.show_calculation, **button_config)
+        calculation_btn.pack(side=tk.LEFT, padx=10)
         self.create_tooltip(calculation_btn, "Calculation")
         
         # Settings - mašinski ključ
-        settings_btn = tk.Button(button_row,
-                               text="🔧",
-                               font=("Arial", 16),
-                               bg=self.current_theme.top_color,
-                               fg=self.current_theme.text_color,
-                               bd=2,
-                               relief='raised',
-                               width=4,
-                               height=2,
-                               command=self.show_settings)
-        settings_btn.pack(side=tk.LEFT, padx=8)
+        settings_btn = tk.Button(button_row, text="🔧", 
+                               command=self.show_settings, **button_config)
+        settings_btn.pack(side=tk.LEFT, padx=10)
         self.create_tooltip(settings_btn, "Settings")
+        
+        # Dodaj hover efekte za okrugli izgled
+        for btn in [explanation_btn, comparison_btn, calculation_btn, settings_btn]:
+            self.add_button_hover_effect(btn)
         
     def minimize_to_widget(self):
         """Minimize to widget mode"""
@@ -708,6 +710,24 @@ class NormalMode:
             widget.bind("<Leave>", hide_tooltip)
         
         widget.bind("<Enter>", show_tooltip)
+    
+    def add_button_hover_effect(self, button):
+        """Dodaj hover efekat za okrugli izgled dugmeta"""
+        original_bg = button.cget('bg')
+        original_relief = button.cget('relief')
+        
+        def on_enter(event):
+            button.config(bg=self.current_theme.text_color, 
+                         fg=self.current_theme.bottom_color,
+                         relief='sunken')
+        
+        def on_leave(event):
+            button.config(bg=original_bg, 
+                         fg=self.current_theme.text_color,
+                         relief=original_relief)
+        
+        button.bind("<Enter>", on_enter)
+        button.bind("<Leave>", on_leave)
     
     def show_language_menu(self):
         """Prikaži meni za izbor jezika"""
