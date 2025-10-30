@@ -371,8 +371,9 @@ class NormalMode:
     def setup_normal_window(self):
         """Setup normal mode window sa gradientom"""
         self.parent.title("Astronomical Watch - Full Display")
-        self.parent.geometry("480x420")
+        self.parent.geometry("520x650")  # Povećano za dodatni sadržaj
         self.parent.resizable(True, True)
+        self.parent.minsize(500, 600)  # Minimalne dimenzije
         
         # Restore normal decorations
         self.parent.overrideredirect(False)
@@ -380,8 +381,8 @@ class NormalMode:
         # Center window
         screen_width = self.parent.winfo_screenwidth()
         screen_height = self.parent.winfo_screenheight()
-        x = (screen_width // 2) - 240
-        y = (screen_height // 2) - 210
+        x = (screen_width // 2) - 260  # Adjusted for new width
+        y = (screen_height // 2) - 325  # Adjusted for new height
         self.parent.geometry(f"+{x}+{y}")
         
         # Get current sky theme
@@ -451,23 +452,35 @@ class NormalMode:
         
         self.main_canvas.bind('<Configure>', configure_canvas)
         
-        # Header
+        # Header sa minimize dugmetom
         header_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
         header_frame.pack(fill=tk.X, padx=20, pady=15)
+        
+        # Minimize dugme u gornjem desnom uglu
+        minimize_btn = tk.Button(header_frame,
+                               text="━",  # Unicode minimize simbol
+                               font=("Arial", 14, "bold"),
+                               bg=self.current_theme.top_color,
+                               fg=self.current_theme.text_color,
+                               bd=1,
+                               relief='raised',
+                               width=3,
+                               command=self.minimize_to_widget)
+        minimize_btn.pack(side=tk.RIGHT)
         
         title = tk.Label(header_frame,
                         text="ASTRONOMICAL WATCH",
                         font=("Segoe UI", 16, "bold"),
                         bg=self.current_theme.bottom_color,
                         fg=self.current_theme.text_color)
-        title.pack()
+        title.pack(side=tk.LEFT)
         
         subtitle = tk.Label(header_frame,
-                           text="mikroDies Precision Timekeeping",
+                           text="mikroDies Precision • Web API Style",
                            font=("Segoe UI", 11),
                            bg=self.current_theme.bottom_color,
                            fg=self.current_theme.text_color)
-        subtitle.pack()
+        subtitle.pack(side=tk.LEFT, padx=(0, 10))
         
         # Main time card with semi-transparent background
         time_frame = tk.Frame(self.main_frame, bg=self.current_theme.top_color, relief='raised', bd=1)
@@ -487,65 +500,116 @@ class NormalMode:
                               fg=self.current_theme.text_color)
         format_desc.pack(pady=(0, 10))
         
-        # Info grid
+        # Info grid - PROŠIRENO kao web API prikaz
         info_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
         info_frame.pack(fill=tk.X, padx=20, pady=(0, 15))
         
-        # Left column
-        left_col = tk.Frame(info_frame, bg=self.current_theme.bottom_color)
+        # Timestamp card - kao web API
+        timestamp_frame = tk.Frame(info_frame, bg=self.current_theme.top_color, relief='raised', bd=1)
+        timestamp_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        tk.Label(timestamp_frame, text="TIMESTAMPS",
+                font=("Arial", 10, "bold"), bg=self.current_theme.top_color, fg=self.current_theme.text_color).pack(pady=(8, 5))
+        
+        self.timestamp_basic_label = tk.Label(timestamp_frame,
+                                             text="Basic: 000.000",
+                                             font=("Consolas", 12),
+                                             bg=self.current_theme.top_color,
+                                             fg=self.current_theme.text_color)
+        self.timestamp_basic_label.pack(pady=2)
+        
+        self.timestamp_full_label = tk.Label(timestamp_frame,
+                                            text="Full: 000.000.000",
+                                            font=("Consolas", 12),
+                                            bg=self.current_theme.top_color,
+                                            fg=self.current_theme.text_color)
+        self.timestamp_full_label.pack(pady=(2, 8))
+        
+        # Glavni sadržaj - dve kolone
+        content_frame = tk.Frame(info_frame, bg=self.current_theme.bottom_color)
+        content_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        # Left column - Components
+        left_col = tk.Frame(content_frame, bg=self.current_theme.bottom_color)
         left_col.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         tk.Label(left_col, text="ASTRONOMICAL COMPONENTS",
-                font=("Arial", 10, "bold"), bg=self.bg_color, fg=self.accent_color).pack(anchor='w')
-        
+                font=("Arial", 10, "bold"), bg=self.current_theme.bottom_color, fg=self.current_theme.text_color).pack(anchor='w', pady=(0, 5))
         self.dies_label = tk.Label(left_col,
                                   text="Dies: ---",
-                                  font=("Arial", 10),
-                                  bg=self.bg_color,
-                                  fg=self.text_color)
+                                  font=("Consolas", 10),
+                                  bg=self.current_theme.bottom_color,
+                                  fg=self.current_theme.text_color)
         self.dies_label.pack(anchor='w', pady=2)
         
         self.milides_label = tk.Label(left_col,
                                      text="miliDies: ---",
-                                     font=("Arial", 10),
-                                     bg=self.bg_color,
-                                     fg=self.text_color)
+                                     font=("Consolas", 10),
+                                     bg=self.current_theme.bottom_color,
+                                     fg=self.current_theme.text_color)
         self.milides_label.pack(anchor='w', pady=2)
         
         self.mikrodiet_label = tk.Label(left_col,
                                        text="mikroDies: ---",
-                                       font=("Arial", 10),
-                                       bg=self.bg_color,
-                                       fg=self.text_color)
+                                       font=("Consolas", 10),
+                                       bg=self.current_theme.bottom_color,
+                                       fg=self.current_theme.text_color)
         self.mikrodiet_label.pack(anchor='w', pady=2)
         
-        # Right column  
-        right_col = tk.Frame(info_frame, bg=self.bg_color)
+        self.mikro_fraction_label = tk.Label(left_col,
+                                            text="μDies Fraction: ---.---",
+                                            font=("Consolas", 10),
+                                            bg=self.current_theme.bottom_color,
+                                            fg=self.current_theme.text_color)
+        self.mikro_fraction_label.pack(anchor='w', pady=2)
+        
+        # Right column - Time References
+        right_col = tk.Frame(content_frame, bg=self.current_theme.bottom_color)
         right_col.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
         
-        tk.Label(right_col, text="REFERENCE TIME",
-                font=("Arial", 10, "bold"), bg=self.bg_color, fg=self.accent_color).pack(anchor='e')
-        
+        tk.Label(right_col, text="TIME REFERENCES",
+                font=("Arial", 10, "bold"), bg=self.current_theme.bottom_color, fg=self.current_theme.text_color).pack(anchor='e', pady=(0, 5))
         self.utc_label = tk.Label(right_col,
                                  text="UTC: ---",
-                                 font=("Arial", 10),
-                                 bg=self.bg_color,
-                                 fg=self.text_color)
+                                 font=("Consolas", 10),
+                                 bg=self.current_theme.bottom_color,
+                                 fg=self.current_theme.text_color)
         self.utc_label.pack(anchor='e', pady=2)
+        
+        self.utc_iso_label = tk.Label(right_col,
+                                     text="UTC ISO: ---",
+                                     font=("Consolas", 9),
+                                     bg=self.current_theme.bottom_color,
+                                     fg=self.current_theme.text_color)
+        self.utc_iso_label.pack(anchor='e', pady=2)
         
         self.local_label = tk.Label(right_col,
                                    text="Local: ---",
-                                   font=("Arial", 10),
-                                   bg=self.bg_color,
-                                   fg=self.text_color)
+                                   font=("Consolas", 10),
+                                   bg=self.current_theme.bottom_color,
+                                   fg=self.current_theme.text_color)
         self.local_label.pack(anchor='e', pady=2)
         
-        self.period_label = tk.Label(right_col,
-                                    text="Period: 2025-26",
-                                    font=("Arial", 10),
-                                    bg=self.bg_color,
-                                    fg=self.text_color)
-        self.period_label.pack(anchor='e', pady=2)
+        # Equinox information card
+        equinox_frame = tk.Frame(info_frame, bg=self.current_theme.top_color, relief='raised', bd=1)
+        equinox_frame.pack(fill=tk.X, pady=(0, 10))
+        
+        tk.Label(equinox_frame, text="EQUINOX PERIOD",
+                font=("Arial", 10, "bold"), bg=self.current_theme.top_color, fg=self.current_theme.text_color).pack(pady=(8, 5))
+        
+        self.current_equinox_label = tk.Label(equinox_frame,
+                                             text="Current: 2025-03-20T09:01:28Z",
+                                             font=("Consolas", 9),
+                                             bg=self.current_theme.top_color,
+                                             fg=self.current_theme.text_color)
+        self.current_equinox_label.pack(pady=1)
+        
+        self.next_equinox_label = tk.Label(equinox_frame,
+                                          text="Next: 2026-03-20T14:45:50Z",
+                                          font=("Consolas", 9),
+                                          bg=self.current_theme.top_color,
+                                          fg=self.current_theme.text_color)
+        self.next_equinox_label.pack(pady=(1, 8))
         
         # Progress section
         progress_frame = tk.Frame(self.parent, bg=self.card_color, relief='sunken', bd=2)
@@ -602,7 +666,7 @@ class NormalMode:
             self.on_minimize()
     
     def update_normal(self):
-        """Update normal mode display"""
+        """Update normal mode display - WEB API stil"""
         try:
             if HAS_CORE:
                 try:
@@ -616,27 +680,63 @@ class NormalMode:
                         'dies': reading.day_index,
                         'milides': reading.miliDies,
                         'mikrodiet': reading.mikroDies,
-                        'utc': reading.utc
+                        'mikro_fraction': reading.mikroDies_fraction,
+                        'utc': reading.utc,
+                        'current_equinox': current_eq,
+                        'next_equinox': next_eq
                     }
                 except:
-                    data = AstronomicalCalculator.calculate_time()
+                    calc_data = AstronomicalCalculator.calculate_time()
+                    data = {
+                        'dies': calc_data['dies'],
+                        'milides': calc_data['milides'], 
+                        'mikrodiet': calc_data['mikrodiet'],
+                        'mikro_fraction': 0.0,
+                        'utc': calc_data['utc'],
+                        'current_equinox': datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc),
+                        'next_equinox': datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
+                    }
             else:
-                data = AstronomicalCalculator.calculate_time()
+                calc_data = AstronomicalCalculator.calculate_time()
+                data = {
+                    'dies': calc_data['dies'],
+                    'milides': calc_data['milides'], 
+                    'mikrodiet': calc_data['mikrodiet'],
+                    'mikro_fraction': 0.0,
+                    'utc': calc_data['utc'],
+                    'current_equinox': datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc),
+                    'next_equinox': datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
+                }
             
-            # Main time display
-            time_str = "{:03d}.{:03d}.{:03d}".format(
+            # Main time display - NOVO FORMATIRANJE
+            time_str = "{}.{:03d}.{:03d}".format(
                 data['dies'], data['milides'], data['mikrodiet']
             )
             self.main_time_label.config(text=time_str)
             
-            # Components
+            # Timestamps - kao web API
+            basic_timestamp = "{}.{:03d}".format(data['dies'], data['milides'])
+            full_timestamp = "{}.{:03d}.{:03d}".format(data['dies'], data['milides'], data['mikrodiet'])
+            
+            self.timestamp_basic_label.config(text=f"Basic: {basic_timestamp}")
+            self.timestamp_full_label.config(text=f"Full: {full_timestamp}")
+            
+            # Components - POBOLJŠANO
             self.dies_label.config(text=f"Dies: {data['dies']}")
             self.milides_label.config(text=f"miliDies: {data['milides']}")
             self.mikrodiet_label.config(text=f"mikroDies: {data['mikrodiet']}")
+            self.mikro_fraction_label.config(text=f"μDies Fraction: {data['mikro_fraction']:.3f}")
             
-            # Time references
+            # Time references - PROŠIRENO
             utc_str = data['utc'].strftime('%H:%M:%S UTC')
             self.utc_label.config(text=f"UTC: {utc_str}")
+            
+            # UTC ISO format - kao web API
+            utc_iso = data['utc'].isoformat().replace("+00:00", "Z")
+            # Skrati ISO da stane u prikaz
+            if len(utc_iso) > 20:
+                utc_iso = utc_iso[:19] + "Z"
+            self.utc_iso_label.config(text=f"UTC ISO: {utc_iso}")
             
             try:
                 local_time = data['utc'].replace(tzinfo=timezone.utc).astimezone()
@@ -645,9 +745,16 @@ class NormalMode:
             except:
                 self.local_label.config(text="Local: --:--:--")
             
-            # Progress
+            # Equinox information - NOVO
+            current_eq_str = data['current_equinox'].strftime('%Y-%m-%dT%H:%M:%SZ')
+            next_eq_str = data['next_equinox'].strftime('%Y-%m-%dT%H:%M:%SZ')
+            
+            self.current_equinox_label.config(text=f"Current: {current_eq_str}")
+            self.next_equinox_label.config(text=f"Next: {next_eq_str}")
+            
+            # Progress - POBOLJŠANO
             self.main_progress_var.set(data['mikrodiet'])
-            self.progress_label.config(text=f"{data['mikrodiet']} / 1000 mikroDies ({data['mikrodiet']/10:.1f}%)")
+            self.progress_label.config(text=f"mikroDies: {data['mikrodiet']} / 1000 ({data['mikrodiet']/10:.1f}%)")
             
         except Exception as e:
             self.main_time_label.config(text="ERROR")

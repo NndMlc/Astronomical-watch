@@ -8,7 +8,7 @@ from src.astronomical_watch.core.astro_time_core import AstronomicalYear, get_cu
 from ui.gradient import get_sky_theme
 from ui.translations import tr, LANGUAGES
 from ui.comparison_card import ComparisonCard
-from ui.calculation_card import CalculationCard
+from astronomical_watch.ui.calculation_card import CalculationCard
 
 # Attempt to import ui.explanation_cards if it exists, otherwise fallback gracefully
 import importlib.util
