@@ -24,6 +24,27 @@ if errorlevel 1 (
 echo ✓ Python pronađen
 echo.
 
+REM Test tkinter compatibility FIRST
+echo 🔍 Testiram tkinter kompatibilnost...
+python -c "import tkinter; print('tkinter OK')" >nul 2>&1
+if errorlevel 1 (
+    echo ⚠️  tkinter nije dostupan - koristim console verziju
+    echo.
+    echo 📟 Pokretam console Astronomical Watch...
+    if exist "awatch_console.py" (
+        python awatch_console.py
+    ) else (
+        echo ❌ awatch_console.py nije pronađen!
+        echo Molimo kopiraj awatch_console.py u isti folder
+        pause
+        exit /b 1
+    )
+    goto :end
+)
+
+echo ✓ tkinter je dostupan - mogu koristiti GUI verziju
+echo.
+
 REM Try to run the Windows optimized version first
 if exist "awatch_windows.py" (
     echo ▶️  Pokretam Windows kompatibilnu verziju...
@@ -50,6 +71,7 @@ if exist "awatch_windows.py" (
     exit /b 1
 )
 
+:end
 echo.
 echo 👋 Desktop aplikacija zatvorena
 pause
