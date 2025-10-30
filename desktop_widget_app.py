@@ -7,6 +7,7 @@ Modern widget + normal mode with astronomical time display
 import tkinter as tk
 from tkinter import ttk, Canvas
 import math
+import time
 from datetime import datetime, timezone
 import threading
 import time
@@ -434,13 +435,16 @@ class NormalMode:
                 )
     
     def create_normal_ui(self):
-        """Kreiraj jednostavan vertikalni normal mode UI - NOVA SPECIFIKACIJA"""
+        """Kreiraj jednostavan vertikalni normal mode UI - NOVA SPECIFIKACIJA SA GRADIENTOM"""
         
-        # Main container sa scroll
+        # Main container sa scroll i gradient pozadinom
         self.main_canvas = tk.Canvas(self.parent, bg=self.current_theme.bottom_color, highlightthickness=0)
         self.main_canvas.pack(fill=tk.BOTH, expand=True)
         
-        self.main_frame = tk.Frame(self.main_canvas, bg=self.current_theme.bottom_color)
+        # Kreiraj gradient pozadinu kao u widget mode-u
+        self.update_normal_gradient()
+        
+        self.main_frame = tk.Frame(self.main_canvas, bg='', bd=0)  # Transparentna pozadina
         canvas_frame = self.main_canvas.create_window(0, 0, anchor=tk.NW, window=self.main_frame)
         
         def configure_canvas(event=None):
@@ -450,7 +454,7 @@ class NormalMode:
         self.main_canvas.bind('<Configure>', configure_canvas)
         
         # 1. HEADER sa dugmićima - OKRUGLI DIZAJN
-        header_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
+        header_frame = tk.Frame(self.main_frame, bg='', bd=0)  # Transparentna pozadina
         header_frame.pack(fill=tk.X, padx=20, pady=15)
         
         # Levo dugme - povratak na widget (okrugli)
@@ -458,77 +462,69 @@ class NormalMode:
                            text="←",
                            font=("Arial", 18, "bold"),
                            bg=self.current_theme.top_color,
-                           fg=self.current_theme.text_color,
+                           fg="#ffffff",  # Beli tekst
                            bd=3,
                            relief='raised',
                            width=3,
                            height=1,
                            highlightthickness=2,
-                           highlightbackground=self.current_theme.text_color,
+                           highlightbackground="#ffffff",  # Beli highlight
                            command=self.minimize_to_widget)
         back_btn.pack(side=tk.LEFT)
         self.add_button_hover_effect(back_btn)
         
-        # Naslov u centru
-        title = tk.Label(header_frame,
-                        text="Astronomical Watch",
-                        font=("Arial", 16, "bold"),
-                        bg=self.current_theme.bottom_color,
-                        fg=self.current_theme.text_color)
-        title.pack(side=tk.LEFT, expand=True)
+        # Naslov u centru - SA OUTLINE
+        self.title_container, self.title_label = self.create_text_with_outline_normal(
+            header_frame, "Astronomical Watch", ("Arial", 16, "bold")
+        )
+        self.title_container.pack(side=tk.LEFT, expand=True)
         
         # Desno dugme - izbor jezika (okrugli)
         lang_btn = tk.Button(header_frame,
                            text="🌐",
                            font=("Arial", 16),
                            bg=self.current_theme.top_color,
-                           fg=self.current_theme.text_color,
+                           fg="#ffffff",  # Beli tekst
                            bd=3,
                            relief='raised',
                            width=3,
                            height=1,
                            highlightthickness=2,
-                           highlightbackground=self.current_theme.text_color,
+                           highlightbackground="#ffffff",  # Beli highlight
                            command=self.show_language_menu)
         lang_btn.pack(side=tk.RIGHT)
         self.add_button_hover_effect(lang_btn)
         
-        # 2. DIES broj + label
-        dies_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
+        # 2. DIES broj + label - SA OUTLINE
+        dies_frame = tk.Frame(self.main_frame, bg='', bd=0)  # Transparentna pozadina
         dies_frame.pack(pady=(20, 5))
         
-        self.dies_number_label = tk.Label(dies_frame,
-                                         text="000",
-                                         font=("DejaVu Sans Mono", 48, "bold"),
-                                         bg=self.current_theme.bottom_color,
-                                         fg=self.current_theme.text_color)
-        self.dies_number_label.pack()
+        self.dies_container, self.dies_number_label = self.create_text_with_outline_normal(
+            dies_frame, "000", ("DejaVu Sans Mono", 48, "bold")
+        )
+        self.dies_container.pack()
         
-        tk.Label(dies_frame,
-                text="Dies",
-                font=("Arial", 14),
-                bg=self.current_theme.bottom_color,
-                fg=self.current_theme.text_color).pack()
+        self.dies_label_container, self.dies_text_label = self.create_text_with_outline_normal(
+            dies_frame, "Dies", ("Arial", 14)
+        )
+        self.dies_label_container.pack()
         
-        # 3. MILIDIES broj + label
-        milides_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
+        # 3. MILIDIES broj + label - SA OUTLINE
+        milides_frame = tk.Frame(self.main_frame, bg='', bd=0)  # Transparentna pozadina
         milides_frame.pack(pady=(15, 5))
         
-        self.milides_number_label = tk.Label(milides_frame,
-                                            text="000",
-                                            font=("DejaVu Sans Mono", 48, "bold"),
-                                            bg=self.current_theme.bottom_color,
-                                            fg=self.current_theme.text_color)
-        self.milides_number_label.pack()
+        self.milides_container, self.milides_number_label = self.create_text_with_outline_normal(
+            milides_frame, "000", ("DejaVu Sans Mono", 48, "bold")
+        )
+        self.milides_container.pack()
         
-        tk.Label(milides_frame,
-                text="miliDies",
-                font=("Arial", 14),
-                bg=self.current_theme.bottom_color,
-                fg=self.current_theme.text_color).pack()
+        self.milides_label_container, self.milides_text_label = self.create_text_with_outline_normal(
+            milides_frame, "miliDies", ("Arial", 14)
+        )
+        self.milides_label_container.pack()
         
         # 4. PROGRESS BAR za mikroDies
-        progress_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
+        progress_frame = tk.Frame(self.main_frame, bg='', bd=0)  # Transparentna pozadina
         progress_frame.pack(pady=(20, 5), padx=40)
         
         self.main_progress_var = tk.IntVar(value=0)
@@ -539,47 +535,43 @@ class NormalMode:
                                                mode='determinate')
         self.main_progress_bar.pack()
         
-        # Label ISPOD progress bar-a sa trocifrenim mikroDies
-        self.mikro_label = tk.Label(progress_frame,
-                                   text="mikroDies: 000",
-                                   font=("DejaVu Sans Mono", 14),
-                                   bg=self.current_theme.bottom_color,
-                                   fg=self.current_theme.text_color)
-        self.mikro_label.pack(pady=(8, 0))
+        # Label ISPOD progress bar-a sa trocifrenim mikroDies - SA OUTLINE
+        self.mikro_container, self.mikro_label = self.create_text_with_outline_normal(
+            progress_frame, "mikroDies: 000", ("DejaVu Sans Mono", 14)
+        )
+        self.mikro_container.pack(pady=(8, 0))
         
         # 5. STANDARDNO VREME - vidno odvojeno
-        time_separator = tk.Frame(self.main_frame, bg=self.current_theme.text_color, height=1)
+        time_separator = tk.Frame(self.main_frame, bg="#ffffff", height=2)  # Beli separator
         time_separator.pack(fill=tk.X, padx=50, pady=(25, 15))
         
-        time_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
+        time_frame = tk.Frame(self.main_frame, bg='', bd=0)  # Transparentna pozadina
         time_frame.pack(pady=(0, 20))
         
-        self.standard_time_label = tk.Label(time_frame,
-                                           text="UTC+1  30/10/2025  12:34:56",
-                                           font=("DejaVu Sans Mono", 16),
-                                           bg=self.current_theme.bottom_color,
-                                           fg=self.current_theme.text_color)
-        self.standard_time_label.pack()
+        self.standard_time_container, self.standard_time_label = self.create_text_with_outline_normal(
+            time_frame, "UTC+1  30/10/2025  12:34:56", ("DejaVu Sans Mono", 16)
+        )
+        self.standard_time_container.pack()
         
         # 6. DUGMAD sa slikama u jednom nizu - OKRUGLI I JEDNAKI
-        buttons_frame = tk.Frame(self.main_frame, bg=self.current_theme.bottom_color)
+        buttons_frame = tk.Frame(self.main_frame, bg='', bd=0)  # Transparentna pozadina
         buttons_frame.pack(pady=(20, 30))
         
         # Jedan red dugmadi sa slikama - jednake veličine
-        button_row = tk.Frame(buttons_frame, bg=self.current_theme.bottom_color)
+        button_row = tk.Frame(buttons_frame, bg='', bd=0)  # Transparentna pozadina
         button_row.pack()
         
-        # Definišemo jedinstvene parametre za sve dugmad
+        # Definišemo jedinstvene parametre za sve dugmad - BELI TEKST
         button_config = {
             'font': ("Arial", 18, "bold"),
             'bg': self.current_theme.top_color,
-            'fg': self.current_theme.text_color,
+            'fg': "#ffffff",  # Beli tekst
             'bd': 3,
             'relief': 'raised',
             'width': 3,  # Smanjena širina za okrugliji oblik
             'height': 1,  # Smanjena visina za okrugliji oblik
             'highlightthickness': 2,
-            'highlightbackground': self.current_theme.text_color
+            'highlightbackground': "#ffffff"  # Beli highlight
         }
         
         # Explanation - slovo "i"
@@ -609,6 +601,71 @@ class NormalMode:
         # Dodaj hover efekte za okrugli izgled
         for btn in [explanation_btn, comparison_btn, calculation_btn, settings_btn]:
             self.add_button_hover_effect(btn)
+    
+    def update_normal_gradient(self):
+        """Update gradient pozadinu normal mode-a kao widget mode"""
+        if not GRADIENT_AVAILABLE:
+            # Fallback solid color
+            self.main_canvas.configure(bg="#1e3a8a")
+            return
+            
+        # Get current sky theme
+        current_time = datetime.now(timezone.utc)
+        self.current_theme = get_sky_theme(current_time)
+        
+        # Get canvas dimensions
+        try:
+            canvas_width = self.main_canvas.winfo_width()
+            canvas_height = self.main_canvas.winfo_height()
+        except:
+            canvas_width = 400
+            canvas_height = 600
+        
+        # Create gradient lines
+        gradient_colors = create_gradient_colors(self.current_theme, steps=canvas_height)
+        
+        # Clear previous gradient
+        self.main_canvas.delete("gradient")
+        
+        # Draw gradient lines
+        for i, color in enumerate(gradient_colors):
+            self.main_canvas.create_line(
+                0, i, canvas_width, i,
+                fill=color, width=1, tags="gradient"
+            )
+        
+        # Move gradient to back
+        self.main_canvas.tag_lower("gradient")
+    
+    def create_text_with_outline_normal(self, parent, text, font, x=None, y=None, tags=None):
+        """Kreira Label sa outline tekstom za normal mode"""
+        # Za normal mode koristimo Label sa specijalnim fontom efektom
+        # Simuliramo outline pomoću shadow labela
+        
+        container = tk.Frame(parent, bg='', bd=0)
+        
+        # Kreiraj shadow labele za outline efekat
+        shadow_offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+        
+        for dx, dy in shadow_offsets:
+            shadow_label = tk.Label(container,
+                                   text=text,
+                                   font=font,
+                                   fg="#000000",  # Crna ivica
+                                   bg='',
+                                   bd=0)
+            shadow_label.place(x=dx, y=dy)
+        
+        # Glavni tekst (beli)
+        main_label = tk.Label(container,
+                             text=text,
+                             font=font,
+                             fg="#ffffff",  # Beli tekst
+                             bg='',
+                             bd=0)
+        main_label.place(x=0, y=0)
+        
+        return container, main_label
         
     def minimize_to_widget(self):
         """Minimize to widget mode"""
@@ -616,8 +673,13 @@ class NormalMode:
             self.on_minimize()
     
     def update_normal(self):
-        """Update normal mode display - NOVA JEDNOSTAVNA SPECIFIKACIJA"""
+        """Update normal mode display - NOVA JEDNOSTAVNA SPECIFIKACIJA SA GRADIENTOM"""
         try:
+            # Update gradient svakih 60 sekundi
+            if not hasattr(self, '_last_normal_gradient_update') or time.time() - self._last_normal_gradient_update > 60:
+                self.update_normal_gradient()
+                self._last_normal_gradient_update = time.time()
+            
             if HAS_CORE:
                 try:
                     current_eq = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
@@ -679,9 +741,12 @@ class NormalMode:
             
         except Exception as e:
             # Error handling
-            self.dies_number_label.config(text="ERR")
-            self.milides_number_label.config(text="ERR")
-            self.standard_time_label.config(text="ERROR")
+            if hasattr(self, 'dies_number_label'):
+                self.dies_number_label.config(text="ERR")
+            if hasattr(self, 'milides_number_label'):
+                self.milides_number_label.config(text="ERR")
+            if hasattr(self, 'standard_time_label'):
+                self.standard_time_label.config(text="ERROR")
             print(f"Normal mode update error: {e}")
         
         # Schedule next update
