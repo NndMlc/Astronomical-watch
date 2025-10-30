@@ -97,9 +97,9 @@ class WidgetMode:
         # Remove window decorations (title bar)
         self.parent.overrideredirect(True)
         
-        # Compact modern size - povećano za veće brojeve
-        self.widget_width = 160
-        self.widget_height = 95
+        # Kompaktne dimenzije sa minimalnim marginima
+        self.widget_width = 140
+        self.widget_height = 80
         
         self.parent.geometry(f"{self.widget_width}x{self.widget_height}")
         self.parent.resizable(False, False)
@@ -107,10 +107,10 @@ class WidgetMode:
         # Always on top and corner positioning
         try:
             self.parent.attributes('-topmost', True)
-            # Position u desni gornji ugao sa margin
+            # Position u desni gornji ugao sa minimalnim margin
             screen_width = self.parent.winfo_screenwidth()
-            x_pos = screen_width - self.widget_width - 20
-            y_pos = 20
+            x_pos = screen_width - self.widget_width - 5  # Minimalni margin 5px
+            y_pos = 5  # Minimalni margin 5px
             self.parent.geometry(f"+{x_pos}+{y_pos}")
         except:
             pass
@@ -189,34 +189,36 @@ class WidgetMode:
         # Clear previous content
         self.canvas.delete("content")
         
-        # 1. Naslov malim fontom sa crnom ivicom - gore
-        self.title_text, self.title_outline = self.create_text_with_outline(
-            self.widget_width // 2, 10,
-            "Astronomical Watch",
-            ("Segoe UI", 7, "normal"),
+        # 1. Naslov većim fontom - SAMO BELA BOJA (bez outline)
+        self.title_text = self.canvas.create_text(
+            self.widget_width // 2, 8,
+            text="Astronomical Watch",
+            font=("Segoe UI", 9, "normal"),  # Povećano sa 7 na 9
+            fill="#ffffff",
             tags="content"
         )
         
-        # 2. Brojevi koji pokazuju Dies i miliDies - VELIKI i prominentni
+        # 2. Brojevi koji pokazuju Dies i miliDies - SA OUTLINE (bela preko crne)
         self.time_text, self.time_outline = self.create_text_with_outline(
-            self.widget_width // 2, 35,
+            self.widget_width // 2, 28,
             "000.000",
-            ("Consolas", 20, "bold"),  # Povećano sa 16 na 20
+            ("Consolas", 16, "bold"),  # Vraćeno na originalnu veličinu
             tags="content"
         )
         
-        # 3. Label na kome pise "Dies . miliDies" - ispod brojeva, veći
-        self.format_text, self.format_outline = self.create_text_with_outline(
-            self.widget_width // 2, 55,
-            "Dies . miliDies",
-            ("Segoe UI", 9, "normal"),  # Povećano sa 7 na 9
+        # 3. Label veći font - SAMO BELA BOJA (bez outline)
+        self.format_text = self.canvas.create_text(
+            self.widget_width // 2, 44,
+            text="Dies . miliDies",
+            font=("Segoe UI", 10, "normal"),  # Povećano sa 9 na 10
+            fill="#ffffff",
             tags="content"
         )
         
-        # 4. Progress bar za mikroDies - POMERENO NA SAMO DNO
-        bar_y = 85  # Pomereno sa 67 na 85 (skoro dno)
+        # 4. Progress bar blizu labeli - minimalni margini
+        bar_y = 58  # Približeno labeli (smanjeno sa 85)
         bar_height = 6
-        bar_margin = 8  # Smanjeno sa 15 na 8 - skoro do granica širine
+        bar_margin = 3  # Minimalni margin
         
         # Progress bar background - tamna za kontrast sa belom
         self.progress_bg = self.canvas.create_rectangle(
@@ -232,7 +234,7 @@ class WidgetMode:
             tags="content"
         )
         
-        # UKLONJEN mikroDies label - kompaktniji dizajn
+        # Nema outline za naslov i label - samo brojevi imaju outline
         
     def bind_double_click(self):
         """Bind double click event na canvas i sve elemente"""
@@ -322,15 +324,15 @@ class WidgetMode:
             # Update progress bar za mikroDies (0-1000) - bela boja
             mikro_value = data['mikrodiet']
             if hasattr(self, 'progress_fill'):
-                bar_margin = 8  # Usklađeno sa create_content
+                bar_margin = 3  # Usklađeno sa create_content
                 bar_width = self.widget_width - (2 * bar_margin) - 2  # Account for border
                 progress_width = (mikro_value / 1000.0) * bar_width
                 
                 # Update progress fill - nove koordinate
                 self.canvas.coords(
                     self.progress_fill,
-                    bar_margin + 1, 86,  # y pomereno sa 68 na 86
-                    bar_margin + 1 + progress_width, 90  # y pomereno sa 72 na 90
+                    bar_margin + 1, 59,  # y=59 (bar_y + 1)
+                    bar_margin + 1 + progress_width, 63  # y=63 (bar_y + height - 1)
                 )
                 
                 # Keep progress bar white
