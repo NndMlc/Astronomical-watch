@@ -442,7 +442,8 @@ class NormalMode:
         self.main_canvas.pack(fill=tk.BOTH, expand=True)
         
         # Kreiraj gradient pozadinu kao u widget mode-u
-        self.update_normal_gradient()
+        # Pozovi nakon što je canvas pakovan
+        self.parent.after(100, self.update_normal_gradient)
         
         self.main_frame = tk.Frame(self.main_canvas, bg='', bd=0)  # Transparentna pozadina
         canvas_frame = self.main_canvas.create_window(0, 0, anchor=tk.NW, window=self.main_frame)
@@ -474,10 +475,10 @@ class NormalMode:
         self.add_button_hover_effect(back_btn)
         
         # Naslov u centru - SA OUTLINE
-        self.title_container, self.title_label = self.create_text_with_outline_normal(
+        self.title_label = self.create_text_with_outline_normal(
             header_frame, "Astronomical Watch", ("Arial", 16, "bold")
         )
-        self.title_container.pack(side=tk.LEFT, expand=True)
+        self.title_label.pack(side=tk.LEFT, expand=True)
         
         # Desno dugme - izbor jezika (okrugli)
         lang_btn = tk.Button(header_frame,
@@ -499,29 +500,29 @@ class NormalMode:
         dies_frame = tk.Frame(self.main_frame, bg='', bd=0)  # Transparentna pozadina
         dies_frame.pack(pady=(20, 5))
         
-        self.dies_container, self.dies_number_label = self.create_text_with_outline_normal(
+        self.dies_number_label = self.create_text_with_outline_normal(
             dies_frame, "000", ("DejaVu Sans Mono", 48, "bold")
         )
-        self.dies_container.pack()
+        self.dies_number_label.pack()
         
-        self.dies_label_container, self.dies_text_label = self.create_text_with_outline_normal(
+        self.dies_text_label = self.create_text_with_outline_normal(
             dies_frame, "Dies", ("Arial", 14)
         )
-        self.dies_label_container.pack()
+        self.dies_text_label.pack()
         
         # 3. MILIDIES broj + label - SA OUTLINE
         milides_frame = tk.Frame(self.main_frame, bg='', bd=0)  # Transparentna pozadina
         milides_frame.pack(pady=(15, 5))
         
-        self.milides_container, self.milides_number_label = self.create_text_with_outline_normal(
+        self.milides_number_label = self.create_text_with_outline_normal(
             milides_frame, "000", ("DejaVu Sans Mono", 48, "bold")
         )
-        self.milides_container.pack()
+        self.milides_number_label.pack()
         
-        self.milides_label_container, self.milides_text_label = self.create_text_with_outline_normal(
+        self.milides_text_label = self.create_text_with_outline_normal(
             milides_frame, "miliDies", ("Arial", 14)
         )
-        self.milides_label_container.pack()
+        self.milides_text_label.pack()
         
         # 4. PROGRESS BAR za mikroDies
         progress_frame = tk.Frame(self.main_frame, bg='', bd=0)  # Transparentna pozadina
@@ -536,10 +537,10 @@ class NormalMode:
         self.main_progress_bar.pack()
         
         # Label ISPOD progress bar-a sa trocifrenim mikroDies - SA OUTLINE
-        self.mikro_container, self.mikro_label = self.create_text_with_outline_normal(
+        self.mikro_label = self.create_text_with_outline_normal(
             progress_frame, "mikroDies: 000", ("DejaVu Sans Mono", 14)
         )
-        self.mikro_container.pack(pady=(8, 0))
+        self.mikro_label.pack(pady=(8, 0))
         
         # 5. STANDARDNO VREME - vidno odvojeno
         time_separator = tk.Frame(self.main_frame, bg="#ffffff", height=2)  # Beli separator
@@ -548,10 +549,10 @@ class NormalMode:
         time_frame = tk.Frame(self.main_frame, bg='', bd=0)  # Transparentna pozadina
         time_frame.pack(pady=(0, 20))
         
-        self.standard_time_container, self.standard_time_label = self.create_text_with_outline_normal(
+        self.standard_time_label = self.create_text_with_outline_normal(
             time_frame, "UTC+1  30/10/2025  12:34:56", ("DejaVu Sans Mono", 16)
         )
-        self.standard_time_container.pack()
+        self.standard_time_label.pack()
         
         # 6. DUGMAD sa slikama u jednom nizu - OKRUGLI I JEDNAKI
         buttons_frame = tk.Frame(self.main_frame, bg='', bd=0)  # Transparentna pozadina
@@ -603,69 +604,99 @@ class NormalMode:
             self.add_button_hover_effect(btn)
     
     def update_normal_gradient(self):
-        """Update gradient pozadinu normal mode-a kao widget mode"""
-        if not GRADIENT_AVAILABLE:
-            # Fallback solid color
-            self.main_canvas.configure(bg="#1e3a8a")
-            return
-            
-        # Get current sky theme
-        current_time = datetime.now(timezone.utc)
-        self.current_theme = get_sky_theme(current_time)
-        
-        # Get canvas dimensions
+        """Update pozadinu normal mode-a - JEDNOSTAVAN PRISTUP"""
         try:
-            canvas_width = self.main_canvas.winfo_width()
-            canvas_height = self.main_canvas.winfo_height()
-        except:
-            canvas_width = 400
-            canvas_height = 600
-        
-        # Create gradient lines
-        gradient_colors = create_gradient_colors(self.current_theme, steps=canvas_height)
-        
-        # Clear previous gradient
-        self.main_canvas.delete("gradient")
-        
-        # Draw gradient lines
-        for i, color in enumerate(gradient_colors):
-            self.main_canvas.create_line(
-                0, i, canvas_width, i,
-                fill=color, width=1, tags="gradient"
-            )
-        
-        # Move gradient to back
-        self.main_canvas.tag_lower("gradient")
+            # Jednostavan color-cycling sistem
+            current_time = datetime.now(timezone.utc)
+            hour = current_time.hour
+            
+            # Jednostavne boje na osnovu doba dana
+            if 6 <= hour < 12:  # Jutro
+                bg_color = "#4A90E2"  # Plava jutro
+            elif 12 <= hour < 18:  # Dan
+                bg_color = "#87CEEB"  # Svetlo plava dan
+            elif 18 <= hour < 21:  # Veče
+                bg_color = "#FF7F50"  # Narandžasta veče
+            else:  # Noć
+                bg_color = "#2F4F4F"  # Tamno plava noć
+            
+            print(f"DEBUG: Postavljam pozadinu na {bg_color} (sat: {hour})")
+            
+            # Postavi solid boju pozadine
+            self.main_canvas.configure(bg=bg_color)
+            
+            # Update theme za dugmad
+            if hasattr(self, 'current_theme'):
+                self.current_theme.bottom_color = bg_color
+                self.current_theme.top_color = "#ffffff"
+                self.current_theme.text_color = "#ffffff"
+            
+            print("DEBUG: Pozadina uspešno postavljena")
+            
+        except Exception as e:
+            print(f"DEBUG: Greška u pozadini: {e}")
+            # Fallback na plavu boju
+            self.main_canvas.configure(bg="#2563eb")
     
-    def create_text_with_outline_normal(self, parent, text, font, x=None, y=None, tags=None):
-        """Kreira Label sa outline tekstom za normal mode"""
-        # Za normal mode koristimo Label sa specijalnim fontom efektom
-        # Simuliramo outline pomoću shadow labela
-        
-        container = tk.Frame(parent, bg='', bd=0)
-        
-        # Kreiraj shadow labele za outline efekat
-        shadow_offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
-        
-        for dx, dy in shadow_offsets:
-            shadow_label = tk.Label(container,
-                                   text=text,
-                                   font=font,
-                                   fg="#000000",  # Crna ivica
-                                   bg='',
-                                   bd=0)
-            shadow_label.place(x=dx, y=dy)
-        
-        # Glavni tekst (beli)
-        main_label = tk.Label(container,
-                             text=text,
-                             font=font,
-                             fg="#ffffff",  # Beli tekst
-                             bg='',
-                             bd=0)
-        main_label.place(x=0, y=0)
-        
-        return container, main_label
+    def create_text_with_outline_normal(self, canvas, x, y, text, font, fill="white", outline="black", anchor="center"):
+        """Kreira text sa outline na normal canvasu - JEDNOSTAVAN PRISTUP"""
+        try:
+            print(f"DEBUG: Kreiram tekst '{text}' na poziciji ({x}, {y})")
+            
+            # Samo glavni text sa velikim, kontrast fontom
+            text_id = canvas.create_text(
+                x, y, 
+                text=text, 
+                font=font, 
+                fill="white",  # Uvek beli text za maksimalnu vidljivost
+                anchor=anchor,
+                tags="text_label"
+            )
+            
+            print(f"DEBUG: Tekst kreiran sa ID {text_id}")
+            canvas.update()
+            return text_id
+            
+        except Exception as e:
+            print(f"DEBUG: Greška u kreiranju teksta: {e}")
+            return None
+    
+    def create_normal_labels(self):
+        """Kreiranje labela za normal mode - JEDNOSTAVNA VERZIJA"""
+        try:
+            print("DEBUG: Kreiram normal mode labele...")
+            
+            # Veliki fontovi
+            large_font = ("DejaVu Sans Mono", 32, "bold")  # Veći font
+            medium_font = ("DejaVu Sans Mono", 18, "bold")
+            
+            # Clear postojeće
+            self.main_canvas.delete("text_label")
+            
+            # Pozicije
+            center_x = 200
+            
+            # Dies.miliDies
+            self.dies_label = self.create_text_with_outline_normal(
+                self.main_canvas, center_x, 100, "000.000", large_font
+            )
+            
+            # Datum
+            self.date_label = self.create_text_with_outline_normal(
+                self.main_canvas, center_x, 180, "Date: Loading...", medium_font
+            )
+            
+            # UTC time
+            self.utc_label = self.create_text_with_outline_normal(
+                self.main_canvas, center_x, 230, "UTC: Loading...", medium_font
+            )
+            
+            print("DEBUG: Svi labeli kreirani - GOTOVO!")
+            self.main_canvas.update()
+            
+        except Exception as e:
+            print(f"DEBUG: Greška u labela: {e}")
+    
         
     def minimize_to_widget(self):
         """Minimize to widget mode"""
@@ -673,13 +704,20 @@ class NormalMode:
             self.on_minimize()
     
     def update_normal(self):
-        """Update normal mode display - NOVA JEDNOSTAVNA SPECIFIKACIJA SA GRADIENTOM"""
+        """Update normal mode display - RADIKALNO JEDNOSTAVNO"""
         try:
+            print("DEBUG: Update normal mode...")
+            
             # Update gradient svakih 60 sekundi
             if not hasattr(self, '_last_normal_gradient_update') or time.time() - self._last_normal_gradient_update > 60:
                 self.update_normal_gradient()
                 self._last_normal_gradient_update = time.time()
             
+            # Kreiraj labele ako ne postoje
+            if not hasattr(self, 'dies_label') or self.dies_label is None:
+                self.create_normal_labels()
+            
+            # Get astronomical data
             if HAS_CORE:
                 try:
                     current_eq = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
@@ -692,65 +730,37 @@ class NormalMode:
                         'dies': reading.day_index,
                         'milides': reading.miliDies,
                         'mikrodiet': reading.mikroDies,
-                        'utc': reading.utc
+                        'utc': datetime.now(timezone.utc)
                     }
                 except:
                     data = AstronomicalCalculator.calculate_time()
             else:
                 data = AstronomicalCalculator.calculate_time()
             
-            # 1. Dies broj (veliki font)
-            self.dies_number_label.config(text=str(data['dies']))
+            # Update labele sa novim podacima
+            if hasattr(self, 'dies_label') and self.dies_label:
+                dies_text = f"{data['dies']:03d}.{data['milides']:03d}"
+                self.main_canvas.itemconfig(self.dies_label, text=dies_text)
+                print(f"DEBUG: Dies text updated: {dies_text}")
             
-            # 2. miliDies broj (veliki font, trocifreni)
-            self.milides_number_label.config(text=f"{data['milides']:03d}")
+            if hasattr(self, 'date_label') and self.date_label:
+                date_text = f"Date: {data['utc'].strftime('%d/%m/%Y')}"
+                self.main_canvas.itemconfig(self.date_label, text=date_text)
+                print(f"DEBUG: Date text updated: {date_text}")
             
-            # 3. Progress bar za mikroDies i label ispod
-            self.main_progress_var.set(data['mikrodiet'])
-            self.mikro_label.config(text=f"mikroDies: {data['mikrodiet']:03d}")
+            if hasattr(self, 'utc_label') and self.utc_label:
+                utc_text = f"UTC: {data['utc'].strftime('%H:%M:%S')}"
+                self.main_canvas.itemconfig(self.utc_label, text=utc_text)
+                print(f"DEBUG: UTC text updated: {utc_text}")
             
-            # 4. Standardno vreme - UTC+timezone DD/MM/YYYY hh:mm:ss
-            utc_time = data['utc']
-            
-            # Pokušaj da izračunaš lokalnu timezone offset
-            try:
-                local_time = utc_time.replace(tzinfo=timezone.utc).astimezone()
-                # Izračunaj offset u satima
-                offset_seconds = local_time.utcoffset().total_seconds()
-                offset_hours = int(offset_seconds / 3600)
-                
-                # Format timezone
-                if offset_hours >= 0:
-                    timezone_str = f"UTC+{offset_hours}"
-                else:
-                    timezone_str = f"UTC{offset_hours}"
-                
-                # Format datum i vreme
-                date_str = local_time.strftime("%d/%m/%Y")
-                time_str = local_time.strftime("%H:%M:%S")
-                
-                standard_time_text = f"{timezone_str}  {date_str}  {time_str}"
-                
-            except:
-                # Fallback na UTC
-                date_str = utc_time.strftime("%d/%m/%Y")
-                time_str = utc_time.strftime("%H:%M:%S")
-                standard_time_text = f"UTC+0  {date_str}  {time_str}"
-            
-            self.standard_time_label.config(text=standard_time_text)
+            self.main_canvas.update()
+            print("DEBUG: Normal mode update završen!")
             
         except Exception as e:
-            # Error handling
-            if hasattr(self, 'dies_number_label'):
-                self.dies_number_label.config(text="ERR")
-            if hasattr(self, 'milides_number_label'):
-                self.milides_number_label.config(text="ERR")
-            if hasattr(self, 'standard_time_label'):
-                self.standard_time_label.config(text="ERROR")
-            print(f"Normal mode update error: {e}")
+            print(f"DEBUG: Greška u normal update: {e}")
         
         # Schedule next update
-        self.parent.after(100, self.update_normal)
+        self.parent.after(1000, self.update_normal)
     
     def create_tooltip(self, widget, text):
         """Kreiraj tooltip za widget"""
