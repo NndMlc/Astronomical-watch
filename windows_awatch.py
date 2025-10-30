@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Astronomical Watch Desktop - Windows Optimized
 Jednostavna verzija za Windows sa embedded kalkulacijama
@@ -14,7 +15,7 @@ class WindowsAstronomicalWatch:
     def __init__(self):
         # Kreiranje glavnog window-a
         self.root = tk.Tk()
-        self.root.title("🌟 Astronomical Watch - mikroDies")
+        self.root.title("Astronomical Watch - mikroDies")
         self.root.geometry("350x220")
         self.root.resizable(False, False)
         
@@ -41,7 +42,7 @@ class WindowsAstronomicalWatch:
         header_frame.pack(fill=tk.X, padx=15, pady=10)
         
         title = tk.Label(header_frame, 
-                        text="🌟 Astronomical Watch",
+                        text="Astronomical Watch",
                         font=("Segoe UI", 14, "bold"),
                         bg=self.bg_color, 
                         fg=self.highlight_color)
@@ -127,7 +128,7 @@ class WindowsAstronomicalWatch:
         right_col.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
         
         self.mikro_label = tk.Label(right_col,
-                                   text="μDies: ---",
+                                   text="mikroDies: ---",
                                    font=("Segoe UI", 9),
                                    bg=self.bg_color,
                                    fg=self.text_color)
@@ -205,7 +206,7 @@ class WindowsAstronomicalWatch:
             # Details
             self.dies_label.config(text=f"Dies: {astro_data['day_index']}")
             self.year_label.config(text=f"Period: {astro_data['year_label']}")
-            self.mikro_label.config(text=f"μDies: {astro_data['mikroDies']}")
+            self.mikro_label.config(text=f"mikroDies: {astro_data['mikroDies']}")
             self.precision_label.config(text=f"Precision: {astro_data['mikroDies_fraction']:.3f}")
             
             # Progress bar (mikroDies progress within current miliDies)
@@ -221,7 +222,7 @@ class WindowsAstronomicalWatch:
         
     def start_updates(self):
         """Start the update loop"""
-        print("🌟 Astronomical Watch Windows - Starting...")
+        print("Astronomical Watch Windows - Starting...")
         print("Real-time mikroDies precision display")
         print("Press Alt+F4 to close")
         self.update_display()
@@ -243,9 +244,9 @@ def main():
     # Check if running on Windows
     import platform
     if platform.system() == "Windows":
-        print("✓ Windows detected - optimized display enabled")
+        print("Windows detected - optimized display enabled")
     else:
-        print("⚠️  Non-Windows system - basic compatibility mode")
+        print("Non-Windows system - basic compatibility mode")
     
     app = WindowsAstronomicalWatch()
     app.run()

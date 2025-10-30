@@ -25,7 +25,10 @@ echo ✓ Python pronađen
 echo.
 
 REM Try to run the Windows optimized version first
-if exist "windows_awatch.py" (
+if exist "awatch_windows.py" (
+    echo ▶️  Pokretam Windows kompatibilnu verziju...
+    python awatch_windows.py
+) else if exist "windows_awatch.py" (
     echo ▶️  Pokretam Windows optimizovanu verziju...
     python windows_awatch.py
 ) else if exist "standalone_desktop.py" (
@@ -38,7 +41,8 @@ if exist "windows_awatch.py" (
     echo ❌ Nijedna desktop aplikacija nije pronađena!
     echo.
     echo Potrebni fajlovi:
-    echo - windows_awatch.py (preporučeno)
+    echo - awatch_windows.py (PREPORUČENO za Windows)
+    echo - windows_awatch.py 
     echo - standalone_desktop.py 
     echo - desktop_app.py
     echo.
