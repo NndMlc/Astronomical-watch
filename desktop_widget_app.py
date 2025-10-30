@@ -204,7 +204,7 @@ class WidgetMode:
         self.time_text, self.time_outline = self.create_text_with_outline(
             self.widget_width // 2, 35,  # Spušteno sa 25 na 35
             "0.000",  # Dies bez padding, miliDies trocifreni
-            ("Consolas", 28, "bold"),
+            ("DejaVu Sans Mono", 28, "bold"),  # tkinter će koristiti fallback ako nema
             tags="content"
         )
         
