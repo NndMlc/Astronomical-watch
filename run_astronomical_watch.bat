@@ -1,19 +1,23 @@
 @echo off
 REM Astronomical Watch Desktop Launcher for Windows
-echo Starting Astronomical Watch...
+echo ========================================
+echo  ASTRONOMICAL WATCH DESKTOP LAUNCHER
+echo ========================================
 echo Checking Python version...
 python --version
 echo.
-echo Trying python astronomical_watch_desktop.py...
+echo Starting Astronomical Watch...
 python astronomical_watch_desktop.py
-if %ERRORLEVEL% NEQ 0 (
+echo.
+if %ERRORLEVEL% EQU 0 (
+    echo ✓ Application started successfully!
+) else (
+    echo ✗ Application failed to start.
     echo.
-    echo Trying python3 instead...
-    python3 astronomical_watch_desktop.py
+    echo Troubleshooting tips:
+    echo - Make sure Python 3.6+ is installed
+    echo - Check that tkinter is available
+    echo - Try running: python -m tkinter
 )
-if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo Trying py launcher...
-    py astronomical_watch_desktop.py
-)
+echo.
 pause

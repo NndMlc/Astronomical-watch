@@ -43,8 +43,7 @@ class AstronomicalWidgetMode:
             self.frame,
             text="000·000",
             font=("Courier New", 20, "bold"),
-            fg="white",
-            bg="transparent"
+            fg="white"
         )
         self.time_label.pack(expand=True)
         
@@ -53,8 +52,7 @@ class AstronomicalWidgetMode:
             self.frame,
             text="Astronomical Time",
             font=("Arial", 8),
-            fg="lightgray",
-            bg="transparent"
+            fg="lightgray"
         )
         self.info_label.pack()
         
@@ -73,8 +71,13 @@ class AstronomicalWidgetMode:
         now_utc = datetime.now(timezone.utc)
         theme = get_sky_theme(now_utc)
         
-        self.master.configure(bg=theme["bg_gradient"])
-        self.frame.configure(bg=theme["bg_gradient"])
+        bg_color = theme["bg_gradient"]
+        self.master.configure(bg=bg_color)
+        self.frame.configure(bg=bg_color)
+        
+        # Update label backgrounds to match
+        self.time_label.configure(bg=bg_color)
+        self.info_label.configure(bg=bg_color)
         
     def _update_display(self):
         """Update the astronomical time display."""
