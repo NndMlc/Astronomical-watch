@@ -71,13 +71,16 @@ class AstronomicalWidgetMode:
         now_utc = datetime.now(timezone.utc)
         theme = get_sky_theme(now_utc)
         
-        bg_color = theme["bg_gradient"]
+        # Use top color for widget background (could also blend top/bottom)
+        bg_color = theme.top_color
+        text_color = theme.text_color
+        
         self.master.configure(bg=bg_color)
         self.frame.configure(bg=bg_color)
         
-        # Update label backgrounds to match
-        self.time_label.configure(bg=bg_color)
-        self.info_label.configure(bg=bg_color)
+        # Update label backgrounds and text colors to match
+        self.time_label.configure(bg=bg_color, fg=text_color)
+        self.info_label.configure(bg=bg_color, fg="lightgray")
         
     def _update_display(self):
         """Update the astronomical time display."""

@@ -289,7 +289,7 @@ class AstronomicalNormalMode:
         """Apply theme to explanation window."""
         now_utc = datetime.now(timezone.utc)
         theme = get_sky_theme(now_utc)
-        window.configure(bg=theme["bg_gradient"])
+        window.configure(bg=theme.top_color)
                 
     def _update_text_labels(self):
         """Update all text labels with current language."""
@@ -303,12 +303,15 @@ class AstronomicalNormalMode:
         now_utc = datetime.now(timezone.utc)
         theme = get_sky_theme(now_utc)
         
-        self.master.configure(bg=theme["bg_gradient"])
-        self.main_frame.configure(bg=theme["bg_gradient"])
-        self.time_frame.configure(bg=theme["bg_gradient"])
-        self.progress_frame.configure(bg=theme["bg_gradient"])
-        self.info_frame.configure(bg=theme["bg_gradient"])
-        self.controls_frame.configure(bg=theme["bg_gradient"])
+        bg_color = theme.top_color
+        text_color = theme.text_color
+        
+        self.master.configure(bg=bg_color)
+        self.main_frame.configure(bg=bg_color)
+        self.time_frame.configure(bg=bg_color)
+        self.progress_frame.configure(bg=bg_color)
+        self.info_frame.configure(bg=bg_color)
+        self.controls_frame.configure(bg=bg_color)
         
     def _update_display(self):
         """Update the astronomical time display."""
