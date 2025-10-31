@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Astronomical Watch Desktop Application
 """
@@ -16,7 +17,7 @@ def main():
         from astronomical_watch.ui.main import main as ui_main
         ui_main()
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         return 1
     return 0
 
