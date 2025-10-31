@@ -31,9 +31,13 @@
    ```
 
 ## What You'll See:
-1. **Widget Mode**: Small corner display showing current astronomical time
+1. **Widget Mode**: Compact 160x90 display showing:
+   - Localized title (changes with language)
+   - Dies.miliDies format in DejaVu Sans Mono font (28px, black border)
+   - mikroDies progress bar (0-999)
+   - mikroDies counter display
 2. **Click the widget** to open Normal Mode with full features
-3. **Language Selection**: Choose from 20 languages
+3. **Language Selection**: Choose from 20 languages (applies to both modes)
 4. **Explanation Button**: Detailed explanation in your chosen language
 
 ## Requirements:

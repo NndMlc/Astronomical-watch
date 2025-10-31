@@ -3,6 +3,14 @@ REM Astronomical Watch Desktop Launcher for Windows
 echo ========================================
 echo  ASTRONOMICAL WATCH DESKTOP LAUNCHER
 echo ========================================
+echo.
+echo New widget features:
+echo - 160x90 compact size
+echo - Dies.miliDies format (with dot)
+echo - DejaVu Sans Mono font, 28px, black border
+echo - mikroDies progress bar (0-999)
+echo - Localized title
+echo.
 echo Checking Python version...
 python --version
 echo.
