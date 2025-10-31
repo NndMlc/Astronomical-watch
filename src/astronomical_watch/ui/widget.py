@@ -69,14 +69,27 @@ class AstronomicalWidgetMode:
         )
         self.time_canvas.pack(pady=(2, 2))
         
-        # Format label
-        self.format_label = tk.Label(
-            self.frame,
-            text="Dies . miliDies",
+        # Labels frame - horizontal layout for "Dies" and "miliDies"
+        self.labels_frame = tk.Frame(self.frame)
+        self.labels_frame.pack()
+        
+        # Dies label (left side)
+        self.dies_label = tk.Label(
+            self.labels_frame,
+            text="Dies",
             font=("Arial", 8),
             fg="lightgray"
         )
-        self.format_label.pack()
+        self.dies_label.pack(side="left", padx=(10, 30))
+        
+        # miliDies label (right side)
+        self.milidies_label = tk.Label(
+            self.labels_frame,
+            text="miliDies",
+            font=("Arial", 8),
+            fg="lightgray"
+        )
+        self.milidies_label.pack(side="left", padx=(0, 10))
         
         # Progress bar for mikroDies (0-999)
         self.progress_frame = tk.Frame(self.frame)
@@ -89,15 +102,6 @@ class AstronomicalWidgetMode:
             highlightthickness=0
         )
         self.progress_canvas.pack(fill="x")
-        
-        # MikroDies label
-        self.micro_label = tk.Label(
-            self.frame,
-            text="mikroDies: 000",
-            font=("Arial", 9),
-            fg="lightgray"
-        )
-        self.micro_label.pack()
         
     def _bind_click_events(self):
         """Bind interaction events to all widgets."""
@@ -129,7 +133,8 @@ class AstronomicalWidgetMode:
         # Double click = open Normal Mode
         widgets_for_interaction = [
             self.master, self.frame, self.title_label, self.time_canvas, 
-            self.format_label, self.progress_frame, self.progress_canvas, self.micro_label
+            self.labels_frame, self.dies_label, self.milidies_label,
+            self.progress_frame, self.progress_canvas
         ]
         
         for widget in widgets_for_interaction:
@@ -152,9 +157,10 @@ class AstronomicalWidgetMode:
         # Update all label backgrounds and text colors to match
         self.title_label.configure(bg=bg_color, fg=text_color)
         self.time_canvas.configure(bg=bg_color)
-        self.format_label.configure(bg=bg_color, fg="lightgray")
+        self.labels_frame.configure(bg=bg_color)
+        self.dies_label.configure(bg=bg_color, fg="lightgray")
+        self.milidies_label.configure(bg=bg_color, fg="lightgray")
         self.progress_frame.configure(bg=bg_color)
-        self.micro_label.configure(bg=bg_color, fg="lightgray")
         
         # Redraw time display with current background
         self._draw_time_display()
@@ -232,9 +238,6 @@ class AstronomicalWidgetMode:
             # Update title with current language
             self.title_label.config(text=tr("title", self.current_language))
             
-            # Update mikroDies label
-            self.micro_label.config(text=f"mikroDies: {self.microDies:03d}")
-            
             # Update progress bar for mikroDies (0-999)
             self._update_progress_bar()
             
@@ -247,7 +250,6 @@ class AstronomicalWidgetMode:
             self.day_index = 0
             self.milliDies = 0
             self.microDies = 0
-            self.micro_label.config(text="mikroDies: 000")
             self._draw_time_display()
             
     def _update_progress_bar(self):
@@ -278,7 +280,7 @@ class AstronomicalWidgetMode:
                 progress_width = int(canvas_width * progress)
                 self.progress_canvas.create_rectangle(
                     0, 0, progress_width, canvas_height,
-                    fill="lightblue", outline=""
+                    fill="#9ACD32", outline=""  # YellowGreen - high visibility on all sky gradients
                 )
                 
         except Exception as e:

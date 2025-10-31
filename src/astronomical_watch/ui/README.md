@@ -16,8 +16,9 @@ This directory contains the user interface components for the Astronomical Watch
 - **Drag support** - move widget by dragging anywhere (no title bar)
 - **White text with black outline** - optimal visibility on any background
 - **86ms update interval** - ultra-fast refresh (1 mikroDies precision)
-- **Format**: `DDD.mmm` (Dies.miliDies) with mikroDies progress bar
+- **Format**: `DDD.mmm` (Dies.miliDies) with separated labels below
 - **Localized title** - changes with language selection
+- **Visual progress bar** - mikroDies indicator (YellowGreen color, no text counter)
 
 ### `normal_mode.py` - Full-Featured Normal Mode  
 - Detailed astronomical time interface with explanation system

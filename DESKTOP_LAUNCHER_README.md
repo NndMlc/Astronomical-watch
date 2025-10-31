@@ -34,8 +34,8 @@
 1. **Widget Mode**: Compact 180x110 borderless overlay display showing:
    - Localized title (changes with language)
    - Dies.miliDies format in DejaVu Sans Mono font (28px, white text with black outline)
-   - mikroDies progress bar (0-999)
-   - mikroDies counter display
+   - Separated labels: "Dies" below left number, "miliDies" below right number
+   - mikroDies progress bar (YellowGreen color, 0-999, visual only)
    - Ultra-fast updates (86ms intervals)
 2. **Double-click the widget** to open Normal Mode with full features
 3. **Drag the widget** to move it around (no title bar to grab)
