@@ -51,30 +51,19 @@ class AstronomicalWidgetMode:
         
     def _create_widgets(self):
         """Create minimalistic UI elements - only numbers and progress bar."""
-        # Main frame with margins
+        # Main frame with minimal padding
         self.frame = tk.Frame(self.master, bd=0, relief='flat')
-        self.frame.pack(fill="both", expand=True, padx=8, pady=5)
+        self.frame.pack(fill="both", expand=True, padx=2, pady=2)
         
-        # Main time display (Dies.miliDies) using Canvas for outlined text
-        self.time_canvas = tk.Canvas(
+        # Single canvas for everything (time display + progress bar)
+        self.canvas = tk.Canvas(
             self.frame,
-            height=35,
+            width=136,  # Fit in 140px widget width
+            height=66,  # Fit in 70px widget height
             highlightthickness=0,
             bd=0
         )
-        self.time_canvas.pack(pady=(0, 2))
-        
-        # Progress bar for mikroDies (0-999)
-        self.progress_frame = tk.Frame(self.frame)
-        self.progress_frame.pack(fill="x")
-        
-        self.progress_canvas = tk.Canvas(
-            self.progress_frame,
-            height=6,
-            bg="gray25",
-            highlightthickness=0
-        )
-        self.progress_canvas.pack(fill="x")
+        self.canvas.pack(fill="both", expand=True)
         
         # Create context menu
         self._create_context_menu()
