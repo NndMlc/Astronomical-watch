@@ -10,44 +10,54 @@ This directory contains the user interface components for the Astronomical Watch
 - Provides adaptive text colors for readability
 - 5 different theme types: bright day, moderate day, dawn/dusk, twilight, night
 
-### `widget.py` - Compact Widget Mode
-- Small, always-on widget display
-- Dynamic gradient background that updates with solar position
-- Full-area click activation - any click opens Normal Mode
-- Real-time astronomical time display in format `2024eq:123.456`
-- Progress bars showing day and year completion
+### `widget.py` - Enhanced Borderless Widget Mode (2025)
+- **180×110 borderless floating overlay** (`overrideredirect(True)`)
+- **Double-click activation** - prevents accidental Normal Mode opening
+- **Drag support** - move widget by dragging anywhere (no title bar)
+- **White text with black outline** - optimal visibility on any background
+- **86ms update interval** - ultra-fast refresh (1 mikroDies precision)
+- **Format**: `DDD.mmm` (Dies.miliDies) with mikroDies progress bar
+- **Localized title** - changes with language selection
 
 ### `normal_mode.py` - Full-Featured Normal Mode  
-- Detailed astronomical time interface
+- Detailed astronomical time interface with explanation system
 - Same gradient background logic as widget mode
-- Tabbed interface for current time and settings
+- **20-language support** with live switching
+- **Explanation button** - loads content from `translate/` folder
 - Extended information display including solar altitude
 - Auto-updating themes and time displays
 
 ### `main.py` - Application Integration
 - Manages widget and normal mode windows
-- Handles click activation from widget to normal mode
+- Handles double-click activation from widget to normal mode
 - Demonstrates proper window lifecycle management
 
-## Key Features Implemented
+## Key Features (Latest 2025)
 
-1. **Full Click Activation**: Widget responds to clicks on any area (background, labels, progress bars)
-2. **Consistent Gradients**: Both widget and normal mode use identical gradient drawing logic
-3. **Astronomical Integration**: Themes driven by real solar position calculations from VSOP87
-4. **Adaptive Colors**: Text color automatically adjusts based on background brightness
-5. **Real-time Updates**: Both interfaces update automatically to reflect current time and sky conditions
+1. **Borderless Widget**: No title bar, perfect floating overlay
+2. **Double-Click Activation**: Smart interaction - drag to move, double-click to activate
+3. **Outline Text Rendering**: Canvas-based text with black outline for visibility
+4. **Ultra-Fast Updates**: 86ms intervals matching astronomical precision
+5. **Multilingual Explanations**: Dynamic content loading from 20 language files
+6. **Drag Support**: Full widget repositioning without title bar
 
 ## Usage
 
 ```python
-# Create and run widget
+# Create and run enhanced widget
 from ui.widget import create_widget
 import tkinter as tk
 
 root = tk.Tk()
 widget = create_widget(root, on_click=lambda: print("Opening Normal Mode"))
-widget.start_updates()
+widget.start_updates()  # 86ms interval updates
 root.mainloop()
+
+# Create normal mode with explanation system
+from ui.normal_mode import create_normal_mode
+normal = create_normal_mode()
+normal.start_updates()
+```
 
 # Create and run normal mode
 from ui.normal_mode import create_normal_mode

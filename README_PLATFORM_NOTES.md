@@ -2,13 +2,21 @@
 
 This document tracks current and planned platform support for Astronomical-watch.
 
-## 1. Desktop (Current)
+## 1. Desktop (Current - Enhanced 2025)
 
 | Platform | Status | Interface | Notes |
 |----------|--------|-----------|-------|
-| Linux (x86_64/ARM) | Supported (manual) | CLI + Tkinter UI | Requires Python 3.10+ (adjust if different); `python3-tk` package for some distros. |
-| macOS (Apple Silicon + Intel) | Supported (manual) | CLI + Tkinter UI | Use official python.org installer or brew. |
-| Windows 10/11 | Supported (manual) | CLI + Tkinter UI | Standard CPython includes Tkinter. |
+| Linux (x86_64/ARM) | ✅ **Enhanced** | Borderless Widget + Normal Mode | Python 3.6+, `python3-tk` package |
+| macOS (Apple Silicon + Intel) | ✅ **Enhanced** | Borderless Widget + Normal Mode | Official python.org installer or brew |
+| Windows 10/11 | ✅ **Enhanced** | Borderless Widget + Normal Mode | Standard CPython includes Tkinter |
+
+### Desktop Features (2025)
+- **🪟 Borderless Widget**: 180×110 floating overlay without title bar
+- **🎯 Double-Click Activation**: Smart interaction prevents accidental opening
+- **📱 Drag Support**: Move widget by dragging anywhere
+- **⚡ 86ms Updates**: Ultra-fast refresh (1 mikroDies precision)
+- **🎨 Outline Text**: White text with black outline for any background
+- **🌍 20 Languages**: Complete localization with explanations
 
 ## 2. Web / PWA (Planned – introducing now)
 

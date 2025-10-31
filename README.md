@@ -1,53 +1,44 @@
 # Astronomical Watch
 
-Dual-licensed astronomical timekeeping reference: immutable core + open interfaces.
+Desktop application for astronomical timekeeping using Dies.miliDies format.
 
 ## Overview
-Represent UTC instants as `DDD.mmm` where:
-- `DDD` = day index since first reference noon ≥ vernal equinox of the current tropical year.
-- `mmm` = thousandths of the current day.
+Represents UTC time as `DDD.mmm` where:
+- `DDD` = Dies (universal day index since vernal equinox)
+- `mmm` = miliDies (thousandths of current Dies)
+- Ultra-precise mikroDies subdivision (1/1000th of miliDies)
 
-## Install
+## Quick Start
+
+### Download & Run
 ```bash
-pip install .
-```
-CLI:
-```bash
-awatch
-```
-Outputs e.g.:
-```
-174.532
-```
-
-## Licensing Model (Plan C)
-- Core (algorithmic invariants): Astronomical Watch Core License v1.0 (no redistribution of modified versions) with a narrowly scoped Security Exception (see LICENSE.CORE §11).
-- Everything else (CLI, wrappers, docs excluding spec) under MIT.
-
-## Quick Install & CLI Usage (New)
-
-```
-# Clone
+# Download the project
 git clone https://github.com/NndMlc/Astronomical-watch.git
 cd Astronomical-watch
 
-# (Optional) Create virtual environment
-python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
-
-# Run CLI directly (no packaging yet)
-python core/cli.py now
-python core/cli.py now --json
-python core/cli.py longitude --unit deg
-python core/cli.py equinox 2025
-
-# (When packaging is added)
-# pip install -e .
-# astronomical-watch now
+# Run desktop application
+python astronomical_watch_desktop.py
 ```
 
-Global option:
+### What You Get
+- **Widget Mode**: 180×110 borderless floating display
+- **Normal Mode**: Full-featured interface with explanations
+- **20 Languages**: Complete multilingual support
+- **Real-time Updates**: 86ms intervals (1 mikroDies)
 
-```
+### Usage
+- **Drag widget**: Move the floating display
+- **Double-click widget**: Open Normal Mode
+- **Language selector**: Choose from 20 languages
+- **Explanation button**: Learn about astronomical time
+
+## Features
+- ⏰ **Real-time Display**: Dies.miliDies.mikroDies format
+- 🌍 **20 Languages**: Full localization
+- 🎨 **Sky Themes**: Background changes with solar position  
+- 📱 **Borderless Widget**: Floating overlay without title bar
+- 🔄 **Ultra-fast Updates**: Every 86ms (1 mikroDies)
+- 📚 **Educational**: Built-in explanations and comparisons
 --max-error-arcsec N   # Request tighter solar longitude precision (if coefficient subsets available)
 ```
 

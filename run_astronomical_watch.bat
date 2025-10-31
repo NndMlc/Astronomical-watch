@@ -5,11 +5,14 @@ echo  ASTRONOMICAL WATCH DESKTOP LAUNCHER
 echo ========================================
 echo.
 echo New widget features:
-echo - 160x90 compact size
-echo - Dies.miliDies format (with dot)
-echo - DejaVu Sans Mono font, 28px, black border
-echo - mikroDies progress bar (0-999)
-echo - Localized title
+echo - 180x110 borderless overlay widget (NO title bar/navbar)
+echo - Localized title ("Astronomical Watch" / "Astronomski sat")
+echo - Dies.miliDies format with WHITE text + BLACK outline
+echo - DejaVu Sans Mono font, 28px
+echo - mikroDies progress bar (0-999) 
+echo - Ultra-fast updates (86ms = 1 mikroDies)
+echo - Drag widget to move (no title bar)
+echo - DOUBLE-CLICK to open Normal Mode
 echo.
 echo Checking Python version...
 python --version

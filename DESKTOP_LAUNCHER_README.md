@@ -31,14 +31,16 @@
    ```
 
 ## What You'll See:
-1. **Widget Mode**: Compact 160x90 display showing:
+1. **Widget Mode**: Compact 180x110 borderless overlay display showing:
    - Localized title (changes with language)
-   - Dies.miliDies format in DejaVu Sans Mono font (28px, black border)
+   - Dies.miliDies format in DejaVu Sans Mono font (28px, white text with black outline)
    - mikroDies progress bar (0-999)
    - mikroDies counter display
-2. **Click the widget** to open Normal Mode with full features
-3. **Language Selection**: Choose from 20 languages (applies to both modes)
-4. **Explanation Button**: Detailed explanation in your chosen language
+   - Ultra-fast updates (86ms intervals)
+2. **Double-click the widget** to open Normal Mode with full features
+3. **Drag the widget** to move it around (no title bar to grab)
+4. **Language Selection**: Choose from 20 languages (applies to both modes)
+5. **Explanation Button**: Detailed explanation in your chosen language
 
 ## Requirements:
 - Python 3.8+ (usually pre-installed on most systems)

@@ -1,11 +1,11 @@
 # Astronomical Watch - Complete Desktop Application
 
-## 🎯 Project Status: ✅ COMPLETED
+## 🎯 Project Status: ✅ COMPLETED & ENHANCED
 
 ### What Was Built
 A complete desktop astronomical watch application with dual-mode interface:
-- **Widget Mode**: Small corner display with live astronomical time
-- **Normal Mode**: Full-featured window with detailed information and 20-language support
+- **Widget Mode**: Borderless floating overlay (180×110) with ultra-fast updates
+- **Normal Mode**: Full-featured window with explanations and 20-language support
 
 ## 🚀 Quick Start
 
@@ -16,37 +16,39 @@ python astronomical_watch_desktop.py
 ```
 
 ### What You'll See
-1. **Widget window appears** (210x140 pixels) showing current Dies·miliDies
-2. **Click the widget** to open Normal Mode (800x600 pixels)  
-3. **Select language** from dropdown menu (20 languages supported)
-4. **Live updates** every second with astronomical time calculations
+1. **Borderless widget appears** (180×110 pixels) showing Dies.miliDies.mikroDies
+2. **Double-click the widget** to open Normal Mode (800×600 pixels)  
+3. **Drag widget** to move it around (no title bar)
+4. **Ultra-fast updates** every 86ms (1 mikroDies interval)
 
-## 📁 Key Files Created/Modified
+## ✨ Latest Features (2025)
 
-### Core Desktop Application
-- **`astronomical_watch_desktop.py`** - Main launcher script
-- **`src/astronomical_watch/ui/main.py`** - Application coordinator (✅ Fixed)
-- **`src/astronomical_watch/ui/widget.py`** - Widget Mode implementation (✅ Rebuilt)
-- **`src/astronomical_watch/ui/normal_mode.py`** - Normal Mode implementation (✅ Rebuilt)
+### Enhanced Widget Mode
+- **🚫 Borderless Design**: `overrideredirect(True)` removes title bar
+- **🎯 Double-click Activation**: Prevents accidental Normal Mode opening
+- **📱 Drag Support**: Move widget by dragging anywhere
+- **⚡ 86ms Updates**: Real-time mikroDies precision
+- **🎨 Outline Text**: White text with black outline for any background
+- **🌍 Localized Title**: Changes with language selection
 
-### Supporting Documentation  
-- **`DESKTOP_APPLICATION.md`** - Complete user guide and technical documentation
+### Visual Improvements
+- **Font**: DejaVu Sans Mono 28px (fallback: Courier New)
+- **Format**: `DDD.mmm` (Dies.miliDies) with mikroDies progress bar
+- **Background**: Dynamic sky gradient based on solar position
+- **Text**: White with black outline for optimal visibility
 
-## 🔧 Technical Implementation
+## 📁 Key Files
 
-### Architecture Approach
-- **Preserved existing UI folder structure** (as requested by user)
-- **Fixed deprecated API calls** from `AstronomicalYear` to current `AstroYear` API
-- **Added factory functions** `create_widget()` and `create_normal_mode()`  
-- **Implemented proper relative imports** using `.gradient` and `.translations`
-- **Added comprehensive language support** with all 20 languages from translations.py
+### Core Application
+- **`astronomical_watch_desktop.py`** - Main launcher with Python version checking
+- **`src/astronomical_watch/ui/widget.py`** - Enhanced borderless widget (✅ Latest)
+- **`src/astronomical_watch/ui/normal_mode.py`** - Normal mode with explanation system (✅ Latest)
+- **`run_astronomical_watch.bat`** - Windows launcher with troubleshooting
 
-### Key Technical Fixes
-1. **Import corrections**: Changed from absolute imports to relative imports
-2. **API modernization**: Updated from deprecated `AstronomicalYear` to current `AstroYear` 
-3. **Missing functions**: Added `start_updates()` and factory functions
-4. **Language integration**: Populated `LANGUAGES` constant with complete language list
-5. **Error handling**: Added graceful fallbacks and error display
+### Launcher Scripts
+- **`run_astronomical_watch.bat`** - Windows batch launcher
+- **`run_astronomical_watch.sh`** - Linux/Mac shell launcher
+- **`DESKTOP_LAUNCHER_README.md`** - User installation guide
 
 ## 🌍 Multilingual Support
 

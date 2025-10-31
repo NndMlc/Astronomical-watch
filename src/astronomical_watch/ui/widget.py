@@ -14,8 +14,16 @@ class AstronomicalWidgetMode:
     def __init__(self, master: tk.Widget = None, on_click_callback: Optional[Callable] = None):
         self.master = master or tk.Tk()
         self.master.title("Astronomical Watch - Widget")
-        self.master.geometry("160x90")
-        self.master.minsize(160, 90)
+        self.master.geometry("180x110")
+        self.master.minsize(180, 110)
+        
+        # Remove title bar (navbar with minimize/maximize/close buttons)
+        self.master.overrideredirect(True)
+        
+        # Add drag support since there's no title bar
+        self._drag_start_x = 0
+        self._drag_start_y = 0
+        self._drag_moved = False
         
         # Store callback for click events
         self.on_click_callback = on_click_callback
@@ -43,7 +51,7 @@ class AstronomicalWidgetMode:
         self.frame = tk.Frame(self.master, bd=0, relief='flat')
         self.frame.pack(fill="both", expand=True, padx=10, pady=5)
         
-        # Title label
+        # Title label (lokalizovani naslov)
         self.title_label = tk.Label(
             self.frame,
             text=tr("title", self.current_language),
@@ -52,22 +60,14 @@ class AstronomicalWidgetMode:
         )
         self.title_label.pack()
         
-        # Main time display (Dies.miliDies)
-        try:
-            # Try DejaVu Sans Mono first, fallback to Courier New
-            time_font = ("DejaVu Sans Mono", 28, "bold")
-        except:
-            time_font = ("Courier New", 28, "bold")
-            
-        self.time_label = tk.Label(
+        # Main time display (Dies.miliDies) using Canvas for outlined text
+        self.time_canvas = tk.Canvas(
             self.frame,
-            text="000.000",
-            font=time_font,
-            fg="white",
-            relief="solid",
-            bd=1
+            height=45,
+            highlightthickness=0,
+            bd=0
         )
-        self.time_label.pack(pady=(2, 0))
+        self.time_canvas.pack(pady=(2, 2))
         
         # Format label
         self.format_label = tk.Label(
@@ -80,11 +80,11 @@ class AstronomicalWidgetMode:
         
         # Progress bar for mikroDies (0-999)
         self.progress_frame = tk.Frame(self.frame)
-        self.progress_frame.pack(pady=(1, 0), fill="x")
+        self.progress_frame.pack(pady=(2, 2), fill="x")
         
         self.progress_canvas = tk.Canvas(
             self.progress_frame,
-            height=6,
+            height=8,
             bg="gray25",
             highlightthickness=0
         )
@@ -94,26 +94,48 @@ class AstronomicalWidgetMode:
         self.micro_label = tk.Label(
             self.frame,
             text="mikroDies: 000",
-            font=("Arial", 8),
+            font=("Arial", 9),
             fg="lightgray"
         )
         self.micro_label.pack()
         
     def _bind_click_events(self):
-        """Bind click events to all widgets."""
-        def on_click(event=None):
-            if self.on_click_callback:
+        """Bind interaction events to all widgets."""
+        def on_drag_start(event):
+            self._drag_start_x = event.x_root
+            self._drag_start_y = event.y_root
+            self._drag_moved = False
+            
+        def on_drag(event):
+            # Calculate distance moved
+            dx = abs(event.x_root - self._drag_start_x)
+            dy = abs(event.y_root - self._drag_start_y)
+            
+            if dx > 3 or dy > 3:  # Only start dragging after small movement threshold
+                self._drag_moved = True
+                x = self.master.winfo_x() + (event.x_root - self._drag_start_x)
+                y = self.master.winfo_y() + (event.y_root - self._drag_start_y)
+                self.master.geometry(f"+{x}+{y}")
+                self._drag_start_x = event.x_root
+                self._drag_start_y = event.y_root
+                
+        def on_double_click(event):
+            # Double click to open Normal Mode (prevents accidental activation)
+            if not self._drag_moved and self.on_click_callback:
                 self.on_click_callback()
         
-        # Bind to all widgets for full-area click activation
-        self.master.bind("<Button-1>", on_click)
-        self.frame.bind("<Button-1>", on_click)
-        self.title_label.bind("<Button-1>", on_click)
-        self.time_label.bind("<Button-1>", on_click)
-        self.format_label.bind("<Button-1>", on_click)
-        self.progress_frame.bind("<Button-1>", on_click)
-        self.progress_canvas.bind("<Button-1>", on_click)
-        self.micro_label.bind("<Button-1>", on_click)
+        # Bind events to all widgets for full-area interaction
+        # Single click + drag = move widget
+        # Double click = open Normal Mode
+        widgets_for_interaction = [
+            self.master, self.frame, self.title_label, self.time_canvas, 
+            self.format_label, self.progress_frame, self.progress_canvas, self.micro_label
+        ]
+        
+        for widget in widgets_for_interaction:
+            widget.bind("<ButtonPress-1>", on_drag_start)
+            widget.bind("<B1-Motion>", on_drag)
+            widget.bind("<Double-Button-1>", on_double_click)
             
     def _apply_theme(self):
         """Apply sky gradient theme based on current time."""
@@ -129,10 +151,64 @@ class AstronomicalWidgetMode:
         
         # Update all label backgrounds and text colors to match
         self.title_label.configure(bg=bg_color, fg=text_color)
-        self.time_label.configure(bg=bg_color, fg=text_color, highlightbackground="black")
+        self.time_canvas.configure(bg=bg_color)
         self.format_label.configure(bg=bg_color, fg="lightgray")
         self.progress_frame.configure(bg=bg_color)
         self.micro_label.configure(bg=bg_color, fg="lightgray")
+        
+        # Redraw time display with current background
+        self._draw_time_display()
+        
+    def _draw_time_display(self):
+        """Draw time text with black outline on canvas for better visibility."""
+        try:
+            # Clear canvas
+            self.time_canvas.delete("all")
+            
+            # Get canvas dimensions
+            canvas_width = self.time_canvas.winfo_width()
+            canvas_height = self.time_canvas.winfo_height()
+            
+            if canvas_width <= 1:  # Not yet rendered
+                self.master.after(10, self._draw_time_display)
+                return
+            
+            # Current time text
+            time_str = f"{self.day_index:03d}.{self.milliDies:03d}"
+            
+            # Font configuration
+            try:
+                font_spec = ("DejaVu Sans Mono", 28, "bold")
+            except:
+                font_spec = ("Courier New", 28, "bold")
+            
+            # Center position
+            x_center = canvas_width // 2
+            y_center = canvas_height // 2
+            
+            # Draw black outline (multiple offset positions)
+            for dx in [-1, 0, 1]:
+                for dy in [-1, 0, 1]:
+                    if dx != 0 or dy != 0:  # Skip center
+                        self.time_canvas.create_text(
+                            x_center + dx, y_center + dy,
+                            text=time_str,
+                            font=font_spec,
+                            fill="black",
+                            anchor="center"
+                        )
+            
+            # Draw white text on top
+            self.time_canvas.create_text(
+                x_center, y_center,
+                text=time_str,
+                font=font_spec,
+                fill="white",
+                anchor="center"
+            )
+            
+        except Exception as e:
+            print(f"Time display drawing error: {e}")
         
     def _update_display(self):
         """Update the astronomical time display."""
@@ -156,24 +232,23 @@ class AstronomicalWidgetMode:
             # Update title with current language
             self.title_label.config(text=tr("title", self.current_language))
             
-            # Update main time display (Dies.miliDies)
-            time_str = f"{self.day_index:03d}.{self.milliDies:03d}"
-            self.time_label.config(text=time_str)
-            
             # Update mikroDies label
             self.micro_label.config(text=f"mikroDies: {self.microDies:03d}")
             
             # Update progress bar for mikroDies (0-999)
             self._update_progress_bar()
             
-            # Update theme
+            # Update theme (this will redraw time display)
             self._apply_theme()
             
         except Exception as e:
             print(f"Widget update error: {e}")
             # Fallback display
-            self.time_label.config(text="ERR.000")
+            self.day_index = 0
+            self.milliDies = 0
+            self.microDies = 0
             self.micro_label.config(text="mikroDies: 000")
+            self._draw_time_display()
             
     def _update_progress_bar(self):
         """Update the mikroDies progress bar."""
@@ -218,8 +293,8 @@ class AstronomicalWidgetMode:
     def start_updates(self):
         """Start the periodic update cycle."""
         self._update_display()
-        # Schedule next update in 1 second
-        self.update_job = self.master.after(1000, self.start_updates)
+        # Schedule next update in 86.4 ms (one mikroDies duration)
+        self.update_job = self.master.after(86, self.start_updates)  # 86.4ms ≈ 86ms
         
     def stop_updates(self):
         """Stop the periodic updates."""

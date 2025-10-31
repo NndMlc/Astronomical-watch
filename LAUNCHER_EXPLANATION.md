@@ -2,14 +2,7 @@
 
 ## Razlog za `astronomical_watch_desktop.py`
 
-### 1. **Složena struktura projekta**
-```
-src/astronomical_watch/    # Glavni paket
-cli/                       # CLI alternative  
-tests/                     # Test files
-```
-
-### 2. **User Experience**
+### 1. **User Experience**
 ```bash
 # Jednostavno za korisnika:
 python astronomical_watch_desktop.py
@@ -19,6 +12,13 @@ cd src && python -m astronomical_watch.ui.main
 # ili
 pip install -e . && astronomical-watch-gui
 ```
+
+### 2. **Nove mogućnosti (2025)**
+- **Borderless Widget**: 180×110 floating overlay bez title bar-a
+- **Double-click aktivacija**: Sprečava slučajno otvaranje  
+- **Drag support**: Pomeranje widget-a bez title bar-a
+- **86ms updates**: Ultra-brzi refresh (1 mikroDies)
+- **Outline text**: Beli tekst sa crnim outline-om za bolje čitanje
 
 ### 3. **Path Management**
 Launcher automatski rešava PYTHONPATH probleme:
