@@ -4,8 +4,8 @@ Shows full click activation and consistent gradient backgrounds.
 """
 from __future__ import annotations
 import tkinter as tk
-from ui.widget import create_widget
-from ui.normal_mode import create_normal_mode
+from .widget import create_widget
+from .normal_mode import create_normal_mode
 
 
 class AstronomicalWatchApp:

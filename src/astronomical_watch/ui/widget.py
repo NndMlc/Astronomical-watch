@@ -1,124 +1,130 @@
+"""
+Astronomical Watch Widget - Small corner display
+"""
+from __future__ import annotations
 import tkinter as tk
-from tkinter import ttk
 from datetime import datetime, timezone
+from typing import Optional, Callable
+from .gradient import get_sky_theme
 
-from src.astronomical_watch.core.astro_time_core import AstronomicalYear, get_current_equinox, get_next_equinox
+from src.astronomical_watch.core.astro_time_core import AstroYear
 
 class AstronomicalWidgetMode:
-    def __init__(self, master: tk.Widget = None):
+    def __init__(self, master: tk.Widget = None, on_click_callback: Optional[Callable] = None):
         self.master = master or tk.Tk()
-        self.master.title("Astronomical Watch - Widget Mode")
+        self.master.title("Astronomical Watch - Widget")
         self.master.geometry("210x140")
         self.master.minsize(160, 120)
-
-        self._firework_shown = False
-
-        self.frame = tk.Frame(self.master, bg='', bd=0)
-        self.frame.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
-
-        self.title_label = tk.Label(self.frame, text="Astronomical Watch", font=("Arial", 9, "bold"), bg='', bd=0)
-        self.title_label.pack(pady=(2, 2))
-
-        self.value_label = tk.Label(self.frame, text="---·---", font=("Arial", 22, "bold"), bg='', bd=0)
-        self.value_label.pack(pady=(2, 2))
-
-        self.progress_var = tk.IntVar(value=0)
-        self.progress_bar = ttk.Progressbar(self.frame, orient="horizontal", length=130, mode="determinate", maximum=99, variable=self.progress_var)
-        self.progress_bar.pack(pady=(2, 2))
-
-        self.countdown_frame = tk.Frame(self.frame, bg="#d5ffd5", bd=0)
-        self.countdown_label = tk.Label(self.countdown_frame, text="", font=("Arial", 10, "bold"), bg="#d5ffd5", fg="#225c17")
-        self.countdown_label.pack(padx=4, pady=2)
-        self.countdown_frame.pack(fill=tk.X, pady=(6,0))
-        self.countdown_frame.pack_forget()
-
-        # Klik/tap na widget otvara normal mod
-        self.frame.bind("<Button-1>", self._open_normal_mode)
-        self.value_label.bind("<Button-1>", self._open_normal_mode)
-        self.progress_bar.bind("<Button-1>", self._open_normal_mode)
-
-        self._update_display()
-
+        
+        # Store callback for click events
+        self.on_click_callback = on_click_callback
+        
+        # Current time values
+        self.day_index = 0
+        self.milliDies = 0
+        
+        # Update job reference
+        self.update_job = None
+        
+        self._create_widgets()
+        self._apply_theme()
+        
+        # Bind click event to entire widget
+        self._bind_click_events()
+        
+    def _create_widgets(self):
+        """Create the main UI elements."""
+        # Main frame
+        self.frame = tk.Frame(self.master, bd=0, relief='flat')
+        self.frame.pack(fill="both", expand=True, padx=5, pady=5)
+        
+        # Time display
+        self.time_label = tk.Label(
+            self.frame,
+            text="000·000",
+            font=("Courier New", 20, "bold"),
+            fg="white",
+            bg="transparent"
+        )
+        self.time_label.pack(expand=True)
+        
+        # Small info label
+        self.info_label = tk.Label(
+            self.frame,
+            text="Astronomical Time",
+            font=("Arial", 8),
+            fg="lightgray",
+            bg="transparent"
+        )
+        self.info_label.pack()
+        
+    def _bind_click_events(self):
+        """Bind click events to all widgets."""
+        def on_click(event=None):
+            if self.on_click_callback:
+                self.on_click_callback()
+                
+        # Bind to all widgets
+        for widget in [self.master, self.frame, self.time_label, self.info_label]:
+            widget.bind("<Button-1>", on_click)
+            
+    def _apply_theme(self):
+        """Apply sky gradient theme based on current time."""
+        now_utc = datetime.now(timezone.utc)
+        theme = get_sky_theme(now_utc)
+        
+        self.master.configure(bg=theme["bg_gradient"])
+        self.frame.configure(bg=theme["bg_gradient"])
+        
     def _update_display(self):
-        now = datetime.now(timezone.utc)
-        eq = get_current_equinox(now)
-        astro_year = AstronomicalYear(eq)
-        astro_year.update(now)
-        dies = astro_year.day_index
-        milidies = astro_year.milidan
-
-        self.value_label.config(text=f"{dies}·{milidies}")
-        self.progress_var.set(milidies % 100)
-
-        next_eq = get_next_equinox(now)
-        if next_eq:
-            astro_year.update(now)
-            dies_now = astro_year.day_index
-            milidies_now = astro_year.milidan
-
-            astro_year.update(next_eq)
-            dies_next = astro_year.day_index
-            milidies_next = astro_year.milidan
-
-            dies_diff = dies_next - dies_now
-            milidies_diff = milidies_next - milidies_now
-            if milidies_diff < 0:
-                dies_diff -= 1
-                milidies_diff += 1000
-
-            if dies_diff < 11 and dies_diff >= 0:
-                if dies_diff == 0:
-                    stotinke = milidies_diff % 100
-                    centi_str = f".{stotinke:02}"
-                    countdown_str = f"{dies_diff}·{milidies_diff}{centi_str}"
-                    self.countdown_label.config(
-                        text=f"Vernal Equinox in: {countdown_str}",
-                        font=("Arial", 10, "bold"),
-                        fg="#b02c06" if stotinke == 0 else "#008c00"
-                    )
-                else:
-                    countdown_str = f"{dies_diff}·{milidies_diff}"
-                    self.countdown_label.config(
-                        text=f"Vernal Equinox in: {countdown_str}",
-                        font=("Arial", 10, "bold"),
-                        fg="#008c00"
-                    )
-                self.countdown_frame.pack(fill=tk.X, pady=(6,0))
-                if dies_diff == 0 and milidies_diff == 0 and not self._firework_shown:
-                    self._firework_shown = True
-                    self._fireworks()
-            else:
-                self.countdown_frame.pack_forget()
-                self._firework_shown = False
-        else:
-            self.countdown_frame.pack_forget()
-            self._firework_shown = False
-
-        self.master.after(200, self._update_display)
-
-    def _fireworks(self):
-        win = tk.Toplevel(self.master)
-        win.title("Vernal Equinox!")
-        win.geometry("210x150")
-        canvas = tk.Canvas(win, width=210, height=120, bg="black")
-        canvas.pack()
-        import random
-        for _ in range(18):
-            x, y = random.randint(30, 180), random.randint(20, 100)
-            color = random.choice(["red", "yellow", "lime", "blue", "magenta", "cyan", "orange", "white"])
-            r = random.randint(10, 22)
-            canvas.create_oval(x-r, y-r, x+r, y+r, outline=color, width=3)
-            win.update()
-            win.after(80)
-        win.after(1800, win.destroy)
-
-    def _open_normal_mode(self, event=None):
+        """Update the astronomical time display."""
         try:
-            from ui.normal_mode import AstronomicalNormalMode
-            AstronomicalNormalMode(self.master)
-        except ImportError:
-            pass  # Optionally show error dialog
+            # Get current time
+            now_utc = datetime.now(timezone.utc)
+            
+            # Use hardcoded equinox values for now
+            current_equinox = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
+            next_equinox = datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
+            
+            # Create AstroYear and get reading
+            astro_year = AstroYear(current_equinox, next_equinox)
+            reading = astro_year.reading(now_utc)
+            
+            # Update display values
+            self.day_index = reading.day_index
+            self.milliDies = reading.miliDies
+            
+            # Update UI
+            time_str = f"{self.day_index:03d}·{self.milliDies:03d}"
+            self.time_label.config(text=time_str)
+            
+            # Update theme
+            self._apply_theme()
+            
+        except Exception as e:
+            print(f"Widget update error: {e}")
+            # Fallback display
+            self.time_label.config(text="ERR·000")
+            
+    def start_updates(self):
+        """Start the periodic update cycle."""
+        self._update_display()
+        # Schedule next update in 1 second
+        self.update_job = self.master.after(1000, self.start_updates)
+        
+    def stop_updates(self):
+        """Stop the periodic updates."""
+        if self.update_job:
+            self.master.after_cancel(self.update_job)
+            self.update_job = None
+
+def create_widget(master: tk.Widget = None, on_click_callback: Optional[Callable] = None) -> AstronomicalWidgetMode:
+    """Factory function to create widget instance."""
+    return AstronomicalWidgetMode(master, on_click_callback)
 
 if __name__ == "__main__":
-    app = AstronomicalWidgetMode()
-    app.master.mainloop()
+    # Test the widget
+    root = tk.Tk()
+    widget = create_widget(root)
+    widget.start_updates()
+    root.mainloop()

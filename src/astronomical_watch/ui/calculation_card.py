@@ -3,7 +3,7 @@ from datetime import datetime, timezone, timedelta
 import math
 import sys
 import os
-from ui.translations import tr
+from .translations import tr
 
 try:
     import matplotlib
@@ -136,3 +136,7 @@ class CalculationCard(tk.Toplevel):
         eqt_today = eqt[today % len(eqt)]
         eqt_today_md = eqt_milidies[today % len(eqt)]
         self.eqt_y_val.config(text=tr("eqt_offset_value_label", self.lang, eqt_today=eqt_today, eqt_today_md=eqt_today_md))
+
+def create_calculation_card(master=None, lang="en"):
+    """Factory function to create CalculationCard instance."""
+    return CalculationCard(master, lang)

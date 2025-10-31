@@ -1,7 +1,7 @@
 from tkinter import Toplevel, Label, Frame, Entry, Button
 from datetime import datetime, timezone, timedelta
-from src.astronomical_watch.core.astro_time_core import get_current_equinox, AstronomicalYear, get_next_equinox
-from ui.translations import tr
+from src.astronomical_watch.core.astro_time_core import AstroYear
+from .translations import tr
 
 def milidies_to_hm(milidies):
     total_seconds = milidies * 86.4  # 1 milidies = 86.4 sekunde
@@ -90,11 +90,16 @@ class ComparisonCard(Toplevel):
             dt_str = self.std_entry.get().strip()
             dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
             dt = dt.replace(tzinfo=timezone.utc)
-            eq = get_current_equinox(dt)
-            astro_year = AstronomicalYear(eq)
-            astro_year.update(dt)
-            day = astro_year.day_index
-            milidies = astro_year.milidan
+            
+            # Use hardcoded equinox values (same as widget/normal_mode)
+            current_equinox = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
+            next_equinox = datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
+            
+            astro_year = AstroYear(current_equinox, next_equinox)
+            reading = astro_year.reading(dt)
+            day = reading.day_index
+            milidies = reading.miliDies
+            
             self.std_result.config(text=tr("astro_result", self.lang, day=day, milidies=milidies))
         except Exception as e:
             self.std_result.config(text=tr("error_text", self.lang, error=str(e)))
@@ -103,11 +108,17 @@ class ComparisonCard(Toplevel):
         try:
             day = int(self.astro_day_entry.get())
             milidies = int(self.astro_milidies_entry.get())
-            eq = get_current_equinox(datetime.now(timezone.utc))
-            base_day = eq + timedelta(days=day)
-            astro_year = AstronomicalYear(eq)
-            base_noon = astro_year._last_noon(base_day)
-            std_dt = base_noon + timedelta(seconds=milidies * 86.4)
+            
+            # Use hardcoded equinox values
+            current_equinox = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
+            next_equinox = datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
+            
+            # Calculate target datetime from astronomical time
+            # day_index days after equinox + milidies fraction of day
+            target_date = current_equinox + timedelta(days=day)
+            milidies_seconds = milidies * 86.4  # 1 miliDies = 86.4 seconds
+            std_dt = target_date + timedelta(seconds=milidies_seconds)
+            
             self.astro_result.config(
                 text=tr("std_result", self.lang, std_time=std_dt.strftime('%Y-%m-%d %H:%M:%S'))
             )
@@ -138,38 +149,54 @@ class ComparisonCard(Toplevel):
             self.milidies_result.config(text=tr("error_text", self.lang, error=str(e)))
 
     def _update_equinox_countdown(self):
-        now = datetime.now(timezone.utc)
-        next_eq = get_next_equinox(now)
-        if next_eq:
-            eq = get_current_equinox(now)
-            astro_year = AstronomicalYear(eq)
-            astro_year.update(now)
-            dies_now = astro_year.day_index
-            milidies_now = astro_year.milidan
-
-            astro_year.update(next_eq)
-            dies_next = astro_year.day_index
-            milidies_next = astro_year.milidan
-
-            dies_diff = dies_next - dies_now
-            milidies_diff = milidies_next - milidies_now
-            if milidies_diff < 0:
-                dies_diff -= 1
-                milidies_diff += 1000
-
-            self.astro_equinox_countdown.config(
-                text=tr("astro_equinox_countdown_result", self.lang, dies=dies_diff, milidies=milidies_diff)
-            )
-
-            delta = next_eq - now
-            days = delta.days
-            hours = delta.seconds // 3600
-            mins = (delta.seconds % 3600) // 60
-            secs = delta.seconds % 60
-            self.std_equinox_countdown.config(
-                text=tr("std_equinox_countdown_result", self.lang, days=days, hours=hours, mins=mins, secs=secs)
-            )
-        else:
-            self.astro_equinox_countdown.config(text=tr("no_equinox_info", self.lang))
+        try:
+            now = datetime.now(timezone.utc)
+            
+            # Use hardcoded equinox values
+            current_equinox = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
+            next_equinox = datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
+            
+            # Get current astronomical time
+            astro_year = AstroYear(current_equinox, next_equinox)
+            current_reading = astro_year.reading(now)
+            
+            # Calculate time until next equinox
+            delta = next_equinox - now
+            if delta.total_seconds() > 0:
+                days = delta.days
+                hours = delta.seconds // 3600
+                mins = (delta.seconds % 3600) // 60
+                secs = delta.seconds % 60
+                
+                # Calculate remaining astronomical time in current year
+                # Total year length in Dies (approximate)
+                year_length_seconds = (next_equinox - current_equinox).total_seconds()
+                year_length_milidies = int(year_length_seconds / 86.4)
+                year_length_dies = year_length_milidies // 1000
+                
+                remaining_dies = year_length_dies - current_reading.day_index
+                remaining_milidies = 1000 - current_reading.miliDies
+                if remaining_milidies == 1000:
+                    remaining_milidies = 0
+                    remaining_dies += 1
+                
+                self.astro_equinox_countdown.config(
+                    text=tr("astro_equinox_countdown_result", self.lang, dies=remaining_dies, milidies=remaining_milidies)
+                )
+                
+                self.std_equinox_countdown.config(
+                    text=tr("std_equinox_countdown_result", self.lang, days=days, hours=hours, mins=mins, secs=secs)
+                )
+            else:
+                self.astro_equinox_countdown.config(text=tr("equinox_passed", self.lang))
+                self.std_equinox_countdown.config(text="")
+                
+        except Exception as e:
+            self.astro_equinox_countdown.config(text=tr("error_text", self.lang, error=str(e)))
             self.std_equinox_countdown.config(text="")
+            
         self.after(1000, self._update_equinox_countdown)
+
+def create_comparison_card(master=None, lang="en"):
+    """Factory function to create ComparisonCard instance."""
+    return ComparisonCard(master, lang)

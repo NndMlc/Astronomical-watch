@@ -27,11 +27,11 @@ dev = [
 
 [project.scripts]
 astronomical-watch = "core.cli:main"
+astronomical-watch-gui = "astronomical_watch.ui.main:main"
 
 [tool.setuptools.packages.find]
-# Ako je cilj uključiti sve pakete u repou, match bi morao biti širi;
-# trenutni value ovde je samo ilustracija dostupnog stanja.
-include = ["core*", "ui*"]
+where = ["src"]
+include = ["astronomical_watch*"]
 
 [tool.ruff]
 line-length = 100
