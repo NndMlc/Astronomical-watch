@@ -35,7 +35,7 @@ class AstronomicalWidgetMode:
         # Current time values
         self.day_index = 0
         self.milliDies = 0
-        self.microDies = 0
+        self.mikroDies = 0
         
         # Current language for title
         self.current_language = "en"
@@ -164,18 +164,12 @@ class AstronomicalWidgetMode:
         
         # Use top color for widget background (could also blend top/bottom)
         bg_color = theme.top_color
-        text_color = theme.text_color
         
         self.master.configure(bg=bg_color)
         self.frame.configure(bg=bg_color)
         
-        # Update all label backgrounds and text colors to match
-        self.title_label.configure(bg=bg_color, fg=text_color)
-        self.time_canvas.configure(bg=bg_color)
-        self.labels_frame.configure(bg=bg_color)
-        self.dies_label.configure(bg=bg_color, fg="lightgray")
-        self.milidies_label.configure(bg=bg_color, fg="lightgray")
-        self.progress_frame.configure(bg=bg_color)
+        # Update canvas background
+        self.canvas.configure(bg=bg_color)
         
         # Redraw time display with current background
         self._draw_time_display()
@@ -184,11 +178,11 @@ class AstronomicalWidgetMode:
         """Draw time text with black outline on canvas for better visibility."""
         try:
             # Clear canvas
-            self.time_canvas.delete("all")
+            self.canvas.delete("all")
             
             # Get canvas dimensions
-            canvas_width = self.time_canvas.winfo_width()
-            canvas_height = self.time_canvas.winfo_height()
+            canvas_width = self.canvas.winfo_width()
+            canvas_height = self.canvas.winfo_height()
             
             if canvas_width <= 1:  # Not yet rendered
                 self.master.after(10, self._draw_time_display)
@@ -197,22 +191,22 @@ class AstronomicalWidgetMode:
             # Current time text
             time_str = f"{self.day_index:03d}.{self.milliDies:03d}"
             
-            # Font configuration
+            # Font configuration for smaller widget
             try:
-                font_spec = ("DejaVu Sans Mono", 28, "bold")
+                font_spec = ("DejaVu Sans Mono", 16, "bold")
             except:
-                font_spec = ("Courier New", 28, "bold")
+                font_spec = ("Courier New", 16, "bold")
             
-            # Center position
+            # Position for time text (upper part of canvas)
             x_center = canvas_width // 2
-            y_center = canvas_height // 2
+            y_time = 20  # Upper position for time
             
             # Draw black outline (multiple offset positions)
             for dx in [-1, 0, 1]:
                 for dy in [-1, 0, 1]:
                     if dx != 0 or dy != 0:  # Skip center
-                        self.time_canvas.create_text(
-                            x_center + dx, y_center + dy,
+                        self.canvas.create_text(
+                            x_center + dx, y_time + dy,
                             text=time_str,
                             font=font_spec,
                             fill="black",
@@ -220,16 +214,51 @@ class AstronomicalWidgetMode:
                         )
             
             # Draw white text on top
-            self.time_canvas.create_text(
-                x_center, y_center,
+            self.canvas.create_text(
+                x_center, y_time,
                 text=time_str,
                 font=font_spec,
                 fill="white",
                 anchor="center"
             )
             
+            # Draw progress bar in lower part
+            self._draw_progress_bar()
+            
         except Exception as e:
             print(f"Time display drawing error: {e}")
+            
+    def _draw_progress_bar(self):
+        """Draw mikroDies progress bar on canvas."""
+        try:
+            canvas_width = self.canvas.winfo_width()
+            canvas_height = self.canvas.winfo_height()
+            
+            # Progress bar dimensions
+            bar_width = canvas_width - 20  # 10px margins
+            bar_height = 8
+            bar_x = 10
+            bar_y = canvas_height - 20  # Near bottom
+            
+            # Calculate progress (0-999 mikroDies)
+            progress = self.mikroDies / 999.0
+            
+            # Draw background bar (dark gray)
+            self.canvas.create_rectangle(
+                bar_x, bar_y, bar_x + bar_width, bar_y + bar_height,
+                fill="gray20", outline="gray40"
+            )
+            
+            # Draw progress bar (YellowGreen)
+            progress_width = int(bar_width * progress)
+            if progress_width > 0:
+                self.canvas.create_rectangle(
+                    bar_x, bar_y, bar_x + progress_width, bar_y + bar_height,
+                    fill="#9ACD32", outline=""
+                )
+                
+        except Exception as e:
+            print(f"Progress bar drawing error: {e}")
         
     def _update_display(self):
         """Update the astronomical time display."""
@@ -248,13 +277,7 @@ class AstronomicalWidgetMode:
             # Update display values
             self.day_index = reading.day_index
             self.milliDies = reading.miliDies
-            self.microDies = reading.mikroDies  # Use the real mikroDies from AstroYear
-            
-            # Update title with current language
-            self.title_label.config(text=tr("title", self.current_language))
-            
-            # Update progress bar for mikroDies (0-999)
-            self._update_progress_bar()
+            self.mikroDies = reading.mikroDies  # Use the real mikroDies from AstroYear
             
             # Update theme (this will redraw time display)
             self._apply_theme()
@@ -264,42 +287,8 @@ class AstronomicalWidgetMode:
             # Fallback display
             self.day_index = 0
             self.milliDies = 0
-            self.microDies = 0
+            self.mikroDies = 0
             self._draw_time_display()
-            
-    def _update_progress_bar(self):
-        """Update the mikroDies progress bar."""
-        try:
-            # Clear canvas
-            self.progress_canvas.delete("all")
-            
-            # Get canvas dimensions
-            canvas_width = self.progress_canvas.winfo_width()
-            canvas_height = self.progress_canvas.winfo_height()
-            
-            if canvas_width <= 1:  # Not yet rendered
-                self.master.after(10, self._update_progress_bar)
-                return
-            
-            # Calculate progress (0-999 mikroDies)
-            progress = self.microDies / 999.0  # 0.0 to 1.0
-            
-            # Draw background
-            self.progress_canvas.create_rectangle(
-                0, 0, canvas_width, canvas_height,
-                fill="gray25", outline=""
-            )
-            
-            # Draw progress bar
-            if progress > 0:
-                progress_width = int(canvas_width * progress)
-                self.progress_canvas.create_rectangle(
-                    0, 0, progress_width, canvas_height,
-                    fill="#9ACD32", outline=""  # YellowGreen - high visibility on all sky gradients
-                )
-                
-        except Exception as e:
-            print(f"Progress bar update error: {e}")
             
     def set_language(self, language: str):
         """Update widget language."""
