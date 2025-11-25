@@ -29,10 +29,11 @@ def check_python_version():
         print("=" * 60)
         
         try:
-            raw_input("Press Enter to continue anyway, or Ctrl+C to exit...")
-        except NameError:
-            # Python 3
-            input("Press Enter to continue anyway, or Ctrl+C to exit...")
+            try:
+                raw_input("Press Enter to continue anyway, or Ctrl+C to exit...")
+            except NameError:
+                # Python 3
+                input("Press Enter to continue anyway, or Ctrl+C to exit...")
         except KeyboardInterrupt:
             print("\nExiting...")
             return False
