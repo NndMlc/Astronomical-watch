@@ -1,6 +1,7 @@
 TRANSLATIONS = {
     "en": {
         "title": "Astronomical Watch",
+        "standard_time": "Standard Time",
         "explanation": "Explanation",
         "comparison": "Comparison",
         "calculations": "Calculations",
@@ -51,6 +52,7 @@ TRANSLATIONS = {
     },
     "sr": {
         "title": "Astronomski sat",
+        "standard_time": "Standardno vreme",
         "explanation": "Objašnjenje",
         "comparison": "Poređenje",
         "calculations": "Proračuni",
@@ -100,6 +102,7 @@ TRANSLATIONS = {
     },
     "es": {
         "title": "Reloj Astronómico",
+        "standard_time": "Hora Estándar",
         "explanation": "Explicación",
         "comparison": "Comparación",
         "calculations": "Cálculos",
@@ -148,7 +151,8 @@ TRANSLATIONS = {
             "eqt_offset_value_label": "Desviación actual de EoT: {eqt_today:.2f} min / {eqt_today_md} miliDies",
     },
     "zh": {
-        "title": "天文时钟",
+        "title": "天文手表",
+        "standard_time": "标准时间",
         "explanation": "说明",
         "comparison": "比较",
         "calculations": "计算",
@@ -198,6 +202,7 @@ TRANSLATIONS = {
     },
     "ar": {
         "title": "الساعة الفلكية",
+        "standard_time": "الوقت المعياري",
         "explanation": "شرح",
         "comparison": "مقارنة",
         "calculations": "حسابات",
@@ -247,6 +252,7 @@ TRANSLATIONS = {
     },
     "pt": {
         "title": "Relógio Astronômico",
+        "standard_time": "Horário Padrão",
         "explanation": "Explicação",
         "comparison": "Comparação",
         "calculations": "Cálculos",
@@ -259,6 +265,7 @@ TRANSLATIONS = {
     },
     "fr": {
         "title": "Montre Astronomique",
+        "standard_time": "Heure Standard",
         "explanation": "Explication",
         "comparison": "Comparaison",
         "calculations": "Calculs",
@@ -308,6 +315,7 @@ TRANSLATIONS = {
     },
     "de": {
         "title": "Astronomische Uhr",
+        "standard_time": "Standardzeit",
         "explanation": "Erklärung",
         "comparison": "Vergleich",
         "calculations": "Berechnungen",
@@ -357,6 +365,7 @@ TRANSLATIONS = {
     },
     "ru": {
         "title": "Астрономические часы",
+        "standard_time": "Стандартное время",
         "explanation": "Объяснение",
         "comparison": "Сравнение",
         "calculations": "Вычисления",
@@ -406,6 +415,7 @@ TRANSLATIONS = {
     },
     "ja": {
         "title": "天文時計",
+        "standard_time": "標準時",
         "explanation": "説明",
         "comparison": "比較",
         "calculations": "計算",
@@ -455,6 +465,7 @@ TRANSLATIONS = {
     },
     "hi": {
         "title": "खगोलीय घड़ी",
+        "standard_time": "मानक समय",
         "explanation": "व्याख्या",
         "comparison": "तुलना",
         "calculations": "गणना",
@@ -504,6 +515,7 @@ TRANSLATIONS = {
     },
     "fa": {
         "title": "ساعت نجومی",
+        "standard_time": "زمان استاندارد",
         "explanation": "توضیح",
         "comparison": "مقایسه",
         "calculations": "محاسبات",
@@ -553,6 +565,7 @@ TRANSLATIONS = {
     },
     "id": {
         "title": "Jam Astronomi",
+        "standard_time": "Waktu Standar",
         "explanation": "Penjelasan",
         "comparison": "Perbandingan",
         "calculations": "Perhitungan",
@@ -700,6 +713,7 @@ TRANSLATIONS = {
     },
     "tr": {
         "title": "Astronomik Saat",
+        "standard_time": "Standart Zaman",
         "explanation": "Açıklama",
         "comparison": "Karşılaştırma",
         "calculations": "Hesaplamalar",
@@ -749,7 +763,8 @@ TRANSLATIONS = {
     },
     "el": {
         "title": "Αστρονομικό Ρολόι",
-        "explanation": "Επεξήγηση",
+        "standard_time": "Κανονική Ώρα",
+        "explanation": "Εξήγηση",
         "comparison": "Σύγκριση",
         "calculations": "Υπολογισμοί",
         "dies": "Dies",
@@ -797,7 +812,8 @@ TRANSLATIONS = {
             "eqt_offset_value_label": "Τρέχουσα απόκλιση EoT: {eqt_today:.2f} λεπτά / {eqt_today_md} miliDies",
     },
     "pl": {
-        "title": "Zegar Astronomiczny",
+        "title": "Zegarek Astronomiczny",
+        "standard_time": "Czas Standardowy",
         "explanation": "Wyjaśnienie",
         "comparison": "Porównanie",
         "calculations": "Obliczenia",
@@ -847,6 +863,7 @@ TRANSLATIONS = {
     },
     "it": {
         "title": "Orologio Astronomico",
+        "standard_time": "Orario Standard",
         "explanation": "Spiegazione",
         "comparison": "Confronto",
         "calculations": "Calcoli",
@@ -895,7 +912,8 @@ TRANSLATIONS = {
             "eqt_offset_value_label": "Scostamento EoT attuale: {eqt_today:.2f} min / {eqt_today_md} miliDies",
     },
     "nl": {
-        "title": "Astronomisch Horloge",
+        "title": "Astronomische Klok",
+        "standard_time": "Standaardtijd",
         "explanation": "Uitleg",
         "comparison": "Vergelijking",
         "calculations": "Berekeningen",

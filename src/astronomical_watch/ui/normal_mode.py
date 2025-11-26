@@ -165,21 +165,23 @@ class ModernNormalMode:
         try:
             print("🎨 Creating UI layout...")
             
-            # Create gradient background canvas first
+            # Create gradient background canvas first - let it expand naturally
             self.gradient_canvas = tk.Canvas(
-                self.master, 
-                width=self.window_width, 
-                height=self.window_height,
-                highlightthickness=0
+                self.master,
+                highlightthickness=0,
+                relief='flat',
+                borderwidth=0
             )
             self.gradient_canvas.pack(fill=tk.BOTH, expand=True)
             print("✅ Gradient canvas created")
             
+            # Bind canvas resize to update gradient
+            self.gradient_canvas.bind('<Configure>', self._on_canvas_resize)
+            
             # Main container over gradient
             self.main_frame = tk.Frame(self.gradient_canvas, bg="")
             self.canvas_frame_id = self.gradient_canvas.create_window(
-                0, 0, anchor=tk.NW, window=self.main_frame,
-                width=self.window_width, height=self.window_height
+                0, 0, anchor=tk.NW, window=self.main_frame
             )
             print("✅ Main frame created")
             
@@ -253,13 +255,13 @@ class ModernNormalMode:
         )
         self.lang_button.pack()
         
-        # Title (center) - pack after sides are positioned
+        # Title (center) - use place for absolute centering
         self.title_label = tk.Label(
             self.title_bar,
             text="Astronomical Watch", 
             font=("Arial", 14, "bold")
         )
-        self.title_label.pack(pady=15)
+        self.title_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
     def _create_time_display(self):
         """Create the main time display area."""
@@ -282,7 +284,7 @@ class ModernNormalMode:
             text="000",
             font=get_monospace_font(52)
         )
-        self.dies_label.pack()
+        self.dies_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
         # MiliDies display
         milidies_container = tk.Frame(self.time_frame)
@@ -300,7 +302,7 @@ class ModernNormalMode:
             text="000", 
             font=get_monospace_font(52)
         )
-        self.milidies_label.pack()
+        self.milidies_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
         # MikroDies display
         mikrodies_container = tk.Frame(self.time_frame)
@@ -318,7 +320,7 @@ class ModernNormalMode:
             text="000",
             font=get_monospace_font(52)
         )
-        self.mikrodies_label.pack()
+        self.mikrodies_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
     def _create_standard_time(self):
         """Create standard time display."""
@@ -435,15 +437,21 @@ class ModernNormalMode:
             
     def _update_text_labels(self):
         """Update all text labels with current language."""
-        # Update title
-        self.title_label.config(text=tr("title", self.current_language))
+        # Update title with explicit text clearing
+        new_title = tr("title", self.current_language)
+        self.title_label.config(text="")  # Clear first
+        self.title_label.update_idletasks()  # Force update
+        self.title_label.config(text=new_title)  # Set new text
         
         # Update time labels
         # Note: Dies, miliDies, mikroDies are universal terms, but we could translate them if needed
         
         # Update standard time label
         if hasattr(self, 'std_time_label_text'):
-            self.std_time_label_text.config(text=tr("standard_time", self.current_language))
+            new_std_time_text = tr("standard_time", self.current_language)
+            self.std_time_label_text.config(text="")  # Clear first
+            self.std_time_label_text.update_idletasks()  # Force update
+            self.std_time_label_text.config(text=new_std_time_text)  # Set new text
             
     def _switch_tab(self, tab_id):
         """Open tab content in a new window."""
@@ -562,6 +570,13 @@ class ModernNormalMode:
             self.current_theme = theme
             print(f"✅ Theme calculated: {theme.top_color} → {theme.bottom_color}")
             
+            # Ensure canvas is ready before creating gradient
+            if self.gradient_canvas:
+                self.gradient_canvas.update_idletasks()
+                canvas_w = self.gradient_canvas.winfo_width()
+                canvas_h = self.gradient_canvas.winfo_height()
+                print(f"📐 Canvas state: {canvas_w}x{canvas_h}")
+            
             # Create gradient background
             self._create_gradient_background(theme)
             print("✅ Gradient background created")
@@ -583,33 +598,58 @@ class ModernNormalMode:
                 print("⚠️ No gradient canvas available")
                 return
                 
+            print(f"🎨 Creating gradient background...")
+            
             # Clear existing gradient
             self.gradient_canvas.delete("gradient")
             
-            # Force canvas update
-            self.gradient_canvas.update_idletasks()
+            # Multiple attempts to get proper canvas dimensions
+            attempts = 0
+            canvas_width = canvas_height = 0
             
-            # Get actual canvas dimensions
-            canvas_width = self.gradient_canvas.winfo_width()
-            canvas_height = self.gradient_canvas.winfo_height() 
+            while (canvas_width <= 1 or canvas_height <= 1) and attempts < 3:
+                self.gradient_canvas.update_idletasks()
+                self.master.update_idletasks()
+                
+                canvas_width = self.gradient_canvas.winfo_width()
+                canvas_height = self.gradient_canvas.winfo_height()
+                
+                print(f"📐 Attempt {attempts + 1}: Canvas size {canvas_width}x{canvas_height}")
+                
+                if canvas_width <= 1 or canvas_height <= 1:
+                    canvas_width = self.window_width
+                    canvas_height = self.window_height
+                    print(f"📐 Using fallback dimensions: {canvas_width}x{canvas_height}")
+                    break
+                    
+                attempts += 1
             
             if canvas_width <= 1 or canvas_height <= 1:
-                canvas_width = self.window_width
-                canvas_height = self.window_height
+                print("❌ Could not get valid canvas dimensions")
+                # Fallback to setting background color
+                self.gradient_canvas.configure(bg=theme.bottom_color)
+                return
             
             # Create gradient colors
             gradient_colors = create_gradient_colors(theme, steps=canvas_height)
             print(f"🌈 Creating gradient: {len(gradient_colors)} colors for {canvas_width}x{canvas_height}")
             
-            # Draw gradient as horizontal lines
+            # Draw gradient as filled rectangles for seamless appearance
+            lines_drawn = 0
             for i, color in enumerate(gradient_colors):
                 if i < canvas_height:
-                    self.gradient_canvas.create_line(
-                        0, i, canvas_width, i,
-                        fill=color, width=1, tags="gradient"
-                    )
+                    try:
+                        # Use filled rectangles instead of lines to avoid gaps
+                        self.gradient_canvas.create_rectangle(
+                            0, i, canvas_width, i + 1,
+                            fill=color, outline=color, width=0, tags="gradient"
+                        )
+                        lines_drawn += 1
+                    except Exception as line_error:
+                        print(f"⚠️ Error drawing rectangle {i}: {line_error}")
+                        break
                 
-            print("✅ Gradient background created")
+            print(f"✅ Gradient created: {lines_drawn} lines drawn")
                 
             # Make main frame transparent
             if hasattr(self, 'main_frame'):
@@ -618,11 +658,35 @@ class ModernNormalMode:
                 
         except Exception as e:
             print(f"❌ Gradient background creation failed: {e}")
+            import traceback
+            traceback.print_exc()
             # Fallback: set a solid color
             try:
-                self.gradient_canvas.configure(bg=theme.bottom_color)
+                if self.gradient_canvas:
+                    self.gradient_canvas.configure(bg=theme.bottom_color)
+                    print(f"🎨 Fallback: Set solid background {theme.bottom_color}")
             except:
-                pass
+                print("❌ Even fallback failed")
+    
+    def _on_canvas_resize(self, event):
+        """Handle canvas resize to update gradient and frame size."""
+        try:
+            # Update canvas frame size to match canvas
+            canvas_width = event.width
+            canvas_height = event.height
+            
+            self.gradient_canvas.itemconfig(
+                self.canvas_frame_id, 
+                width=canvas_width, 
+                height=canvas_height
+            )
+            
+            # Recreate gradient with new dimensions
+            if hasattr(self, 'current_theme'):
+                self._create_gradient_background(self.current_theme)
+                
+        except Exception as e:
+            print(f"⚠️ Canvas resize handling failed: {e}")
         
     def _update_widget_colors(self, theme):
         """Update all widget colors based on theme."""
@@ -748,7 +812,38 @@ class ModernNormalMode:
             
             # Update standard time
             try:
-                std_time = now_utc.strftime("UTC %H:%M:%S %d/%m/%Y")
+                # Get UTC time
+                utc_time = now_utc.strftime("UTC %H:%M:%S %d/%m/%Y")
+                
+                # Get local time with timezone
+                local_now = datetime.now()
+                
+                # Try to get proper timezone name
+                try:
+                    # Get timezone info
+                    local_tz = local_now.astimezone()
+                    tz_name = local_tz.tzinfo.tzname(local_tz)
+                    
+                    # If timezone name is just UTC, try to get offset
+                    if tz_name == 'UTC':
+                        offset = local_tz.strftime('%z')
+                        if offset == '+0000':
+                            tz_name = 'UTC'
+                        else:
+                            tz_name = f'UTC{offset[:3]}:{offset[3:]}'
+                    
+                    local_time = local_now.strftime("%H:%M:%S %d/%m/%Y")
+                    
+                    # Only show local time if different from UTC
+                    if tz_name != 'UTC' or local_now.hour != now_utc.hour:
+                        std_time = f"{utc_time}\n{tz_name} {local_time}"
+                    else:
+                        std_time = utc_time
+                        
+                except:
+                    # Fallback to just UTC if timezone detection fails
+                    std_time = utc_time
+                
                 if hasattr(self, 'std_time_label') and self.std_time_label:
                     self.std_time_label.config(text=std_time)
             except Exception as e:
