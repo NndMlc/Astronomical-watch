@@ -4,6 +4,7 @@ Shows full click activation and consistent gradient backgrounds.
 """
 from __future__ import annotations
 import tkinter as tk
+import os
 from .widget import create_widget
 from .normal_mode import create_normal_mode
 
@@ -16,35 +17,92 @@ class AstronomicalWatchApp:
         self.normal_root = None
         self.widget = None
         self.normal_mode = None
+        self.current_language = "en"
+    
+    def _set_icon(self, window):
+        """Set application icon for a window."""
+        try:
+            current_file = os.path.abspath(__file__)
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_file))))
+            icon_path = os.path.join(project_root, "icons", "astronomical_watch.ico")
+            
+            if os.path.exists(icon_path):
+                window.iconbitmap(icon_path)
+            else:
+                # Try PNG format
+                png_path = os.path.join(project_root, "icons", "astronomical_watch.png")
+                if os.path.exists(png_path):
+                    img = tk.PhotoImage(file=png_path)
+                    window.iconphoto(True, img)
+        except Exception:
+            pass
     
     def show_widget(self):
         """Show the widget window."""
         if self.widget_root is None:
             self.widget_root = tk.Tk()
+            self.widget_root.title("Astronomical Watch")
             self.widget_root.protocol("WM_DELETE_WINDOW", self.on_widget_close)
+            
+            # Set icon
+            self._set_icon(self.widget_root)
             
             # Create widget with click handler to open normal mode
             self.widget = create_widget(self.widget_root, self.open_normal_mode)
             self.widget.start_updates()
+            
+            print("✅ Widget started")
+            print("🖱️  Double-click widget to open Normal Mode")
+            print("🖱️  Right-click widget for context menu")
     
     def open_normal_mode(self):
         """Open Normal Mode window (triggered by widget click)."""
-        print("Opening Normal Mode from widget click...")
+        print("🔄 Opening Normal Mode...")
         
         if self.normal_root is None:
             self.normal_root = tk.Toplevel()
+            self.normal_root.title("Astronomical Watch - Normal Mode")
             self.normal_root.protocol("WM_DELETE_WINDOW", self.on_normal_close)
             
-            self.normal_mode = create_normal_mode(self.normal_root)
+            # Set icon
+            self._set_icon(self.normal_root)
+            
+            # Create normal mode with language sync
+            self.normal_mode = create_normal_mode(
+                self.normal_root, 
+                on_back=self.close_normal_mode,
+                on_language=self.on_language_change
+            )
             self.normal_mode.start_updates()
+            
+            print("✅ Normal Mode opened")
         else:
             # Bring to front if already open
             self.normal_root.deiconify()
             self.normal_root.lift()
             self.normal_root.focus_force()
+            print("📱 Normal Mode brought to front")
+    
+    def close_normal_mode(self):
+        """Close normal mode and return to widget."""
+        if self.normal_root:
+            self.normal_root.destroy()
+            self.normal_root = None
+            self.normal_mode = None
+            print("📴 Normal Mode closed")
+    
+    def on_language_change(self, new_language):
+        """Handle language change from normal mode."""
+        self.current_language = new_language
+        if self.widget:
+            self.widget.set_language(new_language)
+        print(f"🌍 Language changed to: {new_language}")
     
     def on_widget_close(self):
         """Handle widget window close."""
+        if self.widget:
+            self.widget.stop_updates()
+            
         if self.normal_root:
             self.normal_root.destroy()
             self.normal_root = None
@@ -53,26 +111,48 @@ class AstronomicalWatchApp:
         self.widget_root.destroy()
         self.widget_root = None
         self.widget = None
+        print("👋 Application closed")
     
     def on_normal_close(self):
         """Handle normal mode window close."""
+        if self.normal_mode:
+            self.normal_mode.stop_updates()
+            
         self.normal_root.destroy()
         self.normal_root = None
         self.normal_mode = None
+        print("📴 Normal Mode closed")
     
     def run(self):
         """Start the application."""
+        print("=" * 50)
+        print(" ASTRONOMICAL WATCH APPLICATION")
+        print("=" * 50)
+        print("Starting integrated astronomical timekeeping system...")
+        print()
+        
         self.show_widget()
         
         if self.widget_root:
-            self.widget_root.mainloop()
+            try:
+                self.widget_root.mainloop()
+            except KeyboardInterrupt:
+                print("\n👋 Application interrupted by user")
+                self.on_widget_close()
 
 
 def main():
     """Main entry point."""
-    app = AstronomicalWatchApp()
-    app.run()
+    try:
+        app = AstronomicalWatchApp()
+        app.run()
+    except Exception as e:
+        print(f"❌ Application error: {e}")
+        import traceback
+        traceback.print_exc()
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    exit(main())

@@ -16,10 +16,10 @@ def test_api_now_basic():
     r = client.get("/api/now")
     assert r.status_code == 200
     data = r.json()
-    for key in ["utc_iso", "frame_year", "day_index", "milli_day", "timestamp_proposed", "note"]:
+    for key in ["utc_iso", "frame_year", "day_index", "miliDies", "timestamp_proposed", "note"]:
         assert key in data, f"Missing key {key}"
     assert data["utc_iso"].endswith("Z")
-    assert 0 <= data["milli_day"] <= 999
+    assert 0 <= data["miliDies"] <= 999
     assert re.match(r"^\d{4}eq:000\.\d{3}$", data["timestamp_proposed"])
 
 

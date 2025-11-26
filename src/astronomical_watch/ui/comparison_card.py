@@ -97,10 +97,10 @@ class ComparisonCard(Toplevel):
             
             astro_year = AstroYear(current_equinox, next_equinox)
             reading = astro_year.reading(dt)
-            day = reading.day_index
+            dies = reading.dies  # Now using dies field from core
             milidies = reading.miliDies
             
-            self.std_result.config(text=tr("astro_result", self.lang, day=day, milidies=milidies))
+            self.std_result.config(text=tr("astro_result", self.lang, day=dies, milidies=milidies))
         except Exception as e:
             self.std_result.config(text=tr("error_text", self.lang, error=str(e)))
 
@@ -114,7 +114,7 @@ class ComparisonCard(Toplevel):
             next_equinox = datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
             
             # Calculate target datetime from astronomical time
-            # day_index days after equinox + milidies fraction of day
+            # dies days after equinox + milidies fraction of day
             target_date = current_equinox + timedelta(days=day)
             milidies_seconds = milidies * 86.4  # 1 miliDies = 86.4 seconds
             std_dt = target_date + timedelta(seconds=milidies_seconds)
@@ -174,7 +174,7 @@ class ComparisonCard(Toplevel):
                 year_length_milidies = int(year_length_seconds / 86.4)
                 year_length_dies = year_length_milidies // 1000
                 
-                remaining_dies = year_length_dies - current_reading.day_index
+                remaining_dies = year_length_dies - current_reading.dies
                 remaining_milidies = 1000 - current_reading.miliDies
                 if remaining_milidies == 1000:
                     remaining_milidies = 0

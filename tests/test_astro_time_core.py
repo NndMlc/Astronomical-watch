@@ -14,7 +14,7 @@ def test_equnox_reset_mid_day():
     eq = datetime(2025, 3, 20, 8, 5, tzinfo=timezone.utc)
     ay = AstroYear(eq)
     r_eq = ay.reading(eq)
-    assert r_eq.day_index == 0
+    assert r_eq.dies == 0
     # milidan is some value within 0..999
     assert 0 <= r_eq.milidan < 1000
 
@@ -24,10 +24,10 @@ def test_first_noon_index_progression():
     first_noon = ay._first_noon_after_eq
     # Pre first noon -> still day 0
     r_before = ay.reading(first_noon - timedelta(seconds=10))
-    assert r_before.day_index == 0
+    assert r_before.dies == 0
     # At first noon -> start of day 1, milidan=0
     r_noon = ay.reading(first_noon)
-    assert r_noon.day_index == 1
+    assert r_noon.dies == 1
     assert r_noon.milidan == 0
     # After +1 day + 1s -> day 2
     r_next = ay.reading(first_noon + timedelta(days=1, seconds=1))
@@ -49,11 +49,11 @@ def test_rollover_next_equinox():
     # Force rollover
     after_next = next_eq + timedelta(seconds=10)
     r = ay.reading(after_next)
-    assert r.day_index == 0
+    assert r.dies == 0
     # Now first noon for new cycle
     first_noon_new = ay._first_noon_after_eq
     r2 = ay.reading(first_noon_new)
-    assert r2.day_index == 1
+    assert r2.dies == 1
 
 def test_approximate_mapping():
     eq = datetime(2025, 3, 20, 8, 5, tzinfo=timezone.utc)

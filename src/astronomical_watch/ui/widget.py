@@ -36,8 +36,8 @@ class AstronomicalWidgetMode:
         self.on_click_callback = on_click_callback
         
         # Current time values
-        self.day_index = 0
-        self.milliDies = 0
+        self.dies = 0
+        self.miliDies = 0
         self.mikroDies = 0
         
         # Current language for title
@@ -208,7 +208,7 @@ class AstronomicalWidgetMode:
                 return
             
             # Current time text
-            time_str = f"{self.day_index:03d}.{self.milliDies:03d}"
+            time_str = f"{self.dies:03d}.{self.miliDies:03d}"
             
             # Font configuration for smaller widget
             try:
@@ -294,8 +294,8 @@ class AstronomicalWidgetMode:
             reading = astro_year.reading(now_utc)
             
             # Update display values
-            self.day_index = reading.day_index
-            self.milliDies = reading.miliDies
+            self.dies = reading.dies  # Now using dies field from core
+            self.miliDies = reading.miliDies
             self.mikroDies = reading.mikroDies  # Use the real mikroDies from AstroYear
             
             # Update theme (this will redraw time display)
@@ -304,8 +304,8 @@ class AstronomicalWidgetMode:
         except Exception as e:
             print(f"Widget update error: {e}")
             # Fallback display
-            self.day_index = 0
-            self.milliDies = 0
+            self.dies = 0
+            self.miliDies = 0
             self.mikroDies = 0
             self._draw_time_display()
             

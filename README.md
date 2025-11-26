@@ -133,17 +133,17 @@ Now = t (UTC instant)
 
 1. If t < T_eq_y, recompute for previous equinox.
 2. Compute Δt = t − T_eq_y (seconds).
-3. Compute day_index = floor( (t − T_eq_y − offset_to_first_noon) / 86400 ), where offset_to_first_noon aligns day 0 start to the first mean noon after the equinox (or at equinox if it falls b...
+3. Compute dies = floor( (t − T_eq_y − offset_to_first_noon) / 86400 ), where offset_to_first_noon aligns day 0 start to the first mean noon after the equinox (or at equinox if it falls b...
 4. Compute intra_day_seconds = (t − start_of_current_day).
-5. milli_day = floor( 1000 * intra_day_seconds / 86400 ). Range 000–999.
-6. When milli_day rolls 999 → 000, day_index increments.
-7. If t ≥ T_eq_next, reset day_index → 0 and recompute new frame.
+5. miliDies = floor( 1000 * intra_day_seconds / 86400 ). Range 000–999.
+6. When miliDies rolls 999 → 000, dies increments.
+7. If t ≥ T_eq_next, reset dies → 0 and recompute new frame.
 
 Display Format (proposal):
 YYYYeq:DDD.mmm
 - YYYYeq: Gregorian year of the equinox starting the frame
-- DDD: zero-padded day_index (e.g., 000–365/366)
-- mmm: milli_day (000–999)
+- DDD: zero-padded dies (e.g., 000–365/366)
+- mmm: miliDies (000–999)
 
 Example: 2025eq:123.457
 
@@ -172,9 +172,9 @@ Because the tropical year length is ~365.2422 days:
 
 - Compute int_days = floor( (T_eq_next − T_eq_y) / 86400 ) → usually 365.
 - If fractional remainder + alignment with noon boundaries pushes number of distinct day starts to 366, then D_max=366.
-- Accept that final day may have fewer milli-day units if the equinox truncates it; or, alternatively, re-scale the last day (OPTION A vs OPTION B):
+- Accept that final day may have fewer miliDies units if the equinox truncates it; or, alternatively, re-scale the last day (OPTION A vs OPTION B):
 
-Option A (simpler): Truncate final day at next equinox (last milli_day may not reach 999).  
+Option A (simpler): Truncate final day at next equinox (last miliDies may not reach 999).  
 Option B (normalized): Stretch scaling on each day to ensure full 1000 milli-days (complicates uniformity).  
 We choose Option A initially.
 
@@ -216,7 +216,7 @@ lon_precise = solar_longitude_from_datetime(datetime_obj, max_error_arcsec=1.0)
    - Language: (To be decided; e.g., Python/TypeScript/Rust).
    - Module: solar.py / solar.ts for Sun position & EoT.
    - Function: compute_vernal_equinox(year) -> datetime (UTC).
-   - Function: astronomical_now(t_utc) -> {equinox_epoch, next_equinox, day_index, milli_day, raw_fraction, eot, metadata}.
+   - Function: astronomical_now(t_utc) -> {equinox_epoch, next_equinox, dies, miliDies, raw_fraction, eot, metadata}.
 2. CLI Tool:
    - astronomical-watch now → prints current astronomical timestamp.
 3. Tests:
@@ -248,9 +248,9 @@ if t >= next_eq:
     rollover...
 
 intra = t - current_day_start
-milli_day = int((intra / DAY_SECONDS) * 1000)  # clamp 0..999
+miliDies = int((intra / DAY_SECONDS) * 1000)  # clamp 0..999
 
-timestamp = f"{eq.year}eq:{days_since_day0:03d}.{milli_day:03d}"
+timestamp = f"{eq.year}eq:{days_since_day0:03d}.{miliDies:03d}"
 ```
 
 ### Open Questions
@@ -330,6 +330,6 @@ Read CONTRIBUTING.md first.
 
 - Decide primary language (code).
 - Implement equinox + EoT functions.
-- Implement core conversion to (day_index, milli_day).
+- Implement core conversion to (dies, miliDies).
 - Add tests.
 - Publish first CLI.

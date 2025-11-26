@@ -6,8 +6,8 @@ from astronomical_watch import astronomical_time
 
 def main():
     now = datetime.now(timezone.utc)
-    day_index, milli = astronomical_time(now)
-    print(f"{day_index:03d}.{milli:03d}")
+    dies, miliDies = astronomical_time(now)
+    print(f"{dies:03d}.{miliDies:03d}")
 
 if __name__ == "__main__":
     main()

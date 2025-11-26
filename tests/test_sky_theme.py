@@ -22,15 +22,15 @@ def get_sky_phase(astro_reading: dict, solar_events: dict) -> str:
     
     if not sunrise or not sunset:
         # Polar day/night
-        if astro_reading['milli_day'] < 500:
+        if astro_reading['miliDies'] < 500:
             return 'polar_day'
         else:
             return 'polar_night'
     
-    # Use milli_day to determine phase
-    milli_day = astro_reading['milli_day']
+    # Use miliDies to determine phase
+    miliDies = astro_reading['miliDies']
     
-    # Convert sunrise/sunset times to approximate milli_day values
+    # Convert sunrise/sunset times to approximate miliDies values
     # This is very simplified - in reality we'd need to account for the astronomical year properly
     sunrise_hour = sunrise.hour + sunrise.minute / 60.0
     sunset_hour = sunset.hour + sunset.minute / 60.0
@@ -39,7 +39,7 @@ def get_sky_phase(astro_reading: dict, solar_events: dict) -> str:
     if sunset < sunrise:  # sunset is next day
         sunset_hour += 24
     
-    # Convert to rough milli_day equivalents (0-999 scale)
+    # Convert to rough miliDies equivalents (0-999 scale)
     sunrise_milli = int((sunrise_hour * 1000) / 24) % 1000
     sunset_milli = int((sunset_hour * 1000) / 24) % 1000
     
@@ -50,21 +50,21 @@ def get_sky_phase(astro_reading: dict, solar_events: dict) -> str:
     dusk_end = (sunset_milli + 80) % 1000     # ~2 hours after sunset
     
     # Simplified phase detection
-    if dawn_start <= milli_day <= dawn_end:
-        if milli_day <= sunrise_milli:
+    if dawn_start <= miliDies <= dawn_end:
+        if miliDies <= sunrise_milli:
             return 'dawn'
         else:
             return 'day'
-    elif dusk_start <= milli_day <= dusk_end:
-        if milli_day <= sunset_milli:
+    elif dusk_start <= miliDies <= dusk_end:
+        if miliDies <= sunset_milli:
             return 'day'
         else:
             return 'dusk'
-    elif sunrise_milli < milli_day < sunset_milli:
+    elif sunrise_milli < miliDies < sunset_milli:
         return 'day'
     else:
         # Handle wraparound cases and default to night phases
-        if milli_day < sunrise_milli - 200:  # Well before sunrise
+        if miliDies < sunrise_milli - 200:  # Well before sunrise
             return 'deep_night'
         else:
             return 'night'
@@ -96,7 +96,7 @@ def calculate_sunrise_boost_factor(phase: str, solar_events: dict) -> float:
 def test_sky_phase_coverage():
     """
     Test that sky phases cover all possible times throughout a day.
-    Every milli_day value should map to a valid phase.
+    Every miliDies value should map to a valid phase.
     """
     from astronomical_watch import compute_vernal_equinox
     
@@ -107,18 +107,18 @@ def test_sky_phase_coverage():
     astro_reading = astronomical_now(test_date)
     solar_events = calculate_solar_events(test_lat, test_lon, test_date)
     
-    # Test several milli_day values throughout the day
+    # Test several miliDies values throughout the day
     valid_phases = {'deep_night', 'dawn', 'day', 'dusk', 'night', 'polar_day', 'polar_night'}
     
-    for milli_day in range(0, 1000, 50):  # Test every 50 milli_days
-        # Create a test reading with this milli_day
-        test_reading = astro_reading.copy()
-        test_reading['milli_day'] = milli_day
+    for miliDies in range(0, 1000, 50):  # Test every 50 miliDies
+        # Create a test reading with this miliDies
+        test_reading = base_reading.copy()
+        test_reading['miliDies'] = miliDies
         
         phase = get_sky_phase(test_reading, solar_events)
         
         assert phase in valid_phases, (
-            f"Invalid phase '{phase}' for milli_day {milli_day}"
+            f"Invalid phase '{phase}' for miliDies {miliDies}"
         )
 
 

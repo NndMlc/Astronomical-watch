@@ -24,7 +24,7 @@ Astronomical Watch implements an experimental timekeeping system based on astron
 ```python
 # Represents one astronomical year between equinox instants
 ay = AstroYear(current_equinox, next_equinox)
-reading = ay.reading(datetime_utc)  # -> AstroReading(day_index, milliDies)
+reading = ay.reading(datetime_utc)  # -> AstroReading(dies, miliDies)
 ```
 
 #### VSOP87D Dynamic Precision System
@@ -123,4 +123,4 @@ awatch --max-error-arcsec 5      # Higher precision calculations
 - Always pass timezone-aware UTC datetimes to core functions
 - VSOP87 time parameter is millennia since J2000, not centuries
 - Day boundaries at 23:15:54 UTC, not midnight
-- Equinox resets day_index to 0 even if mid-Dies
+- Equinox resets dies to 0 even if mid-Dies

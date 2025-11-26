@@ -7,10 +7,10 @@ Implements a global, uniform astronomical time system based on:
 - Fixed daily boundary in UTC at 23:15:54 UTC (derived from longitude / 15)
 - Uniform division of the mean solar day (86400 SI seconds) into 1000 equal units (miliDies)
 - Astronomical year bounded by successive real vernal equinox instants
-- day_index resets exactly at vernal equinox instant (miliDies continues)
+- dies resets exactly at vernal equinox instant (miliDies continues)
 
 This core is intentionally minimal and stable so higher layers (UI, features) can rely on
-(day_index, miliDies) being globally identical.
+(dies, miliDies) being globally identical.
 """
 from __future__ import annotations
 
@@ -61,8 +61,8 @@ class AstroReading:
     ----------
     utc : datetime
         UTC timestamp of the reading (timezone-aware, UTC).
-    day_index : int
-        Day index within current astronomical year (>=0) or -1 if before current cycle.
+    dies : int
+        Dies index within current astronomical year (>=0) or -1 if before current cycle.
     miliDies : int
         Integer in [0, 999], uniform subdivision of the current mean solar day.
     fraction : float
@@ -74,7 +74,7 @@ class AstroReading:
     """
 
     utc: datetime
-    day_index: int
+    dies: int
     miliDies: int
     fraction: float
     mikroDies: int = 0
@@ -85,11 +85,11 @@ class AstroReading:
 
     def timestamp(self) -> str:
         """Return DDD.mmm format"""
-        return f"{self.day_index:03d}.{self.miliDies:03d}"
+        return f"{self.dies:03d}.{self.miliDies:03d}"
     
     def timestamp_full(self) -> str:
         """Return DDD.mmm.µµµ format with mikroDies"""
-        return f"{self.day_index:03d}.{self.miliDies:03d}.{self.mikroDies:03d}"
+        return f"{self.dies:03d}.{self.miliDies:03d}.{self.mikroDies:03d}"
 
 
 # ---------------------- Core Year Object ---------------------- #
@@ -98,12 +98,12 @@ class AstroYear:
     """Represents one astronomical year between two real vernal equinox instants.
 
     The astronomical year begins exactly at current_equinox.
-    - At that instant: day_index resets to 0 (even if mid-day), milidan unaffected.
+    - At that instant: dies resets to 0 (even if mid-day), milidan unaffected.
     - Day boundary: fixed mean solar noon for reference meridian at 23:15:54 UTC.
-    - Each subsequent boundary increments day_index.
+    - Each subsequent boundary increments dies.
     - On reaching next_equinox (if set and current time >= it) the year rolls over:
       * current_equinox <- next_equinox
-      * day_index will appear as 0 for times >= new equinox prior to first noon
+      * dies will appear as 0 for times >= new equinox prior to first noon
       * next_equinox cleared (caller can set new one when computed)
     - milidan always derived from time since the last global noon, independent of equinox.
 
@@ -210,19 +210,19 @@ class AstroYear:
         mikroDies = int(total_mikroDies % MIKRODIES_PER_MILIDES)
         mikroDies_fraction = (total_mikroDies % 1.0)
 
-        # day_index determination
+        # dies determination
         if t < self.current_equinox:
-            day_index = -1  # before current cycle
+            dies = -1  # before current cycle
         else:
             if t < self._first_noon_after_eq:
-                day_index = 0
+                dies = 0
             else:
                 delta = t - self._first_noon_after_eq
-                day_index = 1 + int(delta.total_seconds() // SECONDS_PER_DAY)
+                dies = 1 + int(delta.total_seconds() // SECONDS_PER_DAY)
 
         return AstroReading(
             utc=t,
-            day_index=day_index,
+            dies=dies,
             miliDies=miliDies,
             fraction=miliDies / MILIDES_PER_DAY,
             mikroDies=mikroDies,
@@ -230,19 +230,19 @@ class AstroYear:
         )
 
     # Convenience for reverse mapping (approximate, ignoring equinox resets mid-day)
-    def approximate_utc_from_day_miliDies(self, day_index: int, miliDies: int) -> datetime:
-        if day_index < 0:
-            raise ValueError("day_index must be >= 0")
+    def approximate_utc_from_day_miliDies(self, dies: int, miliDies: int) -> datetime:
+        if dies < 0:
+            raise ValueError("dies must be >= 0")
         if not (0 <= miliDies < MILIDES_PER_DAY):
             raise ValueError("miliDies out of range")
-        base_noon = self._first_noon_after_eq - timedelta(days=1)  # day_index 0 starts at equinox, may be mid-day
-        # day_index 1 corresponds to first noon after eq, so base_noon aligning logic:
-        # For approximate mapping we treat day_index 1 boundary as first_noon_after_eq.
-        # Thus, effective noon for day_index d>=1: first_noon_after_eq + (d-1) days.
-        if day_index == 0:
+        base_noon = self._first_noon_after_eq - timedelta(days=1)  # dies 0 starts at equinox, may be mid-day
+        # dies 1 corresponds to first noon after eq, so base_noon aligning logic:
+        # For approximate mapping we treat dies 1 boundary as first_noon_after_eq.
+        # Thus, effective noon for dies d>=1: first_noon_after_eq + (d-1) days.
+        if dies == 0:
             # We cannot reconstruct exact UTC (since day 0 began at equinox). We return equinox + miliDies offset.
             return self.current_equinox + timedelta(seconds=miliDies * SECONDS_PER_MILIDES)
-        target_noon = self._first_noon_after_eq + timedelta(days=day_index - 1)
+        target_noon = self._first_noon_after_eq + timedelta(days=dies - 1)
         return target_noon + timedelta(seconds=miliDies * SECONDS_PER_MILIDES)
 
 
@@ -264,7 +264,7 @@ SECONDS_PER_MILIDIES: float = SECONDS_PER_DAY / MILIDIES_PER_DAY  # 86.4 seconds
 
 # Legacy compatibility constants (aliases – keep until full migration).
 MILLIDAN_PER_DAY = MILIDIES_PER_DAY  # legacy name
-SECONDS_PER_MILLIDIES = SECONDS_PER_MILIDIES  # spelled from original draft
+SECONDS_PER_MILLIDIES = SECONDS_PER_MILIDIES  # legacy alias from original draft
 
 
 

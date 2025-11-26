@@ -11,7 +11,7 @@ import os
 from .gradient import get_sky_theme
 from .translations import TRANSLATIONS
 
-from src.astronomical_watch.core.astro_time_core import AstroYear
+from ..core.astro_time_core import AstroYear
 
 # Simple language list for language menu - all 20 languages from translations.py
 LANGUAGES = [
@@ -67,6 +67,10 @@ class AstronomicalNormalMode:
         self.master = master or tk.Tk()
         self.master.title("Astronomical Watch - Normal Mode")
         self.master.geometry("800x600")
+        
+        # Set application icon if available
+        self._set_icon()
+        
         self.on_back = on_back
         self.on_language = on_language
         
@@ -75,8 +79,8 @@ class AstronomicalNormalMode:
         
         # Current astronomical time values
         self.current_time = None
-        self.day_index = 0
-        self.milliDies = 0
+        self.dies = 0
+        self.miliDies = 0
         self.progress_percent = 0.0
         
         # Update job reference
@@ -84,6 +88,26 @@ class AstronomicalNormalMode:
         
         self._create_widgets()
         self._apply_theme()
+        
+    def _set_icon(self):
+        """Set application icon if available."""
+        try:
+            # Get the root directory of the project
+            current_file = os.path.abspath(__file__)
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_file))))
+            icon_path = os.path.join(project_root, "icons", "astronomical_watch.ico")
+            
+            if os.path.exists(icon_path):
+                self.master.iconbitmap(icon_path)
+            else:
+                # Try PNG format
+                png_path = os.path.join(project_root, "icons", "astronomical_watch.png")
+                if os.path.exists(png_path):
+                    img = tk.PhotoImage(file=png_path)
+                    self.master.iconphoto(True, img)
+        except Exception:
+            # Ignore icon errors - not critical
+            pass
         
     def _create_widgets(self):
         """Create the main UI elements."""
@@ -146,7 +170,7 @@ class AstronomicalNormalMode:
             self.info_frame,
             height=8,
             font=("Arial", 10),
-            bg="rgba(255,255,255,0.1)",
+            bg="#2d3748",
             fg="white",
             wrap="word"
         )
@@ -215,11 +239,11 @@ class AstronomicalNormalMode:
         """Show explanation window with content based on current language."""
         try:
             # Import explanation content based on current language
-            explanation_module = f"astronomical_watch.translate.explanation_{self.current_language}_card"
+            explanation_module = f"..translate.explanation_{self.current_language}_card"
             
             # Dynamic import of explanation module
             import importlib
-            module = importlib.import_module(explanation_module)
+            module = importlib.import_module(explanation_module, package=__package__)
             explanation_text = module.EXPLANATION_TEXT
             
             # Create explanation window
@@ -240,7 +264,7 @@ class AstronomicalNormalMode:
                 text_frame,
                 wrap="word",
                 font=("Arial", 11),
-                bg="rgba(255,255,255,0.9)",
+                bg="#f7fafc",
                 fg="#2c3e50",
                 padx=15,
                 pady=15
@@ -294,9 +318,19 @@ class AstronomicalNormalMode:
     def _update_text_labels(self):
         """Update all text labels with current language."""
         self.title_label.config(text=tr("title", self.current_language))
+        self.explanation_button.config(text=tr("explanation", self.current_language))
+        self.close_button.config(text=tr("close", self.current_language))
         
-        # Update other labels as needed
-        # This would be expanded with more UI elements
+        # Update progress label text
+        for child in self.progress_frame.winfo_children():
+            if isinstance(child, tk.Label) and child != self.progress_label:
+                child.config(text=tr("progress_through_day", self.current_language))
+        
+        # Update language label
+        for child in self.controls_frame.winfo_children():
+            if isinstance(child, tk.Label):
+                child.config(text=tr("language", self.current_language))
+                break
         
     def _apply_theme(self):
         """Apply sky gradient theme based on current time."""
@@ -306,12 +340,35 @@ class AstronomicalNormalMode:
         bg_color = theme.top_color
         text_color = theme.text_color
         
+        # Apply colors to main elements
         self.master.configure(bg=bg_color)
         self.main_frame.configure(bg=bg_color)
         self.time_frame.configure(bg=bg_color)
         self.progress_frame.configure(bg=bg_color)
         self.info_frame.configure(bg=bg_color)
         self.controls_frame.configure(bg=bg_color)
+        
+        # Update text colors
+        self.title_label.configure(bg=bg_color, fg=text_color)
+        self.time_label.configure(bg=bg_color, fg=text_color)
+        
+        # Update info text with proper background
+        darker_bg = self._darken_color(bg_color)
+        self.info_text.configure(bg=darker_bg, fg=text_color)
+        
+    def _darken_color(self, hex_color):
+        """Darken a hex color by 20% for better contrast."""
+        try:
+            # Remove # if present
+            hex_color = hex_color.lstrip('#')
+            # Convert to RGB
+            r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+            # Darken by 20%
+            r, g, b = int(r * 0.8), int(g * 0.8), int(b * 0.8)
+            # Convert back to hex
+            return f"#{r:02x}{g:02x}{b:02x}"
+        except:
+            return "#2d3748"  # Fallback dark color
         
     def _update_display(self):
         """Update the astronomical time display."""
@@ -328,27 +385,29 @@ class AstronomicalNormalMode:
             reading = astro_year.reading(now_utc)
             
             # Update display values
-            self.day_index = reading.day_index
-            self.milliDies = reading.miliDies
+            self.dies = reading.dies  # Now using dies field from core
+            self.miliDies = reading.miliDies
+            mikroDies = reading.mikroDies
             self.progress_percent = (reading.miliDies / 1000.0) * 100
             
             # Update UI
-            time_str = f"{self.day_index:03d}·{self.milliDies:03d}"
+            time_str = f"{self.dies:03d}·{self.miliDies:03d}"
             self.time_label.config(text=time_str)
             
             self.progress_bar['value'] = self.progress_percent
             self.progress_label.config(text=f"{self.progress_percent:.1f}%")
             
             # Update info text
-            info_text = f"""
-{tr("current_time", self.current_language)}: {now_utc.strftime('%Y-%m-%d %H:%M:%S UTC')}
-{tr("astronomical_time", self.current_language)}: {time_str}
-{tr("day_index", self.current_language)}: {self.day_index}
-{tr("miliDies", self.current_language)}: {self.milliDies}
-{tr("progress_through_day", self.current_language)}: {self.progress_percent:.1f}%
+            info_text = f"""Current Time (UTC): {now_utc.strftime('%Y-%m-%d %H:%M:%S')}
+Astronomical Time: {time_str}
+Dies (Day): {self.dies}
+miliDies: {self.miliDies}
+mikroDies: {mikroDies}
+Progress through Dies: {self.progress_percent:.1f}%
 
-{tr("explanation", self.current_language)}
-            """.strip()
+The astronomical watch shows time based on the vernal equinox cycle.
+Each Dies represents one universal day.
+Time updates every second for detailed tracking."""
             
             self.info_text.delete('1.0', tk.END)
             self.info_text.insert('1.0', info_text)

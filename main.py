@@ -1,5 +1,6 @@
 """
 Main entry point for the Astronomical Watch widget.
+Displays time in Dies.miliDies format based on vernal equinox.
 Supports launch via `python -m main`
 """
 from __future__ import annotations
@@ -249,8 +250,8 @@ def display_astronomical_watch():
     print(f"\nCurrent UTC time: {now.isoformat()}")
     print(f"Astronomical timestamp: {astro_time['timestamp']}")
     print(f"Equinox epoch: {astro_time['equinox_epoch'].isoformat()}")
-    print(f"Day index: {astro_time['day_index']}")
-    print(f"Milli-day: {astro_time['milli_day']}")
+    print(f"Dies: {astro_time['dies']}")
+    print(f"MiliDies: {astro_time['miliDies']}")
     print(f"Year progress: {astro_time['raw_fraction']:.3f}")
 
     # Solar events
