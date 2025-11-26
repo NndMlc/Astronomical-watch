@@ -61,19 +61,13 @@ class ModernNormalMode:
     """Modern Normal Mode without window decorations."""
     
     def __init__(self, parent, on_back=None, on_language=None):
+        print("🚀 ModernNormalMode.__init__ starting...")
+        
         self.master = parent
         self.on_back = on_back
         self.on_language = on_language
         
-        # Remove window decorations
-        self.master.overrideredirect(True)
-        
-        # Set window size and center it
-        self.window_width = 650
-        self.window_height = 800
-        self._center_window()
-        
-        # Data
+        # Data initialization first
         self.dies = 0
         self.miliDies = 0
         self.mikroDies = 0
@@ -89,21 +83,60 @@ class ModernNormalMode:
         # Active tab
         self.current_tab = "explanation"
         
-        # Create icons
-        self._create_icons()
+        # Window configuration
+        self.window_width = 650
+        self.window_height = 800
         
-        self._create_ui()
-        self._apply_theme()
+        print("📐 Setting up window...")
+        
+        try:
+            # Remove window decorations
+            self.master.overrideredirect(True)
+            print("✅ Window decorations removed")
+            
+            # Update window to ensure it's ready for geometry operations
+            self.master.update_idletasks()
+            
+            # Center the window
+            self._center_window()
+            print("✅ Window centered")
+            
+            # Create icons
+            self._create_icons()
+            print("✅ Icons created")
+            
+            # Create UI
+            self._create_ui()
+            print("✅ UI created")
+            
+            # Apply theme
+            self._apply_theme()
+            print("✅ Theme applied")
+            
+            print("🎉 ModernNormalMode initialization complete!")
+            
+        except Exception as e:
+            print(f"❌ ModernNormalMode initialization failed: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
         
     def _center_window(self):
         """Center the window on screen."""
-        screen_width = self.master.winfo_screenwidth()
-        screen_height = self.master.winfo_screenheight()
-        
-        x = (screen_width - self.window_width) // 2
-        y = (screen_height - self.window_height) // 2
-        
-        self.master.geometry(f"{self.window_width}x{self.window_height}+{x}+{y}")
+        try:
+            screen_width = self.master.winfo_screenwidth()
+            screen_height = self.master.winfo_screenheight()
+            
+            x = (screen_width - self.window_width) // 2
+            y = (screen_height - self.window_height) // 2
+            
+            self.master.geometry(f"{self.window_width}x{self.window_height}+{x}+{y}")
+            print(f"📱 Window centered: {self.window_width}x{self.window_height} at {x},{y}")
+            
+        except Exception as e:
+            print(f"⚠️ Could not center window, using default position: {e}")
+            # Fallback to default size and position
+            self.master.geometry(f"{self.window_width}x{self.window_height}")
         
     def _create_icons(self):
         """Create simple text-based icons."""
@@ -116,39 +149,52 @@ class ModernNormalMode:
         
     def _create_ui(self):
         """Create the modern UI layout."""
-        # Create gradient background canvas first
-        self.gradient_canvas = tk.Canvas(
-            self.master, 
-            width=self.window_width, 
-            height=self.window_height,
-            highlightthickness=0
-        )
-        self.gradient_canvas.pack(fill=tk.BOTH, expand=True)
-        
-        # Main container over gradient
-        self.main_frame = tk.Frame(self.gradient_canvas, bg="")
-        self.canvas_frame_id = self.gradient_canvas.create_window(
-            0, 0, anchor=tk.NW, window=self.main_frame,
-            width=self.window_width, height=self.window_height
-        )
-        
-        # Custom title bar
-        self._create_title_bar()
-        
-        # Time display area
-        self._create_time_display()
-        
-        # Standard time display
-        self._create_standard_time()
-        
-        # Tab buttons
-        self._create_tab_buttons()
-        
-        # Content area for tabs
-        self._create_content_area()
-        
-        # Enable window dragging
-        self._setup_dragging()
+        try:
+            print("🎨 Creating UI layout...")
+            
+            # Create gradient background canvas first
+            self.gradient_canvas = tk.Canvas(
+                self.master, 
+                width=self.window_width, 
+                height=self.window_height,
+                highlightthickness=0
+            )
+            self.gradient_canvas.pack(fill=tk.BOTH, expand=True)
+            print("✅ Gradient canvas created")
+            
+            # Main container over gradient
+            self.main_frame = tk.Frame(self.gradient_canvas, bg="")
+            self.canvas_frame_id = self.gradient_canvas.create_window(
+                0, 0, anchor=tk.NW, window=self.main_frame,
+                width=self.window_width, height=self.window_height
+            )
+            print("✅ Main frame created")
+            
+            # Custom title bar
+            self._create_title_bar()
+            print("✅ Title bar created")
+            
+            # Time display area
+            self._create_time_display()
+            print("✅ Time display created")
+            
+            # Standard time display
+            self._create_standard_time()
+            print("✅ Standard time display created")
+            
+            # Tab buttons
+            self._create_tab_buttons()
+            print("✅ Tab buttons created")
+            
+            # Enable window dragging
+            self._setup_dragging()
+            print("✅ Window dragging enabled")
+            
+        except Exception as e:
+            print(f"❌ UI creation failed: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
         
     def _create_title_bar(self):
         """Create custom title bar with language selector and close button."""
@@ -179,22 +225,11 @@ class ModernNormalMode:
         )
         self.title_label.pack(pady=15)
         
-        # Close button (right side)  
-        self.close_button = tk.Button(
-            self.title_bar,
-            text="✕",
-            font=("Arial", 12, "bold"),
-            relief=tk.FLAT,
-            width=3,
-            height=1,
-            command=self._close_window
-        )
-        self.close_button.pack(side=tk.RIGHT, padx=15, pady=10)
-        
-        # Activity indicator (small dot that blinks)
+        # Activity indicator (small dot)
         self.activity_dot = tk.Label(
             self.title_bar,
             text="●",
+            fg="#00ff00",
             font=("Arial", 8)
         )
         self.activity_dot.pack(side=tk.RIGHT, padx=(0, 10), pady=15)
@@ -213,16 +248,6 @@ class ModernNormalMode:
         )
         self.close_button.pack(side=tk.RIGHT, padx=15, pady=10)
         
-        # Activity indicator (small dot that blinks)
-        self.activity_dot = tk.Label(
-            self.title_bar,
-            text="●",
-            bg="#2d2d2d",
-            fg="#00ff00",
-            font=("Arial", 8)
-        )
-        self.activity_dot.pack(side=tk.RIGHT, padx=(0, 10), pady=15)
-        
     def _create_time_display(self):
         """Create the main time display area."""
         self.time_frame = tk.Frame(self.main_frame)
@@ -235,16 +260,16 @@ class ModernNormalMode:
         self.dies_label_text = tk.Label(
             dies_frame,
             text="Dies:",
-            font=("Arial", 18, "bold")
+            font=("Arial", 12, "bold")
         )
-        self.dies_label_text.pack(side=tk.LEFT, padx=(30, 20))
+        self.dies_label_text.pack(side=tk.LEFT, padx=(50, 10))
         
         self.dies_label = tk.Label(
             dies_frame,
             text="000",
             font=get_monospace_font(52)
         )
-        self.dies_label.pack(side=tk.LEFT)
+        self.dies_label.pack(expand=True)
         
         # MiliDies display
         milidies_frame = tk.Frame(self.time_frame)
@@ -253,16 +278,16 @@ class ModernNormalMode:
         self.milidies_label_text = tk.Label(
             milidies_frame,
             text="miliDies:",
-            font=("Arial", 18, "bold")
+            font=("Arial", 12, "bold")
         )
-        self.milidies_label_text.pack(side=tk.LEFT, padx=(30, 20))
+        self.milidies_label_text.pack(side=tk.LEFT, padx=(50, 10))
         
         self.milidies_label = tk.Label(
             milidies_frame,
             text="000", 
             font=get_monospace_font(52)
         )
-        self.milidies_label.pack(side=tk.LEFT)
+        self.milidies_label.pack(expand=True)
         
         # MikroDies display
         mikrodies_frame = tk.Frame(self.time_frame)
@@ -271,16 +296,16 @@ class ModernNormalMode:
         self.mikrodies_label_text = tk.Label(
             mikrodies_frame,
             text="mikroDies:",
-            font=("Arial", 18, "bold") 
+            font=("Arial", 12, "bold") 
         )
-        self.mikrodies_label_text.pack(side=tk.LEFT, padx=(30, 20))
+        self.mikrodies_label_text.pack(side=tk.LEFT, padx=(50, 10))
         
         self.mikrodies_label = tk.Label(
             mikrodies_frame,
             text="000",
             font=get_monospace_font(52)
         )
-        self.mikrodies_label.pack(side=tk.LEFT)
+        self.mikrodies_label.pack(expand=True)
         
     def _create_standard_time(self):
         """Create standard time display."""
@@ -328,94 +353,18 @@ class ModernNormalMode:
         for tab_id, icon, text in tabs:
             btn = tk.Button(
                 button_container,
-                text=f"{icon}\n{text}",
-                font=("Arial", 10),
+                text=icon,
+                font=("Arial", 16),
                 relief=tk.FLAT,
-                width=12,
-                height=3,
+                width=4,
+                height=2,
                 command=lambda t=tab_id: self._switch_tab(t)
             )
-            btn.pack(side=tk.LEFT, padx=5)
+            btn.pack(side=tk.LEFT, padx=8)
             self.tab_buttons[tab_id] = btn
             
-        # Highlight active tab
-        self._highlight_active_tab()
-        
-    def _create_content_area(self):
-        """Create content area for tab content."""
-        self.content_frame = tk.Frame(self.main_frame)
-        self.content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-        
-        # Create content for each tab
-        self.tab_contents = {}
-        self._create_explanation_content()
-        self._create_comparison_content() 
-        self._create_calculation_content()
-        self._create_settings_content()
-        
-        # Show initial tab
-        self._show_tab_content("explanation")
-        
-    def _create_explanation_content(self):
-        """Create explanation tab content."""
-        frame = tk.Frame(self.content_frame)
-        
-        # Scrollable text area
-        text_widget = tk.Text(
-            frame,
-            font=("Arial", 11),
-            wrap=tk.WORD,
-            relief=tk.FLAT,
-            padx=15,
-            pady=15
-        )
-        text_widget.pack(fill=tk.BOTH, expand=True)
-        
-        # Add explanation text
-        explanation = tr("explanation_text", self.current_language)
-        text_widget.insert(tk.END, explanation)
-        text_widget.config(state=tk.DISABLED)
-        
-        self.tab_contents["explanation"] = frame
-        
-    def _create_comparison_content(self):
-        """Create comparison tab content."""
-        frame = tk.Frame(self.content_frame)
-        
-        label = tk.Label(
-            frame,
-            text="Comparison with traditional time will be displayed here",
-            font=("Arial", 12)
-        )
-        label.pack(expand=True)
-        
-        self.tab_contents["comparison"] = frame
-        
-    def _create_calculation_content(self):
-        """Create calculation tab content."""
-        frame = tk.Frame(self.content_frame) 
-        
-        label = tk.Label(
-            frame,
-            text="Astronomical calculations will be displayed here", 
-            font=("Arial", 12)
-        )
-        label.pack(expand=True)
-        
-        self.tab_contents["calculation"] = frame
-        
-    def _create_settings_content(self):
-        """Create settings tab content."""
-        frame = tk.Frame(self.content_frame)
-        
-        label = tk.Label(
-            frame,
-            text="Settings and preferences will be displayed here", 
-            font=("Arial", 12)
-        )
-        label.pack(expand=True)
-        
-        self.tab_contents["settings"] = frame
+        # Note: Tab content will open in separate windows
+        print("Tab buttons configured for external window opening")
         
     def _setup_dragging(self):
         """Setup window dragging functionality."""
@@ -474,10 +423,10 @@ class ModernNormalMode:
             self.on_language(lang_code)
             
     def _switch_tab(self, tab_id):
-        """Switch to a different tab."""
+        """Open tab content in a new window."""
         self.current_tab = tab_id
         self._highlight_active_tab()
-        self._show_tab_content(tab_id)
+        self._open_tab_window(tab_id)
         
     def _highlight_active_tab(self):
         """Highlight the active tab button."""
@@ -487,15 +436,29 @@ class ModernNormalMode:
             else:
                 button.config(bg="#3d3d3d", fg="#cccccc")
                 
-    def _show_tab_content(self, tab_id):
-        """Show content for the specified tab.""" 
-        # Hide all tab contents
-        for content in self.tab_contents.values():
-            content.pack_forget()
+    def _open_tab_window(self, tab_id):
+        """Open tab content in a separate window."""
+        # Create new window for tab content
+        tab_window = tk.Toplevel(self.master)
+        tab_window.title(f"Astronomical Watch - {tab_id.title()}")
+        tab_window.geometry("500x400")
+        
+        # Add content based on tab type
+        if tab_id == "explanation":
+            content = "Astronomical time explanation will be displayed here."
+        elif tab_id == "comparison":
+            content = "Time comparison tools will be displayed here."
+        elif tab_id == "calculation":
+            content = "Astronomical calculations will be displayed here."
+        elif tab_id == "settings":
+            content = "Settings and preferences will be displayed here."
+        else:
+            content = f"Content for {tab_id} tab."
             
-        # Show selected tab content
-        if tab_id in self.tab_contents:
-            self.tab_contents[tab_id].pack(fill=tk.BOTH, expand=True)
+        label = tk.Label(tab_window, text=content, font=("Arial", 12), wraplength=400)
+        label.pack(expand=True, pady=50)
+        
+        print(f"🗂️ Opened {tab_id} tab in new window")
             
     def _close_window(self):
         """Close the normal mode window."""
@@ -504,36 +467,59 @@ class ModernNormalMode:
             
     def _apply_theme(self):
         """Apply the astronomical theme with gradient background based on current time."""
-        now_utc = datetime.now(timezone.utc)
-        theme = get_sky_theme(now_utc)
-        self.current_theme = theme
-        
-        # Create gradient background
-        self._create_gradient_background(theme)
-        
-        # Apply theme colors to all widgets
-        self._update_widget_colors(theme)
+        try:
+            print("🎨 Applying theme...")
+            now_utc = datetime.now(timezone.utc)
+            theme = get_sky_theme(now_utc)
+            self.current_theme = theme
+            print(f"✅ Theme calculated: {theme.top_color} → {theme.bottom_color}")
+            
+            # Create gradient background
+            self._create_gradient_background(theme)
+            print("✅ Gradient background created")
+            
+            # Apply theme colors to all widgets
+            self._update_widget_colors(theme)
+            print("✅ Widget colors updated")
+            
+        except Exception as e:
+            print(f"❌ Theme application failed: {e}")
+            import traceback
+            traceback.print_exc()
+            # Continue without theme - use default colors
         
     def _create_gradient_background(self, theme):
         """Create gradient background on canvas."""
-        if not self.gradient_canvas:
-            return
+        try:
+            if not self.gradient_canvas:
+                print("⚠️ No gradient canvas available")
+                return
+                
+            # Clear existing gradient
+            self.gradient_canvas.delete("gradient")
             
-        # Clear existing gradient
-        self.gradient_canvas.delete("gradient")
-        
-        # Create gradient colors
-        gradient_colors = create_gradient_colors(theme, steps=self.window_height)
-        
-        # Draw gradient as horizontal lines
-        for i, color in enumerate(gradient_colors):
-            self.gradient_canvas.create_line(
-                0, i, self.window_width, i,
-                fill=color, width=1, tags="gradient"
-            )
+            # Create gradient colors
+            gradient_colors = create_gradient_colors(theme, steps=self.window_height)
+            print(f"🌈 Creating gradient with {len(gradient_colors)} colors")
             
-        # Make main frame transparent
-        self.main_frame.configure(bg="")
+            # Draw gradient as horizontal lines
+            for i, color in enumerate(gradient_colors):
+                self.gradient_canvas.create_line(
+                    0, i, self.window_width, i,
+                    fill=color, width=1, tags="gradient"
+                )
+                
+            print("✅ Gradient lines drawn")
+                
+            # Make main frame transparent
+            if hasattr(self, 'main_frame'):
+                self.main_frame.configure(bg="")
+                print("✅ Main frame made transparent")
+                
+        except Exception as e:
+            print(f"❌ Gradient background creation failed: {e}")
+            import traceback
+            traceback.print_exc()
         
     def _update_widget_colors(self, theme):
         """Update all widget colors based on theme."""
@@ -569,16 +555,8 @@ class ModernNormalMode:
         for button in self.tab_buttons.values():
             button.configure(bg=button_bg, fg=button_fg)
             
-        # Update content area and tab contents
-        self.content_frame.configure(bg="")
-        for tab_content in self.tab_contents.values():
-            tab_content.configure(bg="")
-            # Update child widgets in tab content
-            for child in tab_content.winfo_children():
-                if isinstance(child, tk.Label):
-                    child.configure(bg="", fg=text_color)
-                elif isinstance(child, tk.Text):
-                    child.configure(bg="", fg=text_color)
+        # Tab contents are now in separate windows, no need to update here
+        print("Theme updated for main window widgets")
         
     def _update_time_widget_colors(self, text_color):
         """Update time display widget colors."""
@@ -654,29 +632,53 @@ class ModernNormalMode:
             self.miliDies = reading.miliDies
             mikroDies = reading.mikroDies
             
-            # Update display labels
-            self.dies_label.config(text=f"{self.dies:03d}")
-            self.milidies_label.config(text=f"{self.miliDies:03d}")
-            self.mikrodies_label.config(text=f"{mikroDies:03d}")
+            # Update display labels (with error checking)
+            try:
+                if hasattr(self, 'dies_label') and self.dies_label:
+                    self.dies_label.config(text=f"{self.dies:03d}")
+                if hasattr(self, 'milidies_label') and self.milidies_label:
+                    self.milidies_label.config(text=f"{self.miliDies:03d}")
+                if hasattr(self, 'mikrodies_label') and self.mikrodies_label:
+                    self.mikrodies_label.config(text=f"{mikroDies:03d}")
+            except Exception as e:
+                print(f"⚠️ Could not update time labels: {e}")
             
             # Update standard time
-            std_time = now_utc.strftime("UTC %H:%M:%S %d/%m/%Y")
-            self.std_time_label.config(text=std_time)
+            try:
+                std_time = now_utc.strftime("UTC %H:%M:%S %d/%m/%Y")
+                if hasattr(self, 'std_time_label') and self.std_time_label:
+                    self.std_time_label.config(text=std_time)
+            except Exception as e:
+                print(f"⚠️ Could not update standard time: {e}")
             
             # Update gradient theme (every few minutes to track sky changes)
-            self._update_gradient_theme(now_utc)
+            try:
+                self._update_gradient_theme(now_utc)
+            except Exception as e:
+                print(f"⚠️ Could not update gradient theme: {e}")
             
             print(f"🕐 Modern Normal Mode Updated: {self.dies:03d}.{self.miliDies:03d}.{mikroDies:03d}")
             
         except Exception as e:
             print(f"❌ Update error: {e}")
-            # Fallback values
-            self.dies_label.config(text="ERR")
-            self.milidies_label.config(text="ERR") 
-            self.mikrodies_label.config(text="ERR")
+            # Fallback values - only update labels that exist
+            try:
+                if hasattr(self, 'dies_label') and self.dies_label:
+                    self.dies_label.config(text="ERR")
+                if hasattr(self, 'milidies_label') and self.milidies_label:
+                    self.milidies_label.config(text="ERR")
+                if hasattr(self, 'mikrodies_label') and self.mikrodies_label:
+                    self.mikrodies_label.config(text="ERR")
+            except:
+                pass  # Ignore errors in error handling
             
-        # Schedule next update
-        self._update_job = self.master.after(86, self._update_display)  # ~86ms = 1 mikroDies
+        finally:
+            # Always schedule next update if master still exists
+            try:
+                if self.master and hasattr(self.master, 'after'):
+                    self._update_job = self.master.after(86, self._update_display)  # ~86ms = 1 mikroDies
+            except:
+                print("⚠️ Could not schedule next update")
         
     def _update_gradient_theme(self, current_time):
         """Update gradient theme based on current time (called periodically)."""
