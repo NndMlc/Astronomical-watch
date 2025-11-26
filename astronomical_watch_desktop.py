@@ -14,6 +14,15 @@ sys.path.insert(0, src_dir)
 def main():
     """Launch the desktop application."""
     try:
+        # Set application icon if available
+        import tkinter as tk
+        root = tk.Tk()
+        root.withdraw()
+        
+        icon_path = os.path.join(current_dir, "icons", "astronomical_watch.ico")
+        if os.path.exists(icon_path):
+            root.iconbitmap(icon_path)
+        
         from astronomical_watch.ui.main import main as ui_main
         ui_main()
     except Exception as e:

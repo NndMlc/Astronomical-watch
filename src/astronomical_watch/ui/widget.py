@@ -17,6 +17,9 @@ class AstronomicalWidgetMode:
         self.master.geometry("140x70")
         self.master.minsize(140, 70)
         
+        # Set icon if available
+        self._set_icon()
+        
         # Remove title bar (navbar with minimize/maximize/close buttons)
         self.master.overrideredirect(True)
         
@@ -67,6 +70,33 @@ class AstronomicalWidgetMode:
         
         # Create context menu
         self._create_context_menu()
+        
+    def _set_icon(self):
+        """Set application icon if available."""
+        import os
+        try:
+            # Get the root directory of the project
+            current_file = os.path.abspath(__file__)
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_file))))
+            icon_path = os.path.join(project_root, "icons", "astronomical_watch.ico")
+            
+            if os.path.exists(icon_path):
+                self.master.iconbitmap(icon_path)
+            else:
+                # Try alternative icon formats
+                for icon_file in ["astronomical_watch.png", "astronomical_watch.gif", "icon.ico", "icon.png"]:
+                    alt_path = os.path.join(project_root, "icons", icon_file)
+                    if os.path.exists(alt_path):
+                        # For PNG files, we need to use PhotoImage
+                        if alt_path.endswith('.png'):
+                            img = tk.PhotoImage(file=alt_path)
+                            self.master.iconphoto(True, img)
+                        else:
+                            self.master.iconbitmap(alt_path)
+                        break
+        except Exception:
+            # Ignore icon errors - not critical for functionality
+            pass
         
     def _create_context_menu(self):
         """Create right-click context menu."""

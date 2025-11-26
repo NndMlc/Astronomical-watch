@@ -52,6 +52,17 @@ def main():
         root = tk.Tk()
         root.withdraw()  # Hide main window
         
+        # Set application icon if available
+        icon_path = os.path.join(current_dir, "icons", "astronomical_watch.ico")
+        if os.path.exists(icon_path):
+            try:
+                root.iconbitmap(icon_path)
+                print(f"✅ Icon loaded: {icon_path}")
+            except tk.TclError:
+                print(f"⚠️  Icon file exists but couldn't be loaded: {icon_path}")
+        else:
+            print(f"ℹ️  No icon found at: {icon_path}")
+        
         # Create and show widget
         widget = AstronomicalWidgetMode(master=None)
         widget.start_updates()
