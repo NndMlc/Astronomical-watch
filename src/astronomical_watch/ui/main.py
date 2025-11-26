@@ -78,10 +78,19 @@ class AstronomicalWatchApp:
             print("✅ Normal Mode opened")
         else:
             # Bring to front if already open
-            self.normal_root.deiconify()
-            self.normal_root.lift()
-            self.normal_root.focus_force()
-            print("📱 Normal Mode brought to front")
+            try:
+                # Check if window still exists
+                self.normal_root.winfo_exists()
+                self.normal_root.deiconify()
+                self.normal_root.lift()
+                self.normal_root.focus_force()
+                print("📱 Normal Mode brought to front")
+            except tk.TclError:
+                # Window was destroyed, clean up and reopen
+                print("🔄 Previous window destroyed, creating new one...")
+                self.normal_root = None
+                self.normal_mode = None
+                self.open_normal_mode()  # Recursive call to create new window
     
     def close_normal_mode(self):
         """Close normal mode and return to widget."""
@@ -118,7 +127,8 @@ class AstronomicalWatchApp:
         if self.normal_mode:
             self.normal_mode.stop_updates()
             
-        self.normal_root.destroy()
+        # Don't call destroy here - let the window manager handle it
+        # Just clean up our references so it can be reopened
         self.normal_root = None
         self.normal_mode = None
         print("📴 Normal Mode closed")
