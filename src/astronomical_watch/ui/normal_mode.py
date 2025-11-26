@@ -38,7 +38,7 @@ def get_monospace_font(size=14):
     
     return ("monospace", size, "bold")  # Fallback
 
-# Language options
+# Language options - all 20 languages from translations.py
 LANGUAGES = [
     ("English", "en"),
     ("Српски (Serbian)", "sr"),
@@ -49,7 +49,17 @@ LANGUAGES = [
     ("Français", "fr"),
     ("Deutsch", "de"),
     ("Русский (Russian)", "ru"),
-    ("日本語 (Japanese)", "ja")
+    ("日本語 (Japanese)", "ja"),
+    ("हिन्दी (Hindi)", "hi"),
+    ("فارسی (Persian)", "fa"),
+    ("Bahasa Indonesia", "id"),
+    ("Kiswahili", "sw"),
+    ("Hausa", "ha"),
+    ("Türkçe", "tr"),
+    ("Ελληνικά (Greek)", "el"),
+    ("Polski", "pl"),
+    ("Italiano", "it"),
+    ("Nederlands", "nl")
 ]
 
 def tr(key: str, lang: str = "en") -> str:
@@ -112,6 +122,9 @@ class ModernNormalMode:
             # Apply theme
             self._apply_theme()
             print("✅ Theme applied")
+            
+            # Schedule gradient refresh after UI is fully created
+            self.master.after(100, lambda: self._apply_theme())
             
             print("🎉 ModernNormalMode initialization complete!")
             
@@ -202,6 +215,29 @@ class ModernNormalMode:
         self.title_bar.pack(fill=tk.X)
         self.title_bar.pack_propagate(False)
         
+        # Close button (right side first) 
+        self.close_button = tk.Button(
+            self.title_bar,
+            text="✕",
+            bg="#ff4444", 
+            fg="white",
+            font=("Arial", 12, "bold"),
+            relief=tk.FLAT,
+            width=3,
+            height=1,
+            command=self._close_window
+        )
+        self.close_button.pack(side=tk.RIGHT, padx=15, pady=10)
+        
+        # Activity indicator (right side)
+        self.activity_dot = tk.Label(
+            self.title_bar,
+            text="●",
+            fg="#00ff00",
+            font=("Arial", 8)
+        )
+        self.activity_dot.pack(side=tk.RIGHT, padx=(0, 10), pady=15)
+        
         # Language selector (left side)
         self.lang_frame = tk.Frame(self.title_bar)
         self.lang_frame.pack(side=tk.LEFT, padx=15, pady=10)
@@ -217,7 +253,7 @@ class ModernNormalMode:
         )
         self.lang_button.pack()
         
-        # Title (center)
+        # Title (center) - pack after sides are positioned
         self.title_label = tk.Label(
             self.title_bar,
             text="Astronomical Watch", 
@@ -225,87 +261,64 @@ class ModernNormalMode:
         )
         self.title_label.pack(pady=15)
         
-        # Activity indicator (small dot)
-        self.activity_dot = tk.Label(
-            self.title_bar,
-            text="●",
-            fg="#00ff00",
-            font=("Arial", 8)
-        )
-        self.activity_dot.pack(side=tk.RIGHT, padx=(0, 10), pady=15)
-        
-        # Close button (right side)  
-        self.close_button = tk.Button(
-            self.title_bar,
-            text="✕",
-            bg="#ff4444", 
-            fg="white",
-            font=("Arial", 12, "bold"),
-            relief=tk.FLAT,
-            width=3,
-            height=1,
-            command=self._close_window
-        )
-        self.close_button.pack(side=tk.RIGHT, padx=15, pady=10)
-        
     def _create_time_display(self):
         """Create the main time display area."""
         self.time_frame = tk.Frame(self.main_frame)
         self.time_frame.pack(fill=tk.X, pady=20)
         
         # Dies display
-        dies_frame = tk.Frame(self.time_frame)
-        dies_frame.pack(pady=15)
+        dies_container = tk.Frame(self.time_frame)
+        dies_container.pack(fill=tk.X, pady=15)
         
         self.dies_label_text = tk.Label(
-            dies_frame,
+            dies_container,
             text="Dies:",
             font=("Arial", 12, "bold")
         )
-        self.dies_label_text.pack(side=tk.LEFT, padx=(50, 10))
+        self.dies_label_text.pack(side=tk.LEFT, padx=(50, 0))
         
         self.dies_label = tk.Label(
-            dies_frame,
+            dies_container,
             text="000",
             font=get_monospace_font(52)
         )
-        self.dies_label.pack(expand=True)
+        self.dies_label.pack()
         
         # MiliDies display
-        milidies_frame = tk.Frame(self.time_frame)
-        milidies_frame.pack(pady=15)
+        milidies_container = tk.Frame(self.time_frame)
+        milidies_container.pack(fill=tk.X, pady=15)
         
         self.milidies_label_text = tk.Label(
-            milidies_frame,
+            milidies_container,
             text="miliDies:",
             font=("Arial", 12, "bold")
         )
-        self.milidies_label_text.pack(side=tk.LEFT, padx=(50, 10))
+        self.milidies_label_text.pack(side=tk.LEFT, padx=(50, 0))
         
         self.milidies_label = tk.Label(
-            milidies_frame,
+            milidies_container,
             text="000", 
             font=get_monospace_font(52)
         )
-        self.milidies_label.pack(expand=True)
+        self.milidies_label.pack()
         
         # MikroDies display
-        mikrodies_frame = tk.Frame(self.time_frame)
-        mikrodies_frame.pack(pady=15)
+        mikrodies_container = tk.Frame(self.time_frame)
+        mikrodies_container.pack(fill=tk.X, pady=15)
         
         self.mikrodies_label_text = tk.Label(
-            mikrodies_frame,
+            mikrodies_container,
             text="mikroDies:",
             font=("Arial", 12, "bold") 
         )
-        self.mikrodies_label_text.pack(side=tk.LEFT, padx=(50, 10))
+        self.mikrodies_label_text.pack(side=tk.LEFT, padx=(50, 0))
         
         self.mikrodies_label = tk.Label(
-            mikrodies_frame,
+            mikrodies_container,
             text="000",
             font=get_monospace_font(52)
         )
-        self.mikrodies_label.pack(expand=True)
+        self.mikrodies_label.pack()
         
     def _create_standard_time(self):
         """Create standard time display."""
@@ -320,7 +333,7 @@ class ModernNormalMode:
         # Label for standard time
         self.std_time_label_text = tk.Label(
             self.std_time_frame,
-            text="Standard Time:",
+            text=tr("standard_time", self.current_language),
             font=("Arial", 14)
         )
         self.std_time_label_text.pack(pady=(0, 5))
@@ -410,17 +423,27 @@ class ModernNormalMode:
             pass
             
     def _change_language(self, lang_code):
-        """Change the display language."""
+        """Change the display language and update all UI text."""
         self.current_language = lang_code
         self.lang_button.config(text=f"🌐 {lang_code.upper()}")
         
-        # Update explanation content
-        self._create_explanation_content()
-        if self.current_tab == "explanation":
-            self._show_tab_content("explanation")
-            
+        # Update all translatable text in UI
+        self._update_text_labels()
+        
         if self.on_language:
             self.on_language(lang_code)
+            
+    def _update_text_labels(self):
+        """Update all text labels with current language."""
+        # Update title
+        self.title_label.config(text=tr("title", self.current_language))
+        
+        # Update time labels
+        # Note: Dies, miliDies, mikroDies are universal terms, but we could translate them if needed
+        
+        # Update standard time label
+        if hasattr(self, 'std_time_label_text'):
+            self.std_time_label_text.config(text=tr("standard_time", self.current_language))
             
     def _switch_tab(self, tab_id):
         """Open tab content in a new window."""
@@ -438,27 +461,92 @@ class ModernNormalMode:
                 
     def _open_tab_window(self, tab_id):
         """Open tab content in a separate window."""
-        # Create new window for tab content
-        tab_window = tk.Toplevel(self.master)
-        tab_window.title(f"Astronomical Watch - {tab_id.title()}")
-        tab_window.geometry("500x400")
-        
-        # Add content based on tab type
         if tab_id == "explanation":
-            content = "Astronomical time explanation will be displayed here."
-        elif tab_id == "comparison":
-            content = "Time comparison tools will be displayed here."
-        elif tab_id == "calculation":
-            content = "Astronomical calculations will be displayed here."
-        elif tab_id == "settings":
-            content = "Settings and preferences will be displayed here."
+            self._show_explanation()
         else:
-            content = f"Content for {tab_id} tab."
+            # Create simple window for other tabs
+            tab_window = tk.Toplevel(self.master)
+            tab_window.title(f"Astronomical Watch - {tab_id.title()}")
+            tab_window.geometry("500x400")
             
-        label = tk.Label(tab_window, text=content, font=("Arial", 12), wraplength=400)
-        label.pack(expand=True, pady=50)
+            # Add content based on tab type
+            if tab_id == "comparison":
+                content = "Time comparison tools will be displayed here."
+            elif tab_id == "calculation":
+                content = "Astronomical calculations will be displayed here."
+            elif tab_id == "settings":
+                content = "Settings and preferences will be displayed here."
+            else:
+                content = f"Content for {tab_id} tab."
+                
+            label = tk.Label(tab_window, text=content, font=("Arial", 12), wraplength=400)
+            label.pack(expand=True, pady=50)
+            
+        print(f"🗂️ Opened {tab_id} tab")
         
-        print(f"🗂️ Opened {tab_id} tab in new window")
+    def _show_explanation(self):
+        """Show explanation window with content based on current language."""
+        try:
+            # Import explanation content based on current language
+            explanation_module = f"..translate.explanation_{self.current_language}_card"
+            
+            # Dynamic import of explanation module
+            import importlib
+            module = importlib.import_module(explanation_module, package=__package__)
+            explanation_text = module.EXPLANATION_TEXT
+            
+            # Create explanation window
+            explanation_window = tk.Toplevel(self.master)
+            explanation_window.title(f"{tr('explanation', self.current_language)} — {tr('title', self.current_language)}")
+            explanation_window.geometry("700x600")
+            explanation_window.minsize(600, 500)
+            
+            # Apply theme to explanation window
+            theme = get_sky_theme()
+            explanation_window.configure(bg=theme.bottom_color)
+            
+            # Create scrollable text widget
+            text_frame = tk.Frame(explanation_window, bg=theme.bottom_color)
+            text_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+            
+            # Text widget with scrollbar
+            text_widget = tk.Text(
+                text_frame,
+                wrap=tk.WORD,
+                font=("Arial", 11),
+                bg="#f7fafc",
+                fg="#2c3e50",
+                padx=15,
+                pady=15
+            )
+            
+            scrollbar = tk.Scrollbar(text_frame, orient=tk.VERTICAL, command=text_widget.yview)
+            text_widget.configure(yscrollcommand=scrollbar.set)
+            
+            # Pack text and scrollbar
+            text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            
+            # Insert explanation text
+            text_widget.insert(tk.END, explanation_text)
+            text_widget.config(state=tk.DISABLED)
+            
+            print(f"📖 Opened explanation in {self.current_language}")
+            
+        except Exception as e:
+            print(f"❌ Could not load explanation for {self.current_language}: {e}")
+            # Fallback to simple text
+            explanation_window = tk.Toplevel(self.master)
+            explanation_window.title("Explanation")
+            explanation_window.geometry("500x400")
+            
+            label = tk.Label(
+                explanation_window, 
+                text=f"Explanation content for {self.current_language} is not available.\nPlease check the translate/ directory.",
+                font=("Arial", 12),
+                wraplength=400
+            )
+            label.pack(expand=True, pady=50)
             
     def _close_window(self):
         """Close the normal mode window."""
@@ -498,18 +586,30 @@ class ModernNormalMode:
             # Clear existing gradient
             self.gradient_canvas.delete("gradient")
             
+            # Force canvas update
+            self.gradient_canvas.update_idletasks()
+            
+            # Get actual canvas dimensions
+            canvas_width = self.gradient_canvas.winfo_width()
+            canvas_height = self.gradient_canvas.winfo_height() 
+            
+            if canvas_width <= 1 or canvas_height <= 1:
+                canvas_width = self.window_width
+                canvas_height = self.window_height
+            
             # Create gradient colors
-            gradient_colors = create_gradient_colors(theme, steps=self.window_height)
-            print(f"🌈 Creating gradient with {len(gradient_colors)} colors")
+            gradient_colors = create_gradient_colors(theme, steps=canvas_height)
+            print(f"🌈 Creating gradient: {len(gradient_colors)} colors for {canvas_width}x{canvas_height}")
             
             # Draw gradient as horizontal lines
             for i, color in enumerate(gradient_colors):
-                self.gradient_canvas.create_line(
-                    0, i, self.window_width, i,
-                    fill=color, width=1, tags="gradient"
-                )
+                if i < canvas_height:
+                    self.gradient_canvas.create_line(
+                        0, i, canvas_width, i,
+                        fill=color, width=1, tags="gradient"
+                    )
                 
-            print("✅ Gradient lines drawn")
+            print("✅ Gradient background created")
                 
             # Make main frame transparent
             if hasattr(self, 'main_frame'):
@@ -518,8 +618,11 @@ class ModernNormalMode:
                 
         except Exception as e:
             print(f"❌ Gradient background creation failed: {e}")
-            import traceback
-            traceback.print_exc()
+            # Fallback: set a solid color
+            try:
+                self.gradient_canvas.configure(bg=theme.bottom_color)
+            except:
+                pass
         
     def _update_widget_colors(self, theme):
         """Update all widget colors based on theme."""
