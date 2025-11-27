@@ -853,42 +853,20 @@ class ModernNormalMode:
                 local_now = datetime.now()
                 local_tz = local_now.astimezone()
                 
-                # Try to get timezone name first
-                try:
-                    tz_name = local_tz.tzinfo.tzname(local_tz)
+                # Always use UTC offset format (UTC+/-HH:MM)
+                offset = local_tz.utcoffset()
+                if offset:
+                    total_seconds = int(offset.total_seconds())
+                    hours = total_seconds // 3600
+                    minutes = abs(total_seconds % 3600) // 60
                     
-                    # If we get a proper timezone name, use it
-                    if tz_name and tz_name not in ['UTC', '+00']:
-                        tz_display = tz_name
+                    # Format offset as UTC+/-HH:MM
+                    if hours >= 0:
+                        tz_display = f"UTC+{hours:02d}:{minutes:02d}"
                     else:
-                        # Fallback to UTC offset format
-                        offset = local_tz.utcoffset()
-                        if offset:
-                            total_seconds = int(offset.total_seconds())
-                            hours = total_seconds // 3600
-                            minutes = abs(total_seconds % 3600) // 60
-                            
-                            # Format offset as UTC+/-HH:MM
-                            if hours >= 0:
-                                tz_display = f"UTC+{hours:02d}:{minutes:02d}"
-                            else:
-                                tz_display = f"UTC{hours:03d}:{minutes:02d}"
-                        else:
-                            tz_display = "UTC+00:00"
-                except:
-                    # If timezone name detection fails, use offset
-                    offset = local_tz.utcoffset()
-                    if offset:
-                        total_seconds = int(offset.total_seconds())
-                        hours = total_seconds // 3600
-                        minutes = abs(total_seconds % 3600) // 60
-                        
-                        if hours >= 0:
-                            tz_display = f"UTC+{hours:02d}:{minutes:02d}"
-                        else:
-                            tz_display = f"UTC{hours:03d}:{minutes:02d}"
-                    else:
-                        tz_display = "UTC+00:00"
+                        tz_display = f"UTC{hours:03d}:{minutes:02d}"
+                else:
+                    tz_display = "UTC+00:00"
                 
                 # Format system time
                 local_time = local_now.strftime("%H:%M:%S %d/%m/%Y")
