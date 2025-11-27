@@ -94,8 +94,8 @@ class ModernNormalMode:
         self.current_tab = "explanation"
         
         # Window configuration
-        self.window_width = 650
-        self.window_height = 800
+        self.window_width = 480
+        self.window_height = 550
         
         print("📐 Setting up window...")
         
@@ -119,12 +119,13 @@ class ModernNormalMode:
             self._create_ui()
             print("✅ UI created")
             
-            # Apply theme
+            # Apply theme once after UI is created
             self._apply_theme()
             print("✅ Theme applied")
             
-            # Schedule gradient refresh after UI is fully created
-            self.master.after(100, lambda: self._apply_theme())
+            # Start time updates
+            self.start_updates()
+            print("✅ Time updates started")
             
             print("🎉 ModernNormalMode initialization complete!")
             
@@ -165,12 +166,18 @@ class ModernNormalMode:
         try:
             print("🎨 Creating UI layout...")
             
-            # Create gradient background canvas first - let it expand naturally
+            # Get initial theme colors
+            theme = get_sky_theme()
+            bg_color = "#1e293b"  # Force dark slate background 
+            print(f"🎨 Canvas background color will be: {bg_color}")
+            
+            # Create gradient background canvas first
             self.gradient_canvas = tk.Canvas(
                 self.master,
                 highlightthickness=0,
                 relief='flat',
-                borderwidth=0
+                borderwidth=0,
+                bg=bg_color  # Set dark background color
             )
             self.gradient_canvas.pack(fill=tk.BOTH, expand=True)
             print("✅ Gradient canvas created")
@@ -178,12 +185,14 @@ class ModernNormalMode:
             # Bind canvas resize to update gradient
             self.gradient_canvas.bind('<Configure>', self._on_canvas_resize)
             
-            # Main container over gradient
-            self.main_frame = tk.Frame(self.gradient_canvas, bg="")
+            # Main container over gradient - make truly transparent
+            # Use the parent canvas background for transparency
+            canvas_bg = self.gradient_canvas.cget('bg')
+            self.main_frame = tk.Frame(self.gradient_canvas, bg=canvas_bg, relief='flat', bd=0)
             self.canvas_frame_id = self.gradient_canvas.create_window(
                 0, 0, anchor=tk.NW, window=self.main_frame
             )
-            print("✅ Main frame created")
+            print(f"✅ Main frame created with canvas background: {canvas_bg}")
             
             # Custom title bar
             self._create_title_bar()
@@ -213,7 +222,10 @@ class ModernNormalMode:
         
     def _create_title_bar(self):
         """Create custom title bar with language selector and close button."""
-        self.title_bar = tk.Frame(self.main_frame, height=50)
+        # Use canvas background for all frames
+        canvas_bg = self.gradient_canvas.cget('bg')
+        
+        self.title_bar = tk.Frame(self.main_frame, height=50, bg=canvas_bg, relief='flat', bd=0)
         self.title_bar.pack(fill=tk.X)
         self.title_bar.pack_propagate(False)
         
@@ -229,20 +241,11 @@ class ModernNormalMode:
             height=1,
             command=self._close_window
         )
-        self.close_button.pack(side=tk.RIGHT, padx=15, pady=10)
-        
-        # Activity indicator (right side)
-        self.activity_dot = tk.Label(
-            self.title_bar,
-            text="●",
-            fg="#00ff00",
-            font=("Arial", 8)
-        )
-        self.activity_dot.pack(side=tk.RIGHT, padx=(0, 10), pady=15)
+        self.close_button.pack(side=tk.RIGHT, padx=10, pady=8)
         
         # Language selector (left side)
-        self.lang_frame = tk.Frame(self.title_bar)
-        self.lang_frame.pack(side=tk.LEFT, padx=15, pady=10)
+        self.lang_frame = tk.Frame(self.title_bar, bg=canvas_bg)
+        self.lang_frame.pack(side=tk.LEFT, padx=10, pady=8)
         
         self.lang_button = tk.Button(
             self.lang_frame, 
@@ -259,14 +262,20 @@ class ModernNormalMode:
         self.title_label = tk.Label(
             self.title_bar,
             text="Astronomical Watch", 
-            font=("Arial", 14, "bold")
+            font=("Arial", 14, "bold"),
+            bg=canvas_bg,
+            fg="#e2e8f0"
         )
         self.title_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
     def _create_time_display(self):
         """Create the main time display area with proper grid layout."""
-        self.time_frame = tk.Frame(self.main_frame)
-        self.time_frame.pack(fill=tk.X, pady=20)
+        # Use canvas background for consistency
+        canvas_bg = self.gradient_canvas.cget('bg')
+        text_color = "#e2e8f0"  # Light gray text for dark background
+        
+        self.time_frame = tk.Frame(self.main_frame, bg=canvas_bg, relief='flat', bd=0)
+        self.time_frame.pack(fill=tk.X, pady=5)
         
         # Configure grid columns for consistent layout
         self.time_frame.grid_columnconfigure(0, weight=1, minsize=120)  # Label column
@@ -277,84 +286,108 @@ class ModernNormalMode:
             self.time_frame,
             text="Dies:",
             font=("Arial", 14, "bold"),
-            anchor="e"
+            anchor="e",
+            bg=canvas_bg,
+            fg=text_color
         )
-        self.dies_label_text.grid(row=0, column=0, padx=(20, 10), pady=15, sticky="e")
+        self.dies_label_text.grid(row=0, column=0, padx=(15, 8), pady=5, sticky="e")
         
         self.dies_label = tk.Label(
             self.time_frame,
             text="000",
             font=get_monospace_font(48),
-            anchor="w"
+            anchor="w",
+            bg=canvas_bg,
+            fg=text_color
         )
-        self.dies_label.grid(row=0, column=1, padx=(10, 20), pady=15, sticky="w")
+        self.dies_label.grid(row=0, column=1, padx=(8, 15), pady=5, sticky="w")
         
         # MiliDies display
         self.milidies_label_text = tk.Label(
             self.time_frame,
             text="miliDies:",
             font=("Arial", 14, "bold"),
-            anchor="e"
+            anchor="e",
+            bg=canvas_bg,
+            fg=text_color
         )
-        self.milidies_label_text.grid(row=1, column=0, padx=(20, 10), pady=15, sticky="e")
+        self.milidies_label_text.grid(row=1, column=0, padx=(15, 8), pady=5, sticky="e")
         
         self.milidies_label = tk.Label(
             self.time_frame,
-            text="000", 
+            text="000",
             font=get_monospace_font(48),
-            anchor="w"
+            anchor="w",
+            bg=canvas_bg,
+            fg=text_color
         )
-        self.milidies_label.grid(row=1, column=1, padx=(10, 20), pady=15, sticky="w")
+        self.milidies_label.grid(row=1, column=1, padx=(8, 15), pady=5, sticky="w")
         
         # MikroDies display
         self.mikrodies_label_text = tk.Label(
             self.time_frame,
             text="mikroDies:",
             font=("Arial", 14, "bold"),
-            anchor="e"
+            anchor="e",
+            bg=canvas_bg,
+            fg=text_color
         )
-        self.mikrodies_label_text.grid(row=2, column=0, padx=(20, 10), pady=15, sticky="e")
+        self.mikrodies_label_text.grid(row=2, column=0, padx=(15, 8), pady=5, sticky="e")
         
         self.mikrodies_label = tk.Label(
             self.time_frame,
             text="000",
             font=get_monospace_font(48),
-            anchor="w"
+            anchor="w",
+            bg=canvas_bg,
+            fg=text_color
         )
-        self.mikrodies_label.grid(row=2, column=1, padx=(10, 20), pady=15, sticky="w")
+        self.mikrodies_label.grid(row=2, column=1, padx=(8, 15), pady=5, sticky="w")
         
     def _create_standard_time(self):
-        """Create standard time display."""
+        """Create standard time display section."""
+        # Use canvas background for consistency
+        canvas_bg = self.gradient_canvas.cget('bg')
+        text_color = "#e2e8f0"  # Light gray text for dark background
+        
         # Add visual separator
-        separator_frame = tk.Frame(self.main_frame, height=2)
+        separator_frame = tk.Frame(self.main_frame, height=2, bg=canvas_bg, relief='flat', bd=0)
         separator_frame.pack(fill=tk.X, pady=20)
         separator_frame.pack_propagate(False)
         
-        self.std_time_frame = tk.Frame(self.main_frame)
-        self.std_time_frame.pack(fill=tk.X, pady=20)
+        self.std_time_frame = tk.Frame(self.main_frame, bg=canvas_bg, relief='flat', bd=0)
+        self.std_time_frame.pack(fill=tk.X, pady=5)
         
         # Label for standard time
         self.std_time_label_text = tk.Label(
             self.std_time_frame,
             text=tr("standard_time", self.current_language),
-            font=("Arial", 14)
+            font=("Arial", 14),
+            bg=canvas_bg,
+            fg=text_color
         )
         self.std_time_label_text.pack(pady=(0, 5))
         
         self.std_time_label = tk.Label(
             self.std_time_frame,
-            text="UTC 00:00:00 26/11/2025",
-            font=("Arial", 16, "bold")
+            text="Loading...",
+            font=("Arial", 16, "bold"),
+            bg=canvas_bg,
+            fg=text_color
         )
         self.std_time_label.pack()
         
     def _create_tab_buttons(self):
         """Create tab navigation buttons with icons."""
-        self.tab_frame = tk.Frame(self.main_frame)
-        self.tab_frame.pack(fill=tk.X, pady=20)
+        # Use canvas background for consistency
+        canvas_bg = self.gradient_canvas.cget('bg')
+        text_color = "#e2e8f0"  # Light gray text for dark background
+        
+        self.tab_frame = tk.Frame(self.main_frame, bg=canvas_bg, relief='flat', bd=0)
+        self.tab_frame.pack(fill=tk.X, pady=5)
         
         # Center the buttons
-        button_container = tk.Frame(self.tab_frame)
+        button_container = tk.Frame(self.tab_frame, bg=canvas_bg, relief='flat', bd=0)
         button_container.pack()
         
         self.tab_buttons = {}
@@ -374,6 +407,10 @@ class ModernNormalMode:
                 relief=tk.FLAT,
                 width=4,
                 height=2,
+                bg="#4a5568",  # Lighter gray for visibility
+                fg=text_color,
+                activebackground="#2d3748",  # Dark gray active
+                activeforeground=text_color,
                 command=lambda t=tab_id: self._switch_tab(t)
             )
             btn.pack(side=tk.LEFT, padx=8)
@@ -595,14 +632,21 @@ class ModernNormalMode:
     def _create_gradient_background(self, theme):
         """Create gradient background on canvas."""
         try:
+            print(f"📌 DEBUG: _create_gradient_background called")
+            print(f"📌 DEBUG: gradient_canvas exists: {hasattr(self, 'gradient_canvas')}")
+            if hasattr(self, 'gradient_canvas'):
+                print(f"📌 DEBUG: gradient_canvas is not None: {self.gradient_canvas is not None}")
+                
             if not self.gradient_canvas:
                 print("⚠️ No gradient canvas available")
                 return
                 
             print(f"🎨 Creating gradient background...")
             
-            # Clear existing gradient
+            # Clear existing gradient and set canvas background
             self.gradient_canvas.delete("gradient")
+            self.gradient_canvas.configure(bg=theme.bottom_color)
+            print(f"📋 Canvas background set to: {theme.bottom_color}")
             
             # Force canvas update and get dimensions
             self.gradient_canvas.update_idletasks()
@@ -656,21 +700,8 @@ class ModernNormalMode:
             print(f"✅ Gradient created: {lines_drawn} strips drawn")
                 
             # Make main frame transparent so gradient shows through
-            if hasattr(self, 'main_frame'):
-                self.main_frame.configure(bg="")
-                print("✅ Main frame made transparent")
-                
-        except Exception as e:
-            print(f"❌ Gradient background creation failed: {e}")
-            import traceback
-            traceback.print_exc()
-            # Fallback: set a solid color
-            try:
-                if self.gradient_canvas:
-                    self.gradient_canvas.configure(bg=theme.bottom_color)
-                    print(f"🎨 Fallback: Set solid background {theme.bottom_color}")
-            except:
-                print("❌ Even fallback failed")
+            # Note: Cannot use bg="" in Tkinter, frame stays transparent without bg setting
+            print("✅ Main frame inherits gradient canvas background")
                 
         except Exception as e:
             print(f"❌ Gradient background creation failed: {e}")
@@ -714,26 +745,23 @@ class ModernNormalMode:
         button_fg = "#000000" if bg_is_dark else "#ffffff"
         
         # Update title bar
-        self.title_bar.configure(bg="")
-        self.lang_frame.configure(bg="")
+        # Note: Cannot use bg='' for transparency in Tkinter
         self.lang_button.configure(bg=button_bg, fg=button_fg)
-        self.title_label.configure(bg="", fg=text_color)
+        self.title_label.configure(fg=text_color)
         self.close_button.configure(bg="#ff4444", fg="white")
-        self.activity_dot.configure(bg="", fg="#00ff00")
         
         # Update time display
         self._update_time_widget_colors(text_color)
         
         # Update standard time
-        self.std_time_frame.configure(bg="")
-        self.std_time_label_text.configure(bg="", fg=text_color)
-        self.std_time_label.configure(bg="", fg=text_color)
+        self.std_time_label_text.configure(fg=text_color)
+        self.std_time_label.configure(fg=text_color)
         
         # Update tab buttons and frames
-        self.tab_frame.configure(bg="")
         for child in self.tab_frame.winfo_children():
             if isinstance(child, tk.Frame):
-                child.configure(bg="")
+                # Skip bg configuration for transparency effect
+                pass
                 
         for button in self.tab_buttons.values():
             button.configure(bg=button_bg, fg=button_fg)
@@ -743,25 +771,23 @@ class ModernNormalMode:
         
     def _update_time_widget_colors(self, text_color):
         """Update time display widget colors."""
-        # Update time frame background
-        if hasattr(self, 'time_frame'):
-            self.time_frame.configure(bg="")
+        # Note: Skip bg='' for transparency in Tkinter
         
         # Update time labels with grid layout
         if hasattr(self, 'dies_label_text'):
-            self.dies_label_text.configure(bg="", fg=text_color)
+            self.dies_label_text.configure(fg=text_color)
         if hasattr(self, 'dies_label'):
-            self.dies_label.configure(bg="", fg=text_color)
+            self.dies_label.configure(fg=text_color)
             
         if hasattr(self, 'milidies_label_text'):
-            self.milidies_label_text.configure(bg="", fg=text_color)
+            self.milidies_label_text.configure(fg=text_color)
         if hasattr(self, 'milidies_label'):
-            self.milidies_label.configure(bg="", fg=text_color)
+            self.milidies_label.configure(fg=text_color)
             
         if hasattr(self, 'mikrodies_label_text'):
-            self.mikrodies_label_text.configure(bg="", fg=text_color)
+            self.mikrodies_label_text.configure(fg=text_color)
         if hasattr(self, 'mikrodies_label'):
-            self.mikrodies_label.configure(bg="", fg=text_color)
+            self.mikrodies_label.configure(fg=text_color)
             
     def _is_dark_color(self, hex_color):
         """Check if a color is dark (for contrast decisions)."""
@@ -790,6 +816,7 @@ class ModernNormalMode:
             
     def _update_display(self):
         """Update the astronomical time display."""
+        print("🔄 Updating display...")
         try:
             from ..core.equinox import compute_vernal_equinox
             
@@ -822,37 +849,50 @@ class ModernNormalMode:
             
             # Update standard time
             try:
-                # Get UTC time
-                utc_time = now_utc.strftime("UTC %H:%M:%S %d/%m/%Y")
-                
-                # Get local time with timezone
+                # Get local system time with timezone
                 local_now = datetime.now()
+                local_tz = local_now.astimezone()
                 
-                # Try to get proper timezone name
+                # Try to get timezone name first
                 try:
-                    # Get timezone info
-                    local_tz = local_now.astimezone()
                     tz_name = local_tz.tzinfo.tzname(local_tz)
                     
-                    # If timezone name is just UTC, try to get offset
-                    if tz_name == 'UTC':
-                        offset = local_tz.strftime('%z')
-                        if offset == '+0000':
-                            tz_name = 'UTC'
-                        else:
-                            tz_name = f'UTC{offset[:3]}:{offset[3:]}'
-                    
-                    local_time = local_now.strftime("%H:%M:%S %d/%m/%Y")
-                    
-                    # Only show local time if different from UTC
-                    if tz_name != 'UTC' or local_now.hour != now_utc.hour:
-                        std_time = f"{utc_time}\n{tz_name} {local_time}"
+                    # If we get a proper timezone name, use it
+                    if tz_name and tz_name not in ['UTC', '+00']:
+                        tz_display = tz_name
                     else:
-                        std_time = utc_time
-                        
+                        # Fallback to UTC offset format
+                        offset = local_tz.utcoffset()
+                        if offset:
+                            total_seconds = int(offset.total_seconds())
+                            hours = total_seconds // 3600
+                            minutes = abs(total_seconds % 3600) // 60
+                            
+                            # Format offset as UTC+/-HH:MM
+                            if hours >= 0:
+                                tz_display = f"UTC+{hours:02d}:{minutes:02d}"
+                            else:
+                                tz_display = f"UTC{hours:03d}:{minutes:02d}"
+                        else:
+                            tz_display = "UTC+00:00"
                 except:
-                    # Fallback to just UTC if timezone detection fails
-                    std_time = utc_time
+                    # If timezone name detection fails, use offset
+                    offset = local_tz.utcoffset()
+                    if offset:
+                        total_seconds = int(offset.total_seconds())
+                        hours = total_seconds // 3600
+                        minutes = abs(total_seconds % 3600) // 60
+                        
+                        if hours >= 0:
+                            tz_display = f"UTC+{hours:02d}:{minutes:02d}"
+                        else:
+                            tz_display = f"UTC{hours:03d}:{minutes:02d}"
+                    else:
+                        tz_display = "UTC+00:00"
+                
+                # Format system time
+                local_time = local_now.strftime("%H:%M:%S %d/%m/%Y")
+                std_time = f"{tz_display} {local_time}"
                 
                 if hasattr(self, 'std_time_label') and self.std_time_label:
                     self.std_time_label.config(text=std_time)
