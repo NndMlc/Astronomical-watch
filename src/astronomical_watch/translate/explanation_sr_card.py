@@ -36,7 +36,7 @@ Astronomski Sat koristi više naprednih astronomskih funkcija:
 - Dinamička promena boja interfejsa (gradient) u skladu sa položajem Sunca na nebu.
 - Prikaz odbrojavanja do sledeće prolećne ravnodnevnice, sa specijalnim efektima vatrometa u trenutku ekvinoksa.
 
-Univerzalno vreme — Astronomski Sat uporedo sa standardnim satm
+Univerzalno vreme — Astronomski Sat uporedo sa standardnim satom
 ----------------------------------------------------------
 Jedna od najvažnijih razlika je što Astronomski Sat prikazuje **isto vreme za sve na planeti**. Vreme je globalno definisano prema astronomskim ciklusima i ne zavisi od lokalnih vremenskih zona. Bez obzira gde se nalazite, na severu ili jugu, istoku ili zapadu, sat prikazuje identičan broj Dies i miliDies za svakog korisnika u istom trenutku. Standardni sat, s druge strane, koristi lokalno vreme i vremenske zone, pa se vreme razlikuje od mesta do mesta, dok Astronomski Sat ukida te razlike i stvara jedinstven univerzalni sistem.
 

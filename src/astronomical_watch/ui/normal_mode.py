@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from ..core.astro_time_core import AstroYear
 from .gradient import get_sky_theme, create_gradient_colors
 from .translations import TRANSLATIONS
+from .comparison_card import create_comparison_card
 
 # Detect available monospace font
 def get_monospace_font(size=14):
@@ -473,6 +474,17 @@ class ModernNormalMode:
         except tk.TclError:
             pass
             
+    def bring_to_front(self):
+        """Bring Normal Mode window to front temporarily."""
+        try:
+            self.master.lift()
+            self.master.focus_force()
+            self.master.attributes('-topmost', True)
+            self.master.after(100, lambda: self.master.attributes('-topmost', False))
+            print("🔝 Normal Mode brought to front")
+        except Exception as e:
+            print(f"⚠️ Could not bring Normal Mode to front: {e}")
+            
     def _change_language(self, lang_code):
         """Change the display language and update all UI text."""
         self.current_language = lang_code
@@ -538,6 +550,8 @@ class ModernNormalMode:
                 # Window exists and is valid, just bring to front
                 self.open_windows[tab_id].lift()
                 self.open_windows[tab_id].focus_force()
+                self.open_windows[tab_id].attributes('-topmost', True)
+                self.open_windows[tab_id].after(100, lambda: self.open_windows[tab_id].attributes('-topmost', False))
                 print(f"🔍 Brought existing {tab_id} window to front")
                 return
             except tk.TclError:
@@ -547,11 +561,43 @@ class ModernNormalMode:
         # Create new window
         if tab_id == "explanation":
             self._show_explanation()
+        elif tab_id == "comparison":
+            # Create functional comparison card
+            comparison_window = create_comparison_card(self.master, self.current_language)
+            
+            # Force window to appear above normal mode
+            comparison_window.transient(self.master)
+            comparison_window.lift()
+            comparison_window.focus_force()
+            comparison_window.wm_attributes("-topmost", True)
+            comparison_window.after(200, lambda: comparison_window.wm_attributes("-topmost", False))
+            
+            # Store reference to prevent duplicates
+            self.open_windows[tab_id] = comparison_window
+            
+            # Override the close behavior to update our tracking
+            original_destroy = comparison_window.destroy
+            def enhanced_destroy():
+                print(f"🗑️ Enhanced destroy called for {tab_id}")
+                self.open_windows[tab_id] = None
+                # Schedule button update after window is destroyed
+                self.master.after(10, self._highlight_active_tab)
+                self.master.after(50, self.bring_to_front)
+                original_destroy()
+            
+            comparison_window.destroy = enhanced_destroy
+            
         else:
             # Create simple window for other tabs
             tab_window = tk.Toplevel(self.master)
             tab_window.title(f"Astronomical Watch - {tab_id.title()}")
             tab_window.geometry("500x400")
+            
+            # Bring window to front with temporary topmost
+            tab_window.lift()
+            tab_window.focus_force()
+            tab_window.attributes('-topmost', True)
+            tab_window.after(100, lambda: tab_window.attributes('-topmost', False))
             
             # Store reference to prevent duplicates
             self.open_windows[tab_id] = tab_window
@@ -562,13 +608,13 @@ class ModernNormalMode:
                 tab_window.destroy()
                 # Update button states when window closes
                 self._highlight_active_tab()
+                # Bring Normal Mode to front when card closes
+                self.bring_to_front()
             
             tab_window.protocol("WM_DELETE_WINDOW", on_window_close)
             
             # Add content based on tab type
-            if tab_id == "comparison":
-                content = "Time comparison tools will be displayed here."
-            elif tab_id == "calculation":
+            if tab_id == "calculation":
                 content = "Astronomical calculations will be displayed here."
             elif tab_id == "settings":
                 content = "Settings and preferences will be displayed here."
@@ -592,6 +638,8 @@ class ModernNormalMode:
                 # Window exists and is valid, just bring to front
                 self.open_windows["explanation"].lift()
                 self.open_windows["explanation"].focus_force()
+                self.open_windows["explanation"].attributes('-topmost', True)
+                self.open_windows["explanation"].after(100, lambda: self.open_windows["explanation"].attributes('-topmost', False))
                 print(f"🔍 Brought existing explanation window to front")
                 return
             except tk.TclError:
@@ -613,6 +661,12 @@ class ModernNormalMode:
             explanation_window.geometry("700x600")
             explanation_window.minsize(600, 500)
             
+            # Bring window to front with temporary topmost
+            explanation_window.lift()
+            explanation_window.focus_force()
+            explanation_window.attributes('-topmost', True)
+            explanation_window.after(100, lambda: explanation_window.attributes('-topmost', False))
+            
             # Store reference to prevent duplicates
             self.open_windows["explanation"] = explanation_window
             
@@ -622,6 +676,8 @@ class ModernNormalMode:
                 explanation_window.destroy()
                 # Update button states when window closes
                 self._highlight_active_tab()
+                # Bring Normal Mode to front when card closes
+                self.bring_to_front()
             
             explanation_window.protocol("WM_DELETE_WINDOW", on_explanation_close)
             
@@ -676,9 +732,31 @@ class ModernNormalMode:
             label.pack(expand=True, pady=50)
             
     def _close_window(self):
-        """Close the normal mode window."""
+        """Close the normal mode window and all open cards."""
+        # First, close all open card windows
+        for tab_id, window in self.open_windows.items():
+            if window is not None:
+                try:
+                    window.destroy()
+                    print(f"✅ Closed {tab_id} card")
+                except:
+                    pass
+        
+        # Clear all window references
+        self.open_windows = {
+            "explanation": None,
+            "comparison": None,
+            "calculation": None,
+            "settings": None
+        }
+        
+        # Stop any updates
+        self.stop_updates()
+        
+        # Close Normal Mode and return to widget
         if self.on_back:
             self.on_back()
+            print("✅ Normal Mode closed, returned to widget")
             
     def _apply_theme(self):
         """Apply the astronomical theme with gradient background based on current time."""
