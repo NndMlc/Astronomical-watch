@@ -93,6 +93,14 @@ class ModernNormalMode:
         # Active tab
         self.current_tab = "explanation"
         
+        # Track open windows to prevent duplicates
+        self.open_windows = {
+            "explanation": None,
+            "comparison": None,
+            "calculation": None,
+            "settings": None
+        }
+        
         # Window configuration
         self.window_width = 480
         self.window_height = 550
@@ -419,6 +427,9 @@ class ModernNormalMode:
         # Note: Tab content will open in separate windows
         print("Tab buttons configured for external window opening")
         
+        # Initialize button states
+        self._highlight_active_tab()
+        
     def _setup_dragging(self):
         """Setup window dragging functionality."""
         self._drag_data = {"x": 0, "y": 0}
@@ -493,20 +504,47 @@ class ModernNormalMode:
             
     def _switch_tab(self, tab_id):
         """Open tab content in a new window."""
-        self.current_tab = tab_id
         self._highlight_active_tab()
         self._open_tab_window(tab_id)
         
     def _highlight_active_tab(self):
-        """Highlight the active tab button."""
+        """Highlight the active tab button and show window status."""
         for tab_id, button in self.tab_buttons.items():
-            if tab_id == self.current_tab:
-                button.config(bg="#5d5d5d", fg="#ffffff")
+            # Check if window is open for this tab
+            window_open = False
+            if self.open_windows[tab_id] is not None:
+                try:
+                    self.open_windows[tab_id].winfo_exists()
+                    window_open = True
+                except tk.TclError:
+                    # Window was closed, clear reference
+                    self.open_windows[tab_id] = None
+                    window_open = False
+            
+            if window_open:
+                # Window is open - show as inactive/disabled
+                button.config(bg="#2a2a2a", fg="#666666", state="disabled")
             else:
-                button.config(bg="#3d3d3d", fg="#cccccc")
+                # Normal state - use original colors
+                button.config(bg="#4a5568", fg="#e2e8f0", state="normal")
                 
     def _open_tab_window(self, tab_id):
         """Open tab content in a separate window."""
+        # Check if window is already open
+        if self.open_windows[tab_id] is not None:
+            # Window exists, check if it's still valid
+            try:
+                self.open_windows[tab_id].winfo_exists()
+                # Window exists and is valid, just bring to front
+                self.open_windows[tab_id].lift()
+                self.open_windows[tab_id].focus_force()
+                print(f"🔍 Brought existing {tab_id} window to front")
+                return
+            except tk.TclError:
+                # Window was closed, clear reference
+                self.open_windows[tab_id] = None
+        
+        # Create new window
         if tab_id == "explanation":
             self._show_explanation()
         else:
@@ -514,6 +552,18 @@ class ModernNormalMode:
             tab_window = tk.Toplevel(self.master)
             tab_window.title(f"Astronomical Watch - {tab_id.title()}")
             tab_window.geometry("500x400")
+            
+            # Store reference to prevent duplicates
+            self.open_windows[tab_id] = tab_window
+            
+            # Add cleanup when window is closed
+            def on_window_close():
+                self.open_windows[tab_id] = None
+                tab_window.destroy()
+                # Update button states when window closes
+                self._highlight_active_tab()
+            
+            tab_window.protocol("WM_DELETE_WINDOW", on_window_close)
             
             # Add content based on tab type
             if tab_id == "comparison":
@@ -528,10 +578,26 @@ class ModernNormalMode:
             label = tk.Label(tab_window, text=content, font=("Arial", 12), wraplength=400)
             label.pack(expand=True, pady=50)
             
-        print(f"🗂️ Opened {tab_id} tab")
+            print(f"🗂️ Opened {tab_id} tab")
+            
+        # Update button states after opening window
+        self._highlight_active_tab()
         
     def _show_explanation(self):
         """Show explanation window with content based on current language."""
+        # Check if explanation window is already open
+        if self.open_windows["explanation"] is not None:
+            try:
+                self.open_windows["explanation"].winfo_exists()
+                # Window exists and is valid, just bring to front
+                self.open_windows["explanation"].lift()
+                self.open_windows["explanation"].focus_force()
+                print(f"🔍 Brought existing explanation window to front")
+                return
+            except tk.TclError:
+                # Window was closed, clear reference
+                self.open_windows["explanation"] = None
+        
         try:
             # Import explanation content based on current language
             explanation_module = f"..translate.explanation_{self.current_language}_card"
@@ -546,6 +612,18 @@ class ModernNormalMode:
             explanation_window.title(f"{tr('explanation', self.current_language)} — {tr('title', self.current_language)}")
             explanation_window.geometry("700x600")
             explanation_window.minsize(600, 500)
+            
+            # Store reference to prevent duplicates
+            self.open_windows["explanation"] = explanation_window
+            
+            # Add cleanup when window is closed
+            def on_explanation_close():
+                self.open_windows["explanation"] = None
+                explanation_window.destroy()
+                # Update button states when window closes
+                self._highlight_active_tab()
+            
+            explanation_window.protocol("WM_DELETE_WINDOW", on_explanation_close)
             
             # Apply theme to explanation window
             theme = get_sky_theme()
@@ -578,6 +656,9 @@ class ModernNormalMode:
             text_widget.config(state=tk.DISABLED)
             
             print(f"📖 Opened explanation in {self.current_language}")
+            
+            # Update button states after opening window
+            self._highlight_active_tab()
             
         except Exception as e:
             print(f"❌ Could not load explanation for {self.current_language}: {e}")
