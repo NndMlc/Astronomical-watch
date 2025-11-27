@@ -264,63 +264,64 @@ class ModernNormalMode:
         self.title_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
     def _create_time_display(self):
-        """Create the main time display area."""
+        """Create the main time display area with proper grid layout."""
         self.time_frame = tk.Frame(self.main_frame)
         self.time_frame.pack(fill=tk.X, pady=20)
         
-        # Dies display
-        dies_container = tk.Frame(self.time_frame)
-        dies_container.pack(fill=tk.X, pady=15)
+        # Configure grid columns for consistent layout
+        self.time_frame.grid_columnconfigure(0, weight=1, minsize=120)  # Label column
+        self.time_frame.grid_columnconfigure(1, weight=2, minsize=200)  # Value column
         
+        # Dies display
         self.dies_label_text = tk.Label(
-            dies_container,
+            self.time_frame,
             text="Dies:",
-            font=("Arial", 12, "bold")
+            font=("Arial", 14, "bold"),
+            anchor="e"
         )
-        self.dies_label_text.pack(side=tk.LEFT, padx=(50, 0))
+        self.dies_label_text.grid(row=0, column=0, padx=(20, 10), pady=15, sticky="e")
         
         self.dies_label = tk.Label(
-            dies_container,
+            self.time_frame,
             text="000",
-            font=get_monospace_font(52)
+            font=get_monospace_font(48),
+            anchor="w"
         )
-        self.dies_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        self.dies_label.grid(row=0, column=1, padx=(10, 20), pady=15, sticky="w")
         
         # MiliDies display
-        milidies_container = tk.Frame(self.time_frame)
-        milidies_container.pack(fill=tk.X, pady=15)
-        
         self.milidies_label_text = tk.Label(
-            milidies_container,
+            self.time_frame,
             text="miliDies:",
-            font=("Arial", 12, "bold")
+            font=("Arial", 14, "bold"),
+            anchor="e"
         )
-        self.milidies_label_text.pack(side=tk.LEFT, padx=(50, 0))
+        self.milidies_label_text.grid(row=1, column=0, padx=(20, 10), pady=15, sticky="e")
         
         self.milidies_label = tk.Label(
-            milidies_container,
+            self.time_frame,
             text="000", 
-            font=get_monospace_font(52)
+            font=get_monospace_font(48),
+            anchor="w"
         )
-        self.milidies_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        self.milidies_label.grid(row=1, column=1, padx=(10, 20), pady=15, sticky="w")
         
         # MikroDies display
-        mikrodies_container = tk.Frame(self.time_frame)
-        mikrodies_container.pack(fill=tk.X, pady=15)
-        
         self.mikrodies_label_text = tk.Label(
-            mikrodies_container,
+            self.time_frame,
             text="mikroDies:",
-            font=("Arial", 12, "bold") 
+            font=("Arial", 14, "bold"),
+            anchor="e"
         )
-        self.mikrodies_label_text.pack(side=tk.LEFT, padx=(50, 0))
+        self.mikrodies_label_text.grid(row=2, column=0, padx=(20, 10), pady=15, sticky="e")
         
         self.mikrodies_label = tk.Label(
-            mikrodies_container,
+            self.time_frame,
             text="000",
-            font=get_monospace_font(52)
+            font=get_monospace_font(48),
+            anchor="w"
         )
-        self.mikrodies_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        self.mikrodies_label.grid(row=2, column=1, padx=(10, 20), pady=15, sticky="w")
         
     def _create_standard_time(self):
         """Create standard time display."""
@@ -603,58 +604,73 @@ class ModernNormalMode:
             # Clear existing gradient
             self.gradient_canvas.delete("gradient")
             
-            # Multiple attempts to get proper canvas dimensions
-            attempts = 0
-            canvas_width = canvas_height = 0
+            # Force canvas update and get dimensions
+            self.gradient_canvas.update_idletasks()
+            self.master.update_idletasks()
             
-            while (canvas_width <= 1 or canvas_height <= 1) and attempts < 3:
-                self.gradient_canvas.update_idletasks()
-                self.master.update_idletasks()
-                
-                canvas_width = self.gradient_canvas.winfo_width()
-                canvas_height = self.gradient_canvas.winfo_height()
-                
-                print(f"📐 Attempt {attempts + 1}: Canvas size {canvas_width}x{canvas_height}")
-                
-                if canvas_width <= 1 or canvas_height <= 1:
-                    canvas_width = self.window_width
-                    canvas_height = self.window_height
-                    print(f"📐 Using fallback dimensions: {canvas_width}x{canvas_height}")
-                    break
-                    
-                attempts += 1
+            canvas_width = self.gradient_canvas.winfo_width()
+            canvas_height = self.gradient_canvas.winfo_height()
+            
+            # If canvas not properly sized yet, use window dimensions
+            if canvas_width <= 1 or canvas_height <= 1:
+                canvas_width = self.window_width
+                canvas_height = self.window_height
+                print(f"📐 Using window dimensions: {canvas_width}x{canvas_height}")
+            else:
+                print(f"📐 Canvas size: {canvas_width}x{canvas_height}")
             
             if canvas_width <= 1 or canvas_height <= 1:
-                print("❌ Could not get valid canvas dimensions")
-                # Fallback to setting background color
+                print("❌ Could not get valid canvas dimensions, using solid color")
                 self.gradient_canvas.configure(bg=theme.bottom_color)
                 return
             
-            # Create gradient colors
-            gradient_colors = create_gradient_colors(theme, steps=canvas_height)
+            # Create gradient colors with adequate steps
+            gradient_steps = max(canvas_height, 100)  # At least 100 steps for smooth gradient
+            gradient_colors = create_gradient_colors(theme, steps=gradient_steps)
             print(f"🌈 Creating gradient: {len(gradient_colors)} colors for {canvas_width}x{canvas_height}")
             
             # Draw gradient as filled rectangles for seamless appearance
             lines_drawn = 0
+            step_height = canvas_height / len(gradient_colors)
+            
             for i, color in enumerate(gradient_colors):
-                if i < canvas_height:
-                    try:
-                        # Use filled rectangles instead of lines to avoid gaps
+                try:
+                    # Calculate y position for this color strip
+                    y_start = int(i * step_height)
+                    y_end = int((i + 1) * step_height)
+                    
+                    # Ensure we don't exceed canvas bounds
+                    if y_start < canvas_height:
+                        y_end = min(y_end, canvas_height)
+                        
+                        # Use filled rectangles for smooth gradient
                         self.gradient_canvas.create_rectangle(
-                            0, i, canvas_width, i + 1,
+                            0, y_start, canvas_width, y_end,
                             fill=color, outline=color, width=0, tags="gradient"
                         )
                         lines_drawn += 1
-                    except Exception as line_error:
-                        print(f"⚠️ Error drawing rectangle {i}: {line_error}")
-                        break
+                except Exception as line_error:
+                    print(f"⚠️ Error drawing rectangle {i}: {line_error}")
+                    break
                 
-            print(f"✅ Gradient created: {lines_drawn} lines drawn")
+            print(f"✅ Gradient created: {lines_drawn} strips drawn")
                 
-            # Make main frame transparent
+            # Make main frame transparent so gradient shows through
             if hasattr(self, 'main_frame'):
                 self.main_frame.configure(bg="")
                 print("✅ Main frame made transparent")
+                
+        except Exception as e:
+            print(f"❌ Gradient background creation failed: {e}")
+            import traceback
+            traceback.print_exc()
+            # Fallback: set a solid color
+            try:
+                if self.gradient_canvas:
+                    self.gradient_canvas.configure(bg=theme.bottom_color)
+                    print(f"🎨 Fallback: Set solid background {theme.bottom_color}")
+            except:
+                print("❌ Even fallback failed")
                 
         except Exception as e:
             print(f"❌ Gradient background creation failed: {e}")
@@ -727,17 +743,11 @@ class ModernNormalMode:
         
     def _update_time_widget_colors(self, text_color):
         """Update time display widget colors."""
-        # Update frames
-        for frame_name in ['time_frame']:
-            if hasattr(self, frame_name):
-                getattr(self, frame_name).configure(bg="")
+        # Update time frame background
+        if hasattr(self, 'time_frame'):
+            self.time_frame.configure(bg="")
         
-        # Update all child frames (dies, milidies, mikrodies frames)
-        for child in self.time_frame.winfo_children():
-            if isinstance(child, tk.Frame):
-                child.configure(bg="")
-                
-        # Update labels
+        # Update time labels with grid layout
         if hasattr(self, 'dies_label_text'):
             self.dies_label_text.configure(bg="", fg=text_color)
         if hasattr(self, 'dies_label'):

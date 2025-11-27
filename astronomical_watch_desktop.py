@@ -21,7 +21,11 @@ def main():
         
         icon_path = os.path.join(current_dir, "icons", "astronomical_watch.ico")
         if os.path.exists(icon_path):
-            root.iconbitmap(icon_path)
+            try:
+                root.iconbitmap(icon_path)
+            except Exception as e:
+                print(f"Could not load icon: {e}")
+                # Continue without icon
         
         from astronomical_watch.ui.main import main as ui_main
         ui_main()
