@@ -1,6 +1,7 @@
 from tkinter import Toplevel, Label, Frame, Entry, Button
 from datetime import datetime, timezone, timedelta
-from src.astronomical_watch.core.astro_time_core import AstroYear
+from ..core.astro_time_core import AstroYear
+from ..core.equinox import compute_vernal_equinox
 from .translations import tr
 
 def milidies_to_hm(milidies):
@@ -91,13 +92,17 @@ class ComparisonCard(Toplevel):
             dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
             dt = dt.replace(tzinfo=timezone.utc)
             
-            # Use hardcoded equinox values (same as widget/normal_mode)
-            current_equinox = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
-            next_equinox = datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
+            # Use precise equinox calculation
+            current_year = dt.year
+            equinox = compute_vernal_equinox(current_year)
             
-            astro_year = AstroYear(current_equinox, next_equinox)
+            # Check if we need previous or next year's equinox
+            if dt < equinox:
+                equinox = compute_vernal_equinox(current_year - 1)
+            
+            astro_year = AstroYear(equinox)
             reading = astro_year.reading(dt)
-            dies = reading.dies  # Now using dies field from core
+            dies = reading.dies
             milidies = reading.miliDies
             
             self.std_result.config(text=tr("astro_result", self.lang, day=dies, milidies=milidies))
@@ -109,15 +114,39 @@ class ComparisonCard(Toplevel):
             day = int(self.astro_day_entry.get())
             milidies = int(self.astro_milidies_entry.get())
             
-            # Use hardcoded equinox values
-            current_equinox = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
-            next_equinox = datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
+            # Use current year's equinox
+            now = datetime.now(timezone.utc)
+            current_year = now.year
+            current_equinox = compute_vernal_equinox(current_year)
             
-            # Calculate target datetime from astronomical time
-            # dies days after equinox + milidies fraction of day
-            target_date = current_equinox + timedelta(days=day)
-            milidies_seconds = milidies * 86.4  # 1 miliDies = 86.4 seconds
-            std_dt = target_date + timedelta(seconds=milidies_seconds)
+            # Check if we're before this year's equinox
+            if now < current_equinox:
+                current_equinox = compute_vernal_equinox(current_year - 1)
+            
+            # Use AstroYear's built-in conversion method for accuracy
+            astro_year = AstroYear(current_equinox)
+            
+            # Special handling for Dies 0 to improve precision
+            # Dies 0 miliDies are counted from the last noon before equinox
+            if day == 0:
+                # Calculate last noon before equinox
+                from ..core.astro_time_core import NOON_UTC_HOUR, NOON_UTC_MINUTE, NOON_UTC_SECOND
+                eq_date = current_equinox.date()
+                noon_candidate = datetime(
+                    eq_date.year, eq_date.month, eq_date.day,
+                    NOON_UTC_HOUR, NOON_UTC_MINUTE, NOON_UTC_SECOND,
+                    tzinfo=timezone.utc
+                )
+                if noon_candidate > current_equinox:
+                    last_noon_before_eq = noon_candidate - timedelta(days=1)
+                else:
+                    last_noon_before_eq = noon_candidate
+                
+                # Calculate from that noon
+                std_dt = last_noon_before_eq + timedelta(seconds=milidies * 86.4)
+            else:
+                # For Dies >= 1, use AstroYear's method
+                std_dt = astro_year.approximate_utc_from_day_miliDies(day, milidies)
             
             self.astro_result.config(
                 text=tr("std_result", self.lang, std_time=std_dt.strftime('%Y-%m-%d %H:%M:%S'))
@@ -152,12 +181,18 @@ class ComparisonCard(Toplevel):
         try:
             now = datetime.now(timezone.utc)
             
-            # Use hardcoded equinox values
-            current_equinox = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
-            next_equinox = datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
+            # Use precise equinox calculation
+            current_year = now.year
+            current_equinox = compute_vernal_equinox(current_year)
+            next_equinox = compute_vernal_equinox(current_year + 1)
+            
+            # Check if we're before this year's equinox
+            if now < current_equinox:
+                current_equinox = compute_vernal_equinox(current_year - 1)
+                next_equinox = compute_vernal_equinox(current_year)
             
             # Get current astronomical time
-            astro_year = AstroYear(current_equinox, next_equinox)
+            astro_year = AstroYear(current_equinox)
             current_reading = astro_year.reading(now)
             
             # Calculate time until next equinox
@@ -169,13 +204,13 @@ class ComparisonCard(Toplevel):
                 secs = delta.seconds % 60
                 
                 # Calculate remaining astronomical time in current year
-                # Total year length in Dies (approximate)
                 year_length_seconds = (next_equinox - current_equinox).total_seconds()
-                year_length_milidies = int(year_length_seconds / 86.4)
-                year_length_dies = year_length_milidies // 1000
+                year_length_dies = year_length_seconds / 86400.0  # Precise Dies calculation
                 
-                remaining_dies = year_length_dies - current_reading.dies
+                remaining_dies = int(year_length_dies) - current_reading.dies
                 remaining_milidies = 1000 - current_reading.miliDies
+                
+                # Adjust if we're at exact boundary
                 if remaining_milidies == 1000:
                     remaining_milidies = 0
                     remaining_dies += 1
