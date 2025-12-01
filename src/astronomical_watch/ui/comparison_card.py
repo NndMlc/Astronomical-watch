@@ -1,5 +1,6 @@
 from tkinter import Toplevel, Label, Frame, Entry, Button
 from datetime import datetime, timezone, timedelta
+import time
 from ..core.astro_time_core import AstroYear
 from ..core.equinox import compute_vernal_equinox
 from .translations import tr
@@ -21,15 +22,64 @@ class ComparisonCard(Toplevel):
         super().__init__(master)
         self.lang = lang
         self.title(f"{tr('comparison', self.lang)} — {tr('title', self.lang)}")
-        self.geometry("510x560")
-        self.minsize(470, 400)
+        self.geometry("510x600")
+        self.minsize(470, 450)
 
+        # Detect system timezone
+        self.local_tz = datetime.now().astimezone().tzinfo
+        self.tz_name = self._get_timezone_name()
+        
         self._make_widgets()
         self._update_equinox_countdown()
+    
+    def _get_timezone_name(self):
+        """Get full timezone name from system"""
+        try:
+            # Try to get IANA timezone name from TZ environment
+            import os
+            if 'TZ' in os.environ and os.environ['TZ']:
+                return os.environ['TZ']
+            
+            # Fallback to UTC offset format
+            now = datetime.now()
+            local = now.astimezone()
+            offset = local.strftime('%z')
+            # Format: UTC+01:00
+            if offset:
+                sign = '+' if offset[0] == '+' else '-'
+                hours = offset[1:3]
+                minutes = offset[3:5]
+                return f"UTC{sign}{hours}:{minutes}"
+            return "UTC+00:00"
+        except:
+            return "UTC+00:00"
 
     def _make_widgets(self):
         font_label = ("Arial", 11)
         font_entry = ("Arial", 11)
+        font_info = ("Arial", 10, "italic")
+        
+        # Timezone information at the top
+        tz_frame = Frame(self, bg="#e8f4f8", relief="solid", borderwidth=1)
+        tz_frame.pack(pady=(12, 8), padx=12, fill="x")
+        
+        tz_label = Label(
+            tz_frame, 
+            text=f"⏰ {tr('timezone_label', self.lang)}: {self.tz_name}",
+            font=("Arial", 11, "bold"),
+            bg="#e8f4f8",
+            fg="#1a5490"
+        )
+        tz_label.pack(pady=6)
+        
+        tz_note = Label(
+            tz_frame,
+            text=tr('timezone_note', self.lang),
+            font=font_info,
+            bg="#e8f4f8",
+            fg="#555555"
+        )
+        tz_note.pack(pady=(0, 6))
 
         # Standard → Astronomical
         Label(self, text=tr("std_to_astro_label", self.lang), font=font_label).pack(pady=(16, 2))
@@ -90,18 +140,21 @@ class ComparisonCard(Toplevel):
         try:
             dt_str = self.std_entry.get().strip()
             dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
-            dt = dt.replace(tzinfo=timezone.utc)
+            # Interpret input as local time, not UTC
+            dt = dt.replace(tzinfo=self.local_tz)
+            # Convert to UTC for astronomical calculations
+            dt_utc = dt.astimezone(timezone.utc)
             
             # Use precise equinox calculation
-            current_year = dt.year
+            current_year = dt_utc.year
             equinox = compute_vernal_equinox(current_year)
             
             # Check if we need previous or next year's equinox
-            if dt < equinox:
+            if dt_utc < equinox:
                 equinox = compute_vernal_equinox(current_year - 1)
             
             astro_year = AstroYear(equinox)
-            reading = astro_year.reading(dt)
+            reading = astro_year.reading(dt_utc)
             dies = reading.dies
             milidies = reading.miliDies
             
@@ -148,8 +201,11 @@ class ComparisonCard(Toplevel):
                 # For Dies >= 1, use AstroYear's method
                 std_dt = astro_year.approximate_utc_from_day_miliDies(day, milidies)
             
+            # Convert to local timezone for display
+            std_dt_local = std_dt.astimezone(self.local_tz)
+            
             self.astro_result.config(
-                text=tr("std_result", self.lang, std_time=std_dt.strftime('%Y-%m-%d %H:%M:%S'))
+                text=tr("std_result", self.lang, std_time=std_dt_local.strftime('%Y-%m-%d %H:%M:%S %Z'))
             )
         except Exception as e:
             self.astro_result.config(text=tr("error_text", self.lang, error=str(e)))

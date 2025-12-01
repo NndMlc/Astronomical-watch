@@ -1012,23 +1012,27 @@ class ModernNormalMode:
                 local_now = datetime.now()
                 local_tz = local_now.astimezone()
                 
-                # Always use UTC offset format (UTC+/-HH:MM)
-                offset = local_tz.utcoffset()
-                if offset:
-                    total_seconds = int(offset.total_seconds())
-                    hours = total_seconds // 3600
-                    minutes = abs(total_seconds % 3600) // 60
-                    
-                    # Format offset as UTC+/-HH:MM
-                    if hours >= 0:
-                        tz_display = f"UTC+{hours:02d}:{minutes:02d}"
-                    else:
-                        tz_display = f"UTC{hours:03d}:{minutes:02d}"
+                # Get timezone name - prefer TZ environment variable
+                if 'TZ' in os.environ:
+                    tz_display = os.environ['TZ']
                 else:
-                    tz_display = "UTC+00:00"
+                    # Fallback to UTC offset format (UTC+/-HH:MM)
+                    offset = local_tz.utcoffset()
+                    if offset:
+                        total_seconds = int(offset.total_seconds())
+                        hours = total_seconds // 3600
+                        minutes = abs(total_seconds % 3600) // 60
+                        
+                        # Format offset as UTC+/-HH:MM
+                        if hours >= 0:
+                            tz_display = f"UTC+{hours:02d}:{minutes:02d}"
+                        else:
+                            tz_display = f"UTC{hours:03d}:{minutes:02d}"
+                    else:
+                        tz_display = "UTC+00:00"
                 
                 # Format system time
-                local_time = local_now.strftime("%H:%M:%S %d/%m/%Y")
+                local_time = local_tz.strftime("%H:%M:%S %d/%m/%Y")
                 std_time = f"{tz_display} {local_time}"
                 
                 if hasattr(self, 'std_time_label') and self.std_time_label:
