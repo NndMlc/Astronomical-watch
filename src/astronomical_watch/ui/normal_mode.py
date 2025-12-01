@@ -9,6 +9,8 @@ Main content shows astronomical time values in hierarchical layout.
 import tkinter as tk
 from tkinter import ttk, font as tk_font
 import math
+import os
+import random
 from datetime import datetime, timezone
 from ..core.astro_time_core import AstroYear
 from .gradient import get_sky_theme, create_gradient_colors
@@ -90,6 +92,11 @@ class ModernNormalMode:
         
         # Update timer
         self._update_job = None
+        
+        # Fireworks state
+        self.fireworks_active = False
+        self.fireworks_particles = []
+        self.fireworks_job = None
         
         # Active tab
         self.current_tab = "explanation"
@@ -386,6 +393,16 @@ class ModernNormalMode:
         )
         self.std_time_label.pack()
         
+        # Countdown label (pokazuje se samo kad je < 11 dies)
+        self.countdown_label = tk.Label(
+            self.std_time_frame,  # Koristimo std_time_frame koji koristi pack()
+            text="",
+            font=("Arial", 11, "italic"),
+            bg=canvas_bg,
+            fg="#FFD700"  # Gold color
+        )
+        self.countdown_label.pack(pady=(5, 0))
+        
     def _create_tab_buttons(self):
         """Create tab navigation buttons with icons."""
         # Use canvas background for consistency
@@ -575,15 +592,34 @@ class ModernNormalMode:
             # Store reference to prevent duplicates
             self.open_windows[tab_id] = comparison_window
             
-            # Override the close behavior to update our tracking
+            # Set up proper cleanup when window is closed (any method)
+            def on_comparison_close():
+                print(f"🗑️ Comparison window closing...")
+                if self.open_windows[tab_id] is not None:
+                    self.open_windows[tab_id] = None
+                    print(f"✅ Closed {tab_id} card")
+                    # Schedule button update after window is destroyed
+                    self.master.after(10, self._highlight_active_tab)
+                    self.master.after(50, self.bring_to_front)
+                comparison_window.destroy()
+            
+            # Override both destroy and WM_DELETE_WINDOW protocol
+            comparison_window.protocol("WM_DELETE_WINDOW", on_comparison_close)
+            
+            # Also override destroy method for close button
             original_destroy = comparison_window.destroy
             def enhanced_destroy():
                 print(f"🗑️ Enhanced destroy called for {tab_id}")
-                self.open_windows[tab_id] = None
-                # Schedule button update after window is destroyed
-                self.master.after(10, self._highlight_active_tab)
-                self.master.after(50, self.bring_to_front)
-                original_destroy()
+                if self.open_windows[tab_id] is not None:
+                    self.open_windows[tab_id] = None
+                    print(f"✅ Closed {tab_id} card (via destroy)")
+                    # Schedule button update after window is destroyed
+                    self.master.after(10, self._highlight_active_tab)
+                    self.master.after(50, self.bring_to_front)
+                try:
+                    original_destroy()
+                except:
+                    pass  # Already destroyed
             
             comparison_window.destroy = enhanced_destroy
             
@@ -982,10 +1018,12 @@ class ModernNormalMode:
             now_utc = datetime.now(timezone.utc)
             current_year = now_utc.year
             equinox = compute_vernal_equinox(current_year)
+            next_equinox = compute_vernal_equinox(current_year + 1)
             
             # Check if we need next year's equinox
             if now_utc < equinox:
                 equinox = compute_vernal_equinox(current_year - 1)
+                next_equinox = compute_vernal_equinox(current_year)
                 
             astro_year = AstroYear(equinox)
             reading = astro_year.reading(now_utc)
@@ -995,6 +1033,17 @@ class ModernNormalMode:
             self.miliDies = reading.miliDies
             mikroDies = reading.mikroDies
             
+            # Calculate countdown to next equinox
+            year_length_seconds = (next_equinox - equinox).total_seconds()
+            year_length_dies = int(year_length_seconds / 86400.0)
+            
+            remaining_dies = year_length_dies - self.dies
+            remaining_milidies = 1000 - self.miliDies
+            
+            if remaining_milidies == 1000:
+                remaining_milidies = 0
+                remaining_dies += 1
+            
             # Update display labels (with error checking)
             try:
                 if hasattr(self, 'dies_label') and self.dies_label:
@@ -1003,6 +1052,15 @@ class ModernNormalMode:
                     self.milidies_label.config(text=f"{self.miliDies:03d}")
                 if hasattr(self, 'mikrodies_label') and self.mikrodies_label:
                     self.mikrodies_label.config(text=f"{mikroDies:03d}")
+                    
+                # Update countdown (show only if < 11 dies)
+                if hasattr(self, 'countdown_label') and self.countdown_label:
+                    if remaining_dies < 11:
+                        countdown_text = tr("countdown_label", self.current_language, 
+                                          dies=remaining_dies, milidies=remaining_milidies)
+                        self.countdown_label.config(text=countdown_text)
+                    else:
+                        self.countdown_label.config(text="")
             except Exception as e:
                 print(f"⚠️ Could not update time labels: {e}")
             
@@ -1046,6 +1104,12 @@ class ModernNormalMode:
             except Exception as e:
                 print(f"⚠️ Could not update gradient theme: {e}")
             
+            # Check for equinox moment (Dies 000, miliDies 000-005)
+            if self.dies == 0 and self.miliDies < 5 and not self.fireworks_active:
+                self._start_fireworks()
+            elif self.dies > 0 and self.fireworks_active:
+                self._stop_fireworks()
+            
             print(f"🕐 Modern Normal Mode Updated: {self.dies:03d}.{self.miliDies:03d}.{mikroDies:03d}")
             
         except Exception as e:
@@ -1081,6 +1145,97 @@ class ModernNormalMode:
             self.current_theme = new_theme
             self._create_gradient_background(new_theme)
             self._update_widget_colors(new_theme)
+    
+    def _start_fireworks(self):
+        """Start fireworks animation for equinox celebration"""
+        print("🎆 Starting fireworks animation in Normal Mode!")
+        self.fireworks_active = True
+        self.fireworks_particles = []
+        self._animate_fireworks()
+    
+    def _stop_fireworks(self):
+        """Stop fireworks animation"""
+        if self.fireworks_job:
+            self.master.after_cancel(self.fireworks_job)
+            self.fireworks_job = None
+        self.fireworks_active = False
+        self.fireworks_particles = []
+    
+    def _create_firework(self):
+        """Create a new firework burst"""
+        if not hasattr(self, 'gradient_canvas') or not self.gradient_canvas:
+            return
+        
+        canvas_width = self.gradient_canvas.winfo_width()
+        canvas_height = self.gradient_canvas.winfo_height()
+        
+        # Random starting position
+        x = random.randint(50, canvas_width - 50)
+        y = random.randint(50, canvas_height - 100)
+        
+        # Random color
+        colors = ["#FFD700", "#FF6347", "#00FF00", "#00BFFF", "#FF69B4", "#FFA500", "#FFFF00", "#FFFFFF"]
+        color = random.choice(colors)
+        
+        # Create particles radiating outward
+        num_particles = 25
+        for i in range(num_particles):
+            angle = (2 * math.pi * i) / num_particles
+            speed = random.uniform(2.0, 4.5)
+            vx = math.cos(angle) * speed
+            vy = math.sin(angle) * speed
+            
+            self.fireworks_particles.append({
+                'x': x,
+                'y': y,
+                'vx': vx,
+                'vy': vy,
+                'color': color,
+                'life': 40,  # frames
+                'size': 4
+            })
+    
+    def _animate_fireworks(self):
+        """Animate fireworks particles"""
+        if not self.fireworks_active or not hasattr(self, 'gradient_canvas'):
+            return
+        
+        # Create new firework occasionally
+        if random.random() < 0.2:  # 20% chance per frame
+            self._create_firework()
+        
+        # Update and draw particles
+        canvas_width = self.gradient_canvas.winfo_width()
+        canvas_height = self.gradient_canvas.winfo_height()
+        
+        # Update particles
+        for particle in self.fireworks_particles[:]:
+            particle['x'] += particle['vx']
+            particle['y'] += particle['vy']
+            particle['vy'] += 0.2  # Gravity
+            particle['life'] -= 1
+            
+            # Remove dead particles
+            if particle['life'] <= 0 or particle['y'] > canvas_height:
+                self.fireworks_particles.remove(particle)
+        
+        # Draw fireworks particles on gradient canvas
+        # Remove old firework particles
+        self.gradient_canvas.delete("firework")
+        
+        for particle in self.fireworks_particles:
+            alpha = particle['life'] / 40.0
+            size = max(2, int(particle['size'] * alpha))
+            self.gradient_canvas.create_oval(
+                particle['x'] - size, particle['y'] - size,
+                particle['x'] + size, particle['y'] + size,
+                fill=particle['color'],
+                outline="",
+                tags="firework"
+            )
+        
+        # Schedule next frame
+        self.fireworks_job = self.master.after(50, self._animate_fireworks)  # ~20 FPS
 
 
 def create_normal_mode(parent, on_back=None, on_language=None):

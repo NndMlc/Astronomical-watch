@@ -5,6 +5,8 @@ from __future__ import annotations
 import tkinter as tk
 from datetime import datetime, timezone
 from typing import Optional, Callable
+import random
+import math
 from .gradient import get_sky_theme
 from .translations import tr
 
@@ -45,6 +47,11 @@ class AstronomicalWidgetMode:
         
         # Update job reference
         self.update_job = None
+        
+        # Fireworks state
+        self.fireworks_active = False
+        self.fireworks_particles = []
+        self.fireworks_job = None
         
         self._create_widgets()
         self._apply_theme()
@@ -241,6 +248,33 @@ class AstronomicalWidgetMode:
                 anchor="center"
             )
             
+            # Show countdown if < 11 dies remaining
+            if hasattr(self, 'remaining_dies') and self.remaining_dies < 11:
+                countdown_str = tr("countdown_label", self.current_language, 
+                                  dies=self.remaining_dies, milidies=self.remaining_milidies)
+                countdown_font = ("Arial", 8)
+                y_countdown = 38
+                
+                # Draw countdown with outline
+                for dx in [-1, 0, 1]:
+                    for dy in [-1, 0, 1]:
+                        if dx != 0 or dy != 0:
+                            self.canvas.create_text(
+                                x_center + dx, y_countdown + dy,
+                                text=countdown_str,
+                                font=countdown_font,
+                                fill="black",
+                                anchor="center"
+                            )
+                
+                self.canvas.create_text(
+                    x_center, y_countdown,
+                    text=countdown_str,
+                    font=countdown_font,
+                    fill="#FFD700",  # Gold color for countdown
+                    anchor="center"
+                )
+            
             # Draw progress bar in lower part
             self._draw_progress_bar()
             
@@ -282,21 +316,46 @@ class AstronomicalWidgetMode:
     def _update_display(self):
         """Update the astronomical time display."""
         try:
+            from ..core.equinox import compute_vernal_equinox
+            
             # Get current time
             now_utc = datetime.now(timezone.utc)
             
-            # Use hardcoded equinox values for now
-            current_equinox = datetime(2025, 3, 20, 9, 1, 28, tzinfo=timezone.utc)
-            next_equinox = datetime(2026, 3, 20, 14, 45, 50, tzinfo=timezone.utc)
+            # Use computed equinox values
+            current_year = now_utc.year
+            current_equinox = compute_vernal_equinox(current_year)
+            next_equinox = compute_vernal_equinox(current_year + 1)
+            
+            # Check if we're before this year's equinox
+            if now_utc < current_equinox:
+                current_equinox = compute_vernal_equinox(current_year - 1)
+                next_equinox = compute_vernal_equinox(current_year)
             
             # Create AstroYear and get reading
             astro_year = AstroYear(current_equinox, next_equinox)
             reading = astro_year.reading(now_utc)
             
             # Update display values
-            self.dies = reading.dies  # Now using dies field from core
+            self.dies = reading.dies
             self.miliDies = reading.miliDies
-            self.mikroDies = reading.mikroDies  # Use the real mikroDies from AstroYear
+            self.mikroDies = reading.mikroDies
+            
+            # Calculate countdown to next equinox
+            year_length_seconds = (next_equinox - current_equinox).total_seconds()
+            year_length_dies = int(year_length_seconds / 86400.0)
+            
+            self.remaining_dies = year_length_dies - self.dies
+            self.remaining_milidies = 1000 - self.miliDies
+            
+            if self.remaining_milidies == 1000:
+                self.remaining_milidies = 0
+                self.remaining_dies += 1
+            
+            # Check for equinox moment (Dies 000, miliDies 000-005)
+            if self.dies == 0 and self.miliDies < 5 and not self.fireworks_active:
+                self._start_fireworks()
+            elif self.dies > 0 and self.fireworks_active:
+                self._stop_fireworks()
             
             # Update theme (this will redraw time display)
             self._apply_theme()
@@ -307,7 +366,96 @@ class AstronomicalWidgetMode:
             self.dies = 0
             self.miliDies = 0
             self.mikroDies = 0
+            self.remaining_dies = 999
+            self.remaining_milidies = 999
             self._draw_time_display()
+    
+    def _start_fireworks(self):
+        """Start fireworks animation for equinox celebration"""
+        print("🎆 Starting fireworks animation in widget!")
+        self.fireworks_active = True
+        self.fireworks_particles = []
+        self._animate_fireworks()
+    
+    def _stop_fireworks(self):
+        """Stop fireworks animation"""
+        if self.fireworks_job:
+            self.master.after_cancel(self.fireworks_job)
+            self.fireworks_job = None
+        self.fireworks_active = False
+        self.fireworks_particles = []
+    
+    def _create_firework(self):
+        """Create a new firework burst"""
+        canvas_width = self.canvas.winfo_width()
+        canvas_height = self.canvas.winfo_height()
+        
+        # Random starting position
+        x = random.randint(20, canvas_width - 20)
+        y = random.randint(20, canvas_height - 40)
+        
+        # Random color
+        colors = ["#FFD700", "#FF6347", "#00FF00", "#00BFFF", "#FF69B4", "#FFA500", "#FFFF00"]
+        color = random.choice(colors)
+        
+        # Create particles radiating outward
+        num_particles = 15
+        for i in range(num_particles):
+            angle = (2 * math.pi * i) / num_particles
+            speed = random.uniform(1.5, 3.0)
+            vx = math.cos(angle) * speed
+            vy = math.sin(angle) * speed
+            
+            self.fireworks_particles.append({
+                'x': x,
+                'y': y,
+                'vx': vx,
+                'vy': vy,
+                'color': color,
+                'life': 30,  # frames
+                'size': 3
+            })
+    
+    def _animate_fireworks(self):
+        """Animate fireworks particles"""
+        if not self.fireworks_active:
+            return
+        
+        # Create new firework occasionally
+        if random.random() < 0.15:  # 15% chance per frame
+            self._create_firework()
+        
+        # Update and draw particles
+        canvas_width = self.canvas.winfo_width()
+        canvas_height = self.canvas.winfo_height()
+        
+        # Update particles
+        for particle in self.fireworks_particles[:]:
+            particle['x'] += particle['vx']
+            particle['y'] += particle['vy']
+            particle['vy'] += 0.15  # Gravity
+            particle['life'] -= 1
+            
+            # Remove dead particles
+            if particle['life'] <= 0 or particle['y'] > canvas_height:
+                self.fireworks_particles.remove(particle)
+        
+        # Redraw display with particles
+        self._draw_time_display()
+        
+        # Draw fireworks particles on top
+        for particle in self.fireworks_particles:
+            alpha = particle['life'] / 30.0
+            size = max(1, int(particle['size'] * alpha))
+            self.canvas.create_oval(
+                particle['x'] - size, particle['y'] - size,
+                particle['x'] + size, particle['y'] + size,
+                fill=particle['color'],
+                outline=""
+            )
+        
+        # Schedule next frame
+        self.fireworks_job = self.master.after(50, self._animate_fireworks)  # ~20 FPS
             
     def set_language(self, language: str):
         """Update widget language."""

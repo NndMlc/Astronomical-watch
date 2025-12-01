@@ -1,6 +1,7 @@
 from tkinter import Toplevel, Label, Frame, Entry, Button
 from datetime import datetime, timezone, timedelta
 import time
+import calendar as cal_module
 from ..core.astro_time_core import AstroYear
 from ..core.equinox import compute_vernal_equinox
 from .translations import tr
@@ -22,15 +23,24 @@ class ComparisonCard(Toplevel):
         super().__init__(master)
         self.lang = lang
         self.title(f"{tr('comparison', self.lang)} — {tr('title', self.lang)}")
-        self.geometry("510x600")
-        self.minsize(470, 450)
+        self.geometry("600x850")
+        self.minsize(580, 820)
+        
+        # Configure window to only show close button (disable minimize/maximize)
+        self.resizable(False, False)
 
         # Detect system timezone
         self.local_tz = datetime.now().astimezone().tzinfo
         self.tz_name = self._get_timezone_name()
         
+        # Conversion state tracking
+        self.active_field = None  # 'milidies' or 'time'
+        
+        # Calendar state
+        self.current_cal_month = datetime.now().month
+        self.current_cal_year = datetime.now().year
+        
         self._make_widgets()
-        self._update_equinox_countdown()
     
     def _get_timezone_name(self):
         """Get full timezone name from system"""
@@ -53,6 +63,125 @@ class ComparisonCard(Toplevel):
             return "UTC+00:00"
         except:
             return "UTC+00:00"
+
+    def _prev_month(self):
+        """Navigate to previous month"""
+        self.current_cal_month -= 1
+        if self.current_cal_month < 1:
+            self.current_cal_month = 12
+            self.current_cal_year -= 1
+        self._update_calendar()
+    
+    def _next_month(self):
+        """Navigate to next month"""
+        self.current_cal_month += 1
+        if self.current_cal_month > 12:
+            self.current_cal_month = 1
+            self.current_cal_year += 1
+        self._update_calendar()
+    
+    def _update_calendar(self):
+        """Update calendar display with Dies for each day - read-only"""
+        # Clear existing calendar
+        for widget in self.calendar_grid.winfo_children():
+            widget.destroy()
+        
+        # Update month/year label
+        month_names = {
+            "en": ["January", "February", "March", "April", "May", "June", 
+                   "July", "August", "September", "October", "November", "December"],
+            "sr": ["Januar", "Februar", "Mart", "April", "Maj", "Jun",
+                   "Jul", "Avgust", "Septembar", "Oktobar", "Novembar", "Decembar"]
+        }
+        lang_months = month_names.get(self.lang, month_names["en"])
+        self.month_year_label.config(text=f"{lang_months[self.current_cal_month-1]} {self.current_cal_year}")
+        
+        # Day headers
+        day_names = {
+            "en": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            "sr": ["Pon", "Uto", "Sre", "Čet", "Pet", "Sub", "Ned"]
+        }
+        lang_days = day_names.get(self.lang, day_names["en"])
+        
+        for i, day_name in enumerate(lang_days):
+            Label(self.calendar_grid, text=day_name, font=("Arial", 9, "bold"), 
+                  bg="#d0d0d0", width=7, height=1).grid(row=0, column=i, padx=1, pady=1, sticky="nsew")
+        
+        # Get calendar for month
+        cal = cal_module.monthcalendar(self.current_cal_year, self.current_cal_month)
+        
+        # Create labels for each day (read-only, no interaction)
+        for week_num, week in enumerate(cal):
+            for day_num, day in enumerate(week):
+                if day == 0:
+                    # Empty cell
+                    Label(self.calendar_grid, text="", bg="#f8f9fa", width=7, height=3).grid(
+                        row=week_num+1, column=day_num, padx=1, pady=1, sticky="nsew")
+                else:
+                    # Calculate Dies for this day (at noon)
+                    try:
+                        day_dt = datetime(self.current_cal_year, self.current_cal_month, day, 12, 0, tzinfo=timezone.utc)
+                        
+                        # Get correct equinox for THIS SPECIFIC DAY
+                        equinox = compute_vernal_equinox(self.current_cal_year)
+                        if day_dt < equinox:
+                            equinox = compute_vernal_equinox(self.current_cal_year - 1)
+                        
+                        astro_year = AstroYear(equinox)
+                        reading = astro_year.reading(day_dt)
+                        dies = reading.dies
+                        
+                        # Create label with day (black) and Dies (blue)
+                        day_frame = Frame(self.calendar_grid, bg="#ffffff", relief="solid", borderwidth=1)
+                        day_frame.grid(row=week_num+1, column=day_num, padx=1, pady=1, sticky="nsew")
+                        
+                        # Standard calendar day - black, larger
+                        Label(day_frame, text=f"{day}", font=("Arial", 14, "bold"), 
+                              bg="#ffffff", fg="#000000").pack(expand=True)
+                        
+                        # Dies number - blue, larger  
+                        Label(day_frame, text=f"{dies:03d}", font=("Arial", 12), 
+                              bg="#ffffff", fg="#1565c0").pack(expand=True)
+                        
+                        # Highlight today with light background
+                        today = datetime.now()
+                        if (day == today.day and self.current_cal_month == today.month 
+                            and self.current_cal_year == today.year):
+                            day_frame.config(bg="#fff3e0")
+                            for child in day_frame.winfo_children():
+                                child.config(bg="#fff3e0")
+                            
+                    except Exception as e:
+                        # Fallback for errors
+                        Label(self.calendar_grid, text=f"{day}\n---", font=("Arial", 10),
+                              bg="#ffcccc", width=7, height=3).grid(row=week_num+1, column=day_num, 
+                                                                     padx=1, pady=1, sticky="nsew")
+    
+    def _select_date(self, day, dies):
+        """Handle date selection from calendar"""
+        self.selected_date = datetime(self.current_cal_year, self.current_cal_month, day, 12, 0)
+        
+        # Display selected date
+        date_str = self.selected_date.strftime("%Y-%m-%d")
+        self.selected_date_label.config(
+            text=f"{tr('selected_date', self.lang)}: {date_str}"
+        )
+        
+        # Automatically show astronomical time for selected date
+        dt_local = self.selected_date.replace(tzinfo=self.local_tz)
+        dt_utc = dt_local.astimezone(timezone.utc)
+        
+        # Get correct equinox for THIS SPECIFIC DATE
+        equinox = compute_vernal_equinox(self.current_cal_year)
+        if dt_utc < equinox:
+            equinox = compute_vernal_equinox(self.current_cal_year - 1)
+        
+        astro_year = AstroYear(equinox)
+        reading = astro_year.reading(dt_utc)
+        
+        self.std_result.config(
+            text=tr("astro_result", self.lang, day=reading.dies, milidies=reading.miliDies)
+        )
 
     def _make_widgets(self):
         font_label = ("Arial", 11)
@@ -81,212 +210,298 @@ class ComparisonCard(Toplevel):
         )
         tz_note.pack(pady=(0, 6))
 
-        # Standard → Astronomical
-        Label(self, text=tr("std_to_astro_label", self.lang), font=font_label).pack(pady=(16, 2))
-        frame1 = Frame(self)
-        frame1.pack(pady=(0, 4))
-        self.std_entry = Entry(frame1, font=font_entry, width=22)
-        self.std_entry.insert(0, datetime.now().strftime("%Y-%m-%d %H:%M"))
-        self.std_entry.pack(side="left")
-        Button(frame1, text=tr("convert_button", self.lang), command=self._convert_std_to_astro).pack(side="left", padx=8)
-        self.std_result = Label(self, text="", font=font_label, fg="#2060b0")
-        self.std_result.pack()
+        # Calendar Widget - Read-only display with Dies
+        Label(self, text=tr("calendar_select_label", self.lang), font=("Arial", 11, "bold")).pack(pady=(12, 6))
+        
+        # Calendar frame
+        self.calendar_frame = Frame(self, relief="solid", borderwidth=1, bg="#f8f9fa")
+        self.calendar_frame.pack(pady=(0, 8), padx=12, fill="x")
+        
+        # Month/Year selector
+        month_frame = Frame(self.calendar_frame, bg="#f8f9fa")
+        month_frame.pack(pady=6)
+        
+        Button(month_frame, text="◀", command=self._prev_month, font=("Arial", 9), width=3).pack(side="left", padx=2)
+        self.month_year_label = Label(month_frame, text="", font=("Arial", 10, "bold"), bg="#f8f9fa", width=18)
+        self.month_year_label.pack(side="left", padx=4)
+        Button(month_frame, text="▶", command=self._next_month, font=("Arial", 9), width=3).pack(side="left", padx=2)
+        
+        # Calendar grid
+        self.calendar_grid = Frame(self.calendar_frame, bg="#f8f9fa")
+        self.calendar_grid.pack(pady=(0, 6), padx=4)
+        
+        # Initialize calendar
+        self._update_calendar()
 
-        # Astronomical → Standard
-        Label(self, text=tr("astro_to_std_label", self.lang), font=font_label).pack(pady=(18,2))
-        frame2 = Frame(self)
-        frame2.pack(pady=(0,4))
-        self.astro_day_entry = Entry(frame2, font=font_entry, width=7)
-        self.astro_day_entry.insert(0, "0")
-        self.astro_day_entry.pack(side="left")
-        Label(frame2, text=tr("dies", self.lang), font=font_label).pack(side="left")
-        self.astro_milidies_entry = Entry(frame2, font=font_entry, width=7)
-        self.astro_milidies_entry.insert(0, "0")
-        self.astro_milidies_entry.pack(side="left")
-        Label(frame2, text=tr("milidies", self.lang), font=font_label).pack(side="left")
-        Button(frame2, text=tr("convert_button", self.lang), command=self._convert_astro_to_std).pack(side="left", padx=8)
-        self.astro_result = Label(self, text="", font=font_label, fg="#2060b0")
-        self.astro_result.pack()
-
-        # Milidies ↔ hh:mm
-        Label(self, text=tr("milidies_hm_label", self.lang), font=font_label).pack(pady=(18,2))
-        frame3 = Frame(self)
-        frame3.pack(pady=(0,4))
-        self.milidies_entry = Entry(frame3, font=font_entry, width=7)
-        self.milidies_entry.insert(0, "0")
-        self.milidies_entry.pack(side="left")
-        Button(frame3, text=tr("to_time_button", self.lang), command=self._milidies_to_time).pack(side="left", padx=4)
-        self.time_entry_h = Entry(frame3, font=font_entry, width=3)
-        self.time_entry_h.insert(0, "00")
-        self.time_entry_h.pack(side="left")
-        Label(frame3, text=":", font=font_label).pack(side="left")
-        self.time_entry_m = Entry(frame3, font=font_entry, width=3)
-        self.time_entry_m.insert(0, "00")
-        self.time_entry_m.pack(side="left")
-        Button(frame3, text=tr("to_milidies_button", self.lang), command=self._time_to_milidies).pack(side="left", padx=4)
-        self.milidies_result = Label(self, text="", font=font_label, fg="#2060b0")
-        self.milidies_result.pack()
-
-        # Countdown do sledeće prolećne ravnodnevnice
-        Label(self, text=tr("countdown_next_equinox_label", self.lang), font=font_label).pack(pady=(18,2))
-        self.astro_equinox_countdown = Label(self, text="", font=font_label, fg="#b02c06")
-        self.astro_equinox_countdown.pack()
-        self.std_equinox_countdown = Label(self, text="", font=font_label, fg="#b02c06")
-        self.std_equinox_countdown.pack()
-
-        Button(self, text=tr("close_button", self.lang), command=self.destroy, font=("Arial", 10), padx=12, pady=5).pack(pady=14)
-
-    def _convert_std_to_astro(self):
-        try:
-            dt_str = self.std_entry.get().strip()
-            dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
-            # Interpret input as local time, not UTC
-            dt = dt.replace(tzinfo=self.local_tz)
-            # Convert to UTC for astronomical calculations
-            dt_utc = dt.astimezone(timezone.utc)
-            
-            # Use precise equinox calculation
-            current_year = dt_utc.year
-            equinox = compute_vernal_equinox(current_year)
-            
-            # Check if we need previous or next year's equinox
-            if dt_utc < equinox:
-                equinox = compute_vernal_equinox(current_year - 1)
-            
-            astro_year = AstroYear(equinox)
-            reading = astro_year.reading(dt_utc)
-            dies = reading.dies
-            milidies = reading.miliDies
-            
-            self.std_result.config(text=tr("astro_result", self.lang, day=dies, milidies=milidies))
-        except Exception as e:
-            self.std_result.config(text=tr("error_text", self.lang, error=str(e)))
-
-    def _convert_astro_to_std(self):
-        try:
-            day = int(self.astro_day_entry.get())
-            milidies = int(self.astro_milidies_entry.get())
-            
-            # Use current year's equinox
-            now = datetime.now(timezone.utc)
-            current_year = now.year
-            current_equinox = compute_vernal_equinox(current_year)
-            
-            # Check if we're before this year's equinox
-            if now < current_equinox:
-                current_equinox = compute_vernal_equinox(current_year - 1)
-            
-            # Use AstroYear's built-in conversion method for accuracy
-            astro_year = AstroYear(current_equinox)
-            
-            # Special handling for Dies 0 to improve precision
-            # Dies 0 miliDies are counted from the last noon before equinox
-            if day == 0:
-                # Calculate last noon before equinox
-                from ..core.astro_time_core import NOON_UTC_HOUR, NOON_UTC_MINUTE, NOON_UTC_SECOND
-                eq_date = current_equinox.date()
-                noon_candidate = datetime(
-                    eq_date.year, eq_date.month, eq_date.day,
-                    NOON_UTC_HOUR, NOON_UTC_MINUTE, NOON_UTC_SECOND,
-                    tzinfo=timezone.utc
-                )
-                if noon_candidate > current_equinox:
-                    last_noon_before_eq = noon_candidate - timedelta(days=1)
-                else:
-                    last_noon_before_eq = noon_candidate
+        # MiliDies Time Table - 2 rows x 5 columns grid layout
+        Label(self, text=tr("milidies_time_table_label", self.lang), font=("Arial", 11, "bold")).pack(pady=(18, 8))
+        
+        # Grid container
+        grid_frame = Frame(self, bg="#f8f9fa")
+        grid_frame.pack(pady=(0, 12), padx=12)
+        
+        # Create 2 rows x 5 columns grid
+        for row in range(2):
+            for col in range(5):
+                index = row * 5 + col
+                if index >= 10:
+                    break
                 
-                # Calculate from that noon
-                std_dt = last_noon_before_eq + timedelta(seconds=milidies * 86.4)
+                milidies_value = index * 100
+                
+                # Calculate actual local time using AstroYear with regular Dies (not Dies 0)
+                # Use Dies 100 to get standard reference noon timing
+                try:
+                    test_dt = self.astro_year.approximate_utc_from_day_miliDies(100, milidies_value)
+                    local_dt = test_dt.astimezone()
+                    time_str = local_dt.strftime("%H:%M")
+                except:
+                    # Fallback - reference noon is 23:15:54 UTC = 00:15:54 local (Belgrade)
+                    # Round to 00:16 for display
+                    base_minutes = 16  # 00:16 local start
+                    total_minutes = base_minutes + (milidies_value * 1.44)
+                    hours = int(total_minutes // 60) % 24
+                    minutes = int(total_minutes % 60)
+                    time_str = f"{hours:02d}:{minutes:02d}"
+                
+                # Cell frame with border - smaller dimensions
+                cell_frame = Frame(grid_frame, bg='#f0f0f0', relief="solid", borderwidth=1,
+                                  width=95, height=55)
+                cell_frame.grid(row=row, column=col, padx=3, pady=3, sticky='nsew')
+                cell_frame.pack_propagate(False)
+                
+                # MiliDies value (blue, top)
+                milidies_label = Label(
+                    cell_frame, 
+                    text=f"{milidies_value:03d}",
+                    font=('Arial', 14, 'bold'),
+                    fg='#0066cc',  # Blue
+                    bg='#f0f0f0'
+                )
+                milidies_label.pack(pady=(6, 0))
+                
+                # Time value (black, bottom)
+                time_label = Label(
+                    cell_frame,
+                    text=time_str,
+                    font=('Arial', 11),
+                    fg='#000000',  # Black
+                    bg='#f0f0f0'
+                )
+                time_label.pack(pady=(1, 6))
+
+        # Conversion tool
+        Label(self, text=tr("converter_label", self.lang), font=("Arial", 12, "bold")).pack(pady=(20, 10))
+        
+        converter_frame = Frame(self, bg="#f8f9fa", relief="solid", borderwidth=2)
+        converter_frame.pack(pady=(0, 15), padx=15, fill="x")
+        
+        # Inner frame for better layout with more vertical space
+        inner_frame = Frame(converter_frame, bg="#f8f9fa")
+        inner_frame.pack(pady=20, padx=15, fill="x")
+        
+        # Left: MiliDies input
+        left_frame = Frame(inner_frame, bg="#f8f9fa")
+        left_frame.pack(side="left", padx=(0, 20))
+        Label(left_frame, text="MiliDies:", font=("Arial", 11, "bold"), bg="#f8f9fa").pack(pady=(0, 8))
+        self.milidies_entry = Entry(left_frame, width=5, font=("Arial", 20, "bold"), justify="center")
+        self.milidies_entry.config(highlightthickness=3, highlightbackground="#0066cc", relief="solid", bd=2)
+        self.milidies_entry.pack(ipady=18)
+        self.milidies_entry.bind('<KeyRelease>', self._validate_milidies)
+        self.milidies_entry.bind('<Button-1>', lambda e: self._on_field_click('milidies'))
+        self.milidies_entry.bind('<KeyPress>', self._handle_keypress)
+        
+        # Middle: Convert button
+        middle_frame = Frame(inner_frame, bg="#f8f9fa")
+        middle_frame.pack(side="left", padx=20)
+        Label(middle_frame, text="", font=("Arial", 10), bg="#f8f9fa").pack()  # Spacer for alignment
+        Button(middle_frame, text=tr("convert_button", self.lang), 
+               command=self._convert_bidirectional,
+               font=("Arial", 12, "bold"), padx=30, pady=22).pack()
+        
+        # Right: Hours and Minutes inputs
+        right_frame = Frame(inner_frame, bg="#f8f9fa")
+        right_frame.pack(side="left", padx=(20, 0))
+        Label(right_frame, text="HH:MM:", font=("Arial", 11, "bold"), bg="#f8f9fa").pack(pady=(0, 8))
+        
+        time_input_frame = Frame(right_frame, bg="#f8f9fa")
+        time_input_frame.pack()
+        
+        self.hours_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center")
+        self.hours_entry.config(highlightthickness=3, highlightbackground="#0066cc", relief="solid", bd=2)
+        self.hours_entry.pack(side="left", ipady=18)
+        self.hours_entry.bind('<KeyRelease>', self._validate_hours_and_move)
+        self.hours_entry.bind('<Button-1>', lambda e: self._on_field_click('time'))
+        self.hours_entry.bind('<KeyPress>', self._handle_keypress)
+        
+        Label(time_input_frame, text=":", font=("Arial", 20, "bold"), bg="#f8f9fa").pack(side="left", padx=6)
+        
+        self.minutes_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center")
+        self.minutes_entry.config(highlightthickness=3, highlightbackground="#0066cc", relief="solid", bd=2)
+        self.minutes_entry.pack(side="left", ipady=18)
+        self.minutes_entry.bind('<KeyRelease>', self._validate_minutes)
+        self.minutes_entry.bind('<Button-1>', lambda e: self._on_field_click('time'))
+        self.minutes_entry.bind('<KeyPress>', self._handle_keypress)
+        
+        # Result/error message
+        self.converter_result = Label(converter_frame, text="", font=("Arial", 10), 
+                                     bg="#f8f9fa", fg="#666666")
+        self.converter_result.pack(pady=(5, 12))
+
+    def _handle_keypress(self, event):
+        """Handle keypress - block input to inactive fields and handle numpad"""
+        widget = event.widget
+        
+        # Check if this widget is allowed to receive input
+        if self.active_field == 'milidies' and widget in (self.hours_entry, self.minutes_entry):
+            return 'break'  # Block input to time fields
+        elif self.active_field == 'time' and widget == self.milidies_entry:
+            return 'break'  # Block input to miliDies field
+        
+        # Map numpad keys to regular digit keys
+        numpad_map = {
+            'KP_0': '0', 'KP_1': '1', 'KP_2': '2', 'KP_3': '3', 'KP_4': '4',
+            'KP_5': '5', 'KP_6': '6', 'KP_7': '7', 'KP_8': '8', 'KP_9': '9'
+        }
+        
+        if event.keysym in numpad_map:
+            # Insert the digit and prevent default behavior
+            widget.insert('insert', numpad_map[event.keysym])
+            return 'break'  # Prevent default handling
+    
+    def _on_field_click(self, field_type):
+        """Handle click on a field - clear all and set active field"""
+        # Clear all fields
+        self.milidies_entry.delete(0, 'end')
+        self.hours_entry.delete(0, 'end')
+        self.minutes_entry.delete(0, 'end')
+        self.converter_result.config(text="")
+        
+        # Set active field
+        self.active_field = field_type
+    
+    def _clear_all_fields(self, event=None):
+        """Clear all input fields when user clicks on any field after a conversion"""
+        # Only clear if there's a result showing (conversion was done)
+        if self.converter_result.cget('text'):
+            self.milidies_entry.delete(0, 'end')
+            self.hours_entry.delete(0, 'end')
+            self.minutes_entry.delete(0, 'end')
+            self.converter_result.config(text="")
+    
+    def _validate_milidies(self, event=None):
+        """Allow only 3-digit numbers in miliDies field"""
+        text = self.milidies_entry.get()
+        # Remove non-digit characters
+        cleaned = ''.join(c for c in text if c.isdigit())
+        # Limit to 3 digits
+        if len(cleaned) > 3:
+            cleaned = cleaned[:3]
+        if text != cleaned:
+            self.milidies_entry.delete(0, 'end')
+            self.milidies_entry.insert(0, cleaned)
+    
+    def _validate_hours(self, event=None):
+        """Allow only 2-digit numbers (00-23) in hours field"""
+        text = self.hours_entry.get()
+        cleaned = ''.join(c for c in text if c.isdigit())
+        if len(cleaned) > 2:
+            cleaned = cleaned[:2]
+        if cleaned and int(cleaned) > 23:
+            cleaned = '23'
+        if text != cleaned:
+            self.hours_entry.delete(0, 'end')
+            self.hours_entry.insert(0, cleaned)
+    
+    def _validate_hours_and_move(self, event=None):
+        """Validate hours and auto-move to minutes after 2 digits"""
+        self._validate_hours(event)
+        text = self.hours_entry.get()
+        if len(text) == 2:
+            # Move focus to minutes field
+            self.minutes_entry.focus_set()
+    
+    def _validate_minutes(self, event=None):
+        """Allow only 2-digit numbers (00-59) in minutes field"""
+        text = self.minutes_entry.get()
+        cleaned = ''.join(c for c in text if c.isdigit())
+        if len(cleaned) > 2:
+            cleaned = cleaned[:2]
+        if cleaned and int(cleaned) > 59:
+            cleaned = '59'
+        if text != cleaned:
+            self.minutes_entry.delete(0, 'end')
+            self.minutes_entry.insert(0, cleaned)
+    
+    def _convert_bidirectional(self):
+        """Convert between miliDies and HH:MM based on which field has input"""
+        milidies_text = self.milidies_entry.get().strip()
+        hours_text = self.hours_entry.get().strip()
+        minutes_text = self.minutes_entry.get().strip()
+        
+        try:
+            # If miliDies has input, convert to time
+            if milidies_text:
+                milidies = int(milidies_text)
+                if milidies > 999:
+                    self.converter_result.config(text="MiliDies mora biti 0-999", fg="#d32f2f")
+                    return
+                
+                # Use AstroYear to get accurate time based on timezone
+                try:
+                    test_dt = self.astro_year.approximate_utc_from_day_miliDies(100, milidies)
+                    local_dt = test_dt.astimezone()
+                    hours = local_dt.hour
+                    minutes = local_dt.minute
+                except:
+                    # Fallback calculation
+                    total_minutes = 16 + (milidies * 1.44)  # Start at 00:16 local
+                    hours = int(total_minutes // 60) % 24
+                    minutes = int(total_minutes % 60)
+                
+                self.hours_entry.delete(0, 'end')
+                self.hours_entry.insert(0, f"{hours:02d}")
+                self.minutes_entry.delete(0, 'end')
+                self.minutes_entry.insert(0, f"{minutes:02d}")
+                self.converter_result.config(text=f"{milidies:03d} mD = {hours:02d}:{minutes:02d} ({self.tz_name})", fg="#2e7d32")
+                
+            # If time has input, convert to miliDies
+            elif hours_text and minutes_text:
+                hours = int(hours_text)
+                minutes = int(minutes_text)
+                
+                if hours > 23 or minutes > 59:
+                    self.converter_result.config(text="Vreme mora biti HH (0-23) : MM (0-59)", fg="#d32f2f")
+                    return
+                
+                # Calculate miliDies from local time
+                # Local Dies starts at 00:15:54 (round to 00:16)
+                # Convert input time to minutes from Dies start
+                input_minutes = hours * 60 + minutes
+                dies_start_minutes = 0 * 60 + 16  # 00:16
+                
+                # Handle day wrap
+                if input_minutes < dies_start_minutes:
+                    input_minutes += 24 * 60  # Add 24 hours
+                
+                minutes_from_start = input_minutes - dies_start_minutes
+                milidies = int(round(minutes_from_start / 1.44))
+                
+                # Clamp to 0-999
+                if milidies < 0:
+                    milidies = 0
+                if milidies > 999:
+                    milidies = 999
+                
+                self.milidies_entry.delete(0, 'end')
+                self.milidies_entry.insert(0, f"{milidies:03d}")
+                self.converter_result.config(text=f"{hours:02d}:{minutes:02d} = {milidies:03d} mD ({self.tz_name})", fg="#2e7d32")
             else:
-                # For Dies >= 1, use AstroYear's method
-                std_dt = astro_year.approximate_utc_from_day_miliDies(day, milidies)
-            
-            # Convert to local timezone for display
-            std_dt_local = std_dt.astimezone(self.local_tz)
-            
-            self.astro_result.config(
-                text=tr("std_result", self.lang, std_time=std_dt_local.strftime('%Y-%m-%d %H:%M:%S %Z'))
-            )
+                self.converter_result.config(text="Unesite miliDies ILI sate i minute", fg="#ff6f00")
+                
         except Exception as e:
-            self.astro_result.config(text=tr("error_text", self.lang, error=str(e)))
+            self.converter_result.config(text=f"Greška: {str(e)}", fg="#d32f2f")
 
-    def _milidies_to_time(self):
-        try:
-            milidies = int(self.milidies_entry.get())
-            hm = milidies_to_hm(milidies)
-            self.milidies_result.config(text=tr("milidies_to_time_result", self.lang, milidies=milidies, hm=hm))
-            self.time_entry_h.delete(0, "end")
-            self.time_entry_h.insert(0, hm[:2])
-            self.time_entry_m.delete(0, "end")
-            self.time_entry_m.insert(0, hm[3:5])
-        except Exception as e:
-            self.milidies_result.config(text=tr("error_text", self.lang, error=str(e)))
-
-    def _time_to_milidies(self):
-        try:
-            h = int(self.time_entry_h.get())
-            m = int(self.time_entry_m.get())
-            milidies = hm_to_milidies(h, m)
-            self.milidies_result.config(text=tr("time_to_milidies_result", self.lang, h=h, m=m, milidies=milidies))
-            self.milidies_entry.delete(0, "end")
-            self.milidies_entry.insert(0, str(milidies))
-        except Exception as e:
-            self.milidies_result.config(text=tr("error_text", self.lang, error=str(e)))
-
-    def _update_equinox_countdown(self):
-        try:
-            now = datetime.now(timezone.utc)
-            
-            # Use precise equinox calculation
-            current_year = now.year
-            current_equinox = compute_vernal_equinox(current_year)
-            next_equinox = compute_vernal_equinox(current_year + 1)
-            
-            # Check if we're before this year's equinox
-            if now < current_equinox:
-                current_equinox = compute_vernal_equinox(current_year - 1)
-                next_equinox = compute_vernal_equinox(current_year)
-            
-            # Get current astronomical time
-            astro_year = AstroYear(current_equinox)
-            current_reading = astro_year.reading(now)
-            
-            # Calculate time until next equinox
-            delta = next_equinox - now
-            if delta.total_seconds() > 0:
-                days = delta.days
-                hours = delta.seconds // 3600
-                mins = (delta.seconds % 3600) // 60
-                secs = delta.seconds % 60
-                
-                # Calculate remaining astronomical time in current year
-                year_length_seconds = (next_equinox - current_equinox).total_seconds()
-                year_length_dies = year_length_seconds / 86400.0  # Precise Dies calculation
-                
-                remaining_dies = int(year_length_dies) - current_reading.dies
-                remaining_milidies = 1000 - current_reading.miliDies
-                
-                # Adjust if we're at exact boundary
-                if remaining_milidies == 1000:
-                    remaining_milidies = 0
-                    remaining_dies += 1
-                
-                self.astro_equinox_countdown.config(
-                    text=tr("astro_equinox_countdown_result", self.lang, dies=remaining_dies, milidies=remaining_milidies)
-                )
-                
-                self.std_equinox_countdown.config(
-                    text=tr("std_equinox_countdown_result", self.lang, days=days, hours=hours, mins=mins, secs=secs)
-                )
-            else:
-                self.astro_equinox_countdown.config(text=tr("equinox_passed", self.lang))
-                self.std_equinox_countdown.config(text="")
-                
-        except Exception as e:
-            self.astro_equinox_countdown.config(text=tr("error_text", self.lang, error=str(e)))
-            self.std_equinox_countdown.config(text="")
-            
-        self.after(1000, self._update_equinox_countdown)
 
 def create_comparison_card(master=None, lang="en"):
     """Factory function to create ComparisonCard instance."""
