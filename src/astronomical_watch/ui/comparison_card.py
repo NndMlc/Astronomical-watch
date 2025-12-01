@@ -1,10 +1,11 @@
-from tkinter import Toplevel, Label, Frame, Entry, Button
+from tkinter import Toplevel, Label, Frame, Entry, Button, Canvas
 from datetime import datetime, timezone, timedelta
 import time
 import calendar as cal_module
 from ..core.astro_time_core import AstroYear
 from ..core.equinox import compute_vernal_equinox
 from .translations import tr
+from .gradient import get_sky_theme, create_gradient_colors
 
 def milidies_to_hm(milidies):
     total_seconds = milidies * 86.4  # 1 milidies = 86.4 sekunde
@@ -23,11 +24,19 @@ class ComparisonCard(Toplevel):
         super().__init__(master)
         self.lang = lang
         self.title(f"{tr('comparison', self.lang)} — {tr('title', self.lang)}")
-        self.geometry("600x850")
-        self.minsize(580, 820)
+        self.geometry("600x720")
+        self.minsize(580, 700)
         
         # Configure window to only show close button (disable minimize/maximize)
         self.resizable(False, False)
+        
+        # Get sky theme
+        self.theme = get_sky_theme(datetime.now(timezone.utc))
+        
+        # Create canvas for gradient background
+        self.canvas = Canvas(self, width=600, height=720, highlightthickness=0)
+        self.canvas.place(x=0, y=0, relwidth=1, relheight=1)
+        self._draw_gradient()
 
         # Detect system timezone
         self.local_tz = datetime.now().astimezone().tzinfo
@@ -63,6 +72,21 @@ class ComparisonCard(Toplevel):
             return "UTC+00:00"
         except:
             return "UTC+00:00"
+    
+    def _draw_gradient(self):
+        """Draw gradient background on canvas"""
+        width = 600
+        height = 720
+        
+        # Create gradient colors
+        colors = create_gradient_colors(self.theme, steps=height)
+        
+        # Draw gradient as horizontal lines
+        for i, color in enumerate(colors):
+            self.canvas.create_line(0, i, width, i, fill=color, width=1)
+        
+        # Update text color for better contrast
+        self.text_color = self.theme.text_color
 
     def _prev_month(self):
         """Navigate to previous month"""
@@ -86,6 +110,10 @@ class ComparisonCard(Toplevel):
         for widget in self.calendar_grid.winfo_children():
             widget.destroy()
         
+        # Get theme colors
+        text_color = self.theme.text_color
+        frame_bg = self.theme.bottom_color
+        
         # Update month/year label
         month_names = {
             "en": ["January", "February", "March", "April", "May", "June", 
@@ -105,7 +133,7 @@ class ComparisonCard(Toplevel):
         
         for i, day_name in enumerate(lang_days):
             Label(self.calendar_grid, text=day_name, font=("Arial", 9, "bold"), 
-                  bg="#d0d0d0", width=7, height=1).grid(row=0, column=i, padx=1, pady=1, sticky="nsew")
+                  bg=frame_bg, fg=text_color, width=7, height=1).grid(row=0, column=i, padx=1, pady=1, sticky="nsew")
         
         # Get calendar for month
         cal = cal_module.monthcalendar(self.current_cal_year, self.current_cal_month)
@@ -115,7 +143,7 @@ class ComparisonCard(Toplevel):
             for day_num, day in enumerate(week):
                 if day == 0:
                     # Empty cell
-                    Label(self.calendar_grid, text="", bg="#f8f9fa", width=7, height=3).grid(
+                    Label(self.calendar_grid, text="", bg=frame_bg, width=7, height=3).grid(
                         row=week_num+1, column=day_num, padx=1, pady=1, sticky="nsew")
                 else:
                     # Calculate Dies for this day (at noon)
@@ -131,7 +159,7 @@ class ComparisonCard(Toplevel):
                         reading = astro_year.reading(day_dt)
                         dies = reading.dies
                         
-                        # Create label with day (black) and Dies (blue)
+                        # Create label with day and Dies - use lighter shade of theme
                         day_frame = Frame(self.calendar_grid, bg="#ffffff", relief="solid", borderwidth=1)
                         day_frame.grid(row=week_num+1, column=day_num, padx=1, pady=1, sticky="nsew")
                         
@@ -143,18 +171,18 @@ class ComparisonCard(Toplevel):
                         Label(day_frame, text=f"{dies:03d}", font=("Arial", 12), 
                               bg="#ffffff", fg="#1565c0").pack(expand=True)
                         
-                        # Highlight today with light background
+                        # Highlight today with theme color
                         today = datetime.now()
                         if (day == today.day and self.current_cal_month == today.month 
                             and self.current_cal_year == today.year):
-                            day_frame.config(bg="#fff3e0")
+                            day_frame.config(bg=self.theme.top_color)
                             for child in day_frame.winfo_children():
-                                child.config(bg="#fff3e0")
+                                child.config(bg=self.theme.top_color, fg="#ffffff")
                             
                     except Exception as e:
                         # Fallback for errors
                         Label(self.calendar_grid, text=f"{day}\n---", font=("Arial", 10),
-                              bg="#ffcccc", width=7, height=3).grid(row=week_num+1, column=day_num, 
+                              bg="#ffcccc", fg=text_color, width=7, height=3).grid(row=week_num+1, column=day_num, 
                                                                      padx=1, pady=1, sticky="nsew")
     
     def _select_date(self, day, dies):
@@ -188,57 +216,63 @@ class ComparisonCard(Toplevel):
         font_entry = ("Arial", 11)
         font_info = ("Arial", 10, "italic")
         
+        # Get theme colors - use semi-transparent frames
+        text_color = self.theme.text_color
+        frame_bg = self.theme.bottom_color
+        
         # Timezone information at the top
-        tz_frame = Frame(self, bg="#e8f4f8", relief="solid", borderwidth=1)
-        tz_frame.pack(pady=(12, 8), padx=12, fill="x")
+        tz_frame = Frame(self, bg=frame_bg, relief="solid", borderwidth=1)
+        tz_frame.pack(pady=(6, 4), padx=12, fill="x")
         
         tz_label = Label(
             tz_frame, 
             text=f"⏰ {tr('timezone_label', self.lang)}: {self.tz_name}",
-            font=("Arial", 11, "bold"),
-            bg="#e8f4f8",
-            fg="#1a5490"
+            font=("Arial", 9, "bold"),
+            bg=frame_bg,
+            fg=text_color
         )
-        tz_label.pack(pady=6)
+        tz_label.pack(pady=3)
         
         tz_note = Label(
             tz_frame,
             text=tr('timezone_note', self.lang),
-            font=font_info,
-            bg="#e8f4f8",
-            fg="#555555"
+            font=("Arial", 8, "italic"),
+            bg=frame_bg,
+            fg=text_color
         )
-        tz_note.pack(pady=(0, 6))
+        tz_note.pack(pady=(0, 3))
 
         # Calendar Widget - Read-only display with Dies
-        Label(self, text=tr("calendar_select_label", self.lang), font=("Arial", 11, "bold")).pack(pady=(12, 6))
+        Label(self, text=tr("calendar_select_label", self.lang), font=("Arial", 9, "bold"), 
+              bg=self.theme.top_color, fg=text_color).pack(pady=(6, 3))
         
         # Calendar frame
-        self.calendar_frame = Frame(self, relief="solid", borderwidth=1, bg="#f8f9fa")
-        self.calendar_frame.pack(pady=(0, 8), padx=12, fill="x")
+        self.calendar_frame = Frame(self, relief="solid", borderwidth=1, bg=frame_bg)
+        self.calendar_frame.pack(pady=(0, 4), padx=12, fill="x")
         
         # Month/Year selector
-        month_frame = Frame(self.calendar_frame, bg="#f8f9fa")
-        month_frame.pack(pady=6)
+        month_frame = Frame(self.calendar_frame, bg=frame_bg)
+        month_frame.pack(pady=3)
         
-        Button(month_frame, text="◀", command=self._prev_month, font=("Arial", 9), width=3).pack(side="left", padx=2)
-        self.month_year_label = Label(month_frame, text="", font=("Arial", 10, "bold"), bg="#f8f9fa", width=18)
+        Button(month_frame, text="◀", command=self._prev_month, font=("Arial", 8), width=3).pack(side="left", padx=2)
+        self.month_year_label = Label(month_frame, text="", font=("Arial", 9, "bold"), bg=frame_bg, fg=text_color, width=18)
         self.month_year_label.pack(side="left", padx=4)
-        Button(month_frame, text="▶", command=self._next_month, font=("Arial", 9), width=3).pack(side="left", padx=2)
+        Button(month_frame, text="▶", command=self._next_month, font=("Arial", 8), width=3).pack(side="left", padx=2)
         
         # Calendar grid
-        self.calendar_grid = Frame(self.calendar_frame, bg="#f8f9fa")
-        self.calendar_grid.pack(pady=(0, 6), padx=4)
+        self.calendar_grid = Frame(self.calendar_frame, bg=frame_bg)
+        self.calendar_grid.pack(pady=(0, 3), padx=4)
         
         # Initialize calendar
         self._update_calendar()
 
         # MiliDies Time Table - 2 rows x 5 columns grid layout
-        Label(self, text=tr("milidies_time_table_label", self.lang), font=("Arial", 11, "bold")).pack(pady=(18, 8))
+        Label(self, text=tr("milidies_time_table_label", self.lang), font=("Arial", 9, "bold"),
+              bg=self.theme.top_color, fg=text_color).pack(pady=(8, 4))
         
         # Grid container
-        grid_frame = Frame(self, bg="#f8f9fa")
-        grid_frame.pack(pady=(0, 12), padx=12)
+        grid_frame = Frame(self, bg=frame_bg)
+        grid_frame.pack(pady=(0, 6), padx=12)
         
         # Create 2 rows x 5 columns grid
         for row in range(2):
@@ -266,44 +300,42 @@ class ComparisonCard(Toplevel):
                 
                 # Cell frame with border - smaller dimensions
                 cell_frame = Frame(grid_frame, bg='#f0f0f0', relief="solid", borderwidth=1,
-                                  width=95, height=55)
-                cell_frame.grid(row=row, column=col, padx=3, pady=3, sticky='nsew')
+                                  width=85, height=48)
+                cell_frame.grid(row=row, column=col, padx=2, pady=2, sticky='nsew')
                 cell_frame.pack_propagate(False)
                 
                 # MiliDies value (blue, top)
                 milidies_label = Label(
                     cell_frame, 
                     text=f"{milidies_value:03d}",
-                    font=('Arial', 14, 'bold'),
+                    font=('Arial', 12, 'bold'),
                     fg='#0066cc',  # Blue
                     bg='#f0f0f0'
                 )
-                milidies_label.pack(pady=(6, 0))
+                milidies_label.pack(pady=(4, 0))
                 
                 # Time value (black, bottom)
                 time_label = Label(
                     cell_frame,
                     text=time_str,
-                    font=('Arial', 11),
+                    font=('Arial', 10),
                     fg='#000000',  # Black
                     bg='#f0f0f0'
                 )
-                time_label.pack(pady=(1, 6))
+                time_label.pack(pady=(1, 4))
 
         # Conversion tool
-        Label(self, text=tr("converter_label", self.lang), font=("Arial", 12, "bold")).pack(pady=(20, 10))
-        
-        converter_frame = Frame(self, bg="#f8f9fa", relief="solid", borderwidth=2)
-        converter_frame.pack(pady=(0, 15), padx=15, fill="x")
+        converter_frame = Frame(self, bg=frame_bg, relief="solid", borderwidth=2)
+        converter_frame.pack(pady=(10, 10), padx=15, fill="x")
         
         # Inner frame for better layout with more vertical space
-        inner_frame = Frame(converter_frame, bg="#f8f9fa")
-        inner_frame.pack(pady=20, padx=15, fill="x")
+        inner_frame = Frame(converter_frame, bg=frame_bg)
+        inner_frame.pack(pady=12, padx=15, fill="x")
         
         # Left: MiliDies input
-        left_frame = Frame(inner_frame, bg="#f8f9fa")
-        left_frame.pack(side="left", padx=(0, 20))
-        Label(left_frame, text="MiliDies:", font=("Arial", 11, "bold"), bg="#f8f9fa").pack(pady=(0, 8))
+        left_frame = Frame(inner_frame, bg=frame_bg)
+        left_frame.pack(side="left", padx=(0, 15))
+        Label(left_frame, text="MiliDies:", font=("Arial", 11, "bold"), bg=frame_bg, fg=text_color).pack(pady=(0, 6))
         self.milidies_entry = Entry(left_frame, width=5, font=("Arial", 20, "bold"), justify="center")
         self.milidies_entry.config(highlightthickness=3, highlightbackground="#0066cc", relief="solid", bd=2)
         self.milidies_entry.pack(ipady=18)
@@ -312,19 +344,19 @@ class ComparisonCard(Toplevel):
         self.milidies_entry.bind('<KeyPress>', self._handle_keypress)
         
         # Middle: Convert button
-        middle_frame = Frame(inner_frame, bg="#f8f9fa")
-        middle_frame.pack(side="left", padx=20)
-        Label(middle_frame, text="", font=("Arial", 10), bg="#f8f9fa").pack()  # Spacer for alignment
+        middle_frame = Frame(inner_frame, bg=frame_bg)
+        middle_frame.pack(side="left", padx=15)
+        Label(middle_frame, text="", font=("Arial", 10), bg=frame_bg).pack()  # Spacer for alignment
         Button(middle_frame, text=tr("convert_button", self.lang), 
                command=self._convert_bidirectional,
                font=("Arial", 12, "bold"), padx=30, pady=22).pack()
         
         # Right: Hours and Minutes inputs
-        right_frame = Frame(inner_frame, bg="#f8f9fa")
-        right_frame.pack(side="left", padx=(20, 0))
-        Label(right_frame, text="HH:MM:", font=("Arial", 11, "bold"), bg="#f8f9fa").pack(pady=(0, 8))
+        right_frame = Frame(inner_frame, bg=frame_bg)
+        right_frame.pack(side="left", padx=(15, 0))
+        Label(right_frame, text="HH:MM:", font=("Arial", 11, "bold"), bg=frame_bg, fg=text_color).pack(pady=(0, 6))
         
-        time_input_frame = Frame(right_frame, bg="#f8f9fa")
+        time_input_frame = Frame(right_frame, bg=frame_bg)
         time_input_frame.pack()
         
         self.hours_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center")
@@ -334,7 +366,7 @@ class ComparisonCard(Toplevel):
         self.hours_entry.bind('<Button-1>', lambda e: self._on_field_click('time'))
         self.hours_entry.bind('<KeyPress>', self._handle_keypress)
         
-        Label(time_input_frame, text=":", font=("Arial", 20, "bold"), bg="#f8f9fa").pack(side="left", padx=6)
+        Label(time_input_frame, text=":", font=("Arial", 20, "bold"), bg=frame_bg, fg=text_color).pack(side="left", padx=6)
         
         self.minutes_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center")
         self.minutes_entry.config(highlightthickness=3, highlightbackground="#0066cc", relief="solid", bd=2)
@@ -345,7 +377,7 @@ class ComparisonCard(Toplevel):
         
         # Result/error message
         self.converter_result = Label(converter_frame, text="", font=("Arial", 10), 
-                                     bg="#f8f9fa", fg="#666666")
+                                     bg=frame_bg, fg=text_color)
         self.converter_result.pack(pady=(5, 12))
 
     def _handle_keypress(self, event):
