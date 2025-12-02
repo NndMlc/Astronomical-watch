@@ -276,8 +276,6 @@ class ComparisonCard(Toplevel):
         
         # All content goes in scrollable_frame
         parent_widget = scrollable_frame
-        # Timezone information at the top (now in scrollable area)
-        parent_widget = scrollable_frame
         
         tz_frame = Frame(parent_widget, bg=frame_bg, relief="solid", borderwidth=1)
         tz_frame.pack(pady=(6, 4), padx=12, fill="x")
@@ -384,7 +382,7 @@ class ComparisonCard(Toplevel):
 
         # Conversion tool (in scrollable area)
         converter_frame = Frame(parent_widget, bg=frame_bg, relief="solid", borderwidth=2)
-        converter_frame.pack(pady=(10, 10), padx=15, fill="x")
+        converter_frame.pack(pady=(10, 10), padx=(12, 0), fill="x")
         
         # Inner frame for better layout with more vertical space
         inner_frame = Frame(converter_frame, bg=frame_bg)
@@ -432,11 +430,6 @@ class ComparisonCard(Toplevel):
         self.minutes_entry.bind('<KeyRelease>', self._validate_minutes)
         self.minutes_entry.bind('<Button-1>', lambda e: self._on_field_click('time'))
         self.minutes_entry.bind('<KeyPress>', self._handle_keypress)
-        
-        # Result/error message
-        self.converter_result = Label(converter_frame, text="", font=("Arial", 10), 
-                                     bg=frame_bg, fg=text_color)
-        self.converter_result.pack(pady=(5, 12))
 
     def _handle_keypress(self, event):
         """Handle keypress - block input to inactive fields and handle numpad"""
@@ -465,19 +458,9 @@ class ComparisonCard(Toplevel):
         self.milidies_entry.delete(0, 'end')
         self.hours_entry.delete(0, 'end')
         self.minutes_entry.delete(0, 'end')
-        self.converter_result.config(text="")
         
         # Set active field
         self.active_field = field_type
-    
-    def _clear_all_fields(self, event=None):
-        """Clear all input fields when user clicks on any field after a conversion"""
-        # Only clear if there's a result showing (conversion was done)
-        if self.converter_result.cget('text'):
-            self.milidies_entry.delete(0, 'end')
-            self.hours_entry.delete(0, 'end')
-            self.minutes_entry.delete(0, 'end')
-            self.converter_result.config(text="")
     
     def _validate_milidies(self, event=None):
         """Allow only 3-digit numbers in miliDies field"""
@@ -534,7 +517,6 @@ class ComparisonCard(Toplevel):
             if milidies_text:
                 milidies = int(milidies_text)
                 if milidies > 999:
-                    self.converter_result.config(text="MiliDies mora biti 0-999", fg="#d32f2f")
                     return
                 
                 # Use AstroYear to get accurate time based on timezone
@@ -553,7 +535,6 @@ class ComparisonCard(Toplevel):
                 self.hours_entry.insert(0, f"{hours:02d}")
                 self.minutes_entry.delete(0, 'end')
                 self.minutes_entry.insert(0, f"{minutes:02d}")
-                self.converter_result.config(text=f"{milidies:03d} mD = {hours:02d}:{minutes:02d} ({self.tz_name})", fg="#2e7d32")
                 
             # If time has input, convert to miliDies
             elif hours_text and minutes_text:
@@ -561,7 +542,6 @@ class ComparisonCard(Toplevel):
                 minutes = int(minutes_text)
                 
                 if hours > 23 or minutes > 59:
-                    self.converter_result.config(text="Vreme mora biti HH (0-23) : MM (0-59)", fg="#d32f2f")
                     return
                 
                 # Calculate miliDies from local time
@@ -585,12 +565,9 @@ class ComparisonCard(Toplevel):
                 
                 self.milidies_entry.delete(0, 'end')
                 self.milidies_entry.insert(0, f"{milidies:03d}")
-                self.converter_result.config(text=f"{hours:02d}:{minutes:02d} = {milidies:03d} mD ({self.tz_name})", fg="#2e7d32")
-            else:
-                self.converter_result.config(text="Unesite miliDies ILI sate i minute", fg="#ff6f00")
                 
         except Exception as e:
-            self.converter_result.config(text=f"Greška: {str(e)}", fg="#d32f2f")
+            pass  # Silently ignore errors
 
 
 def create_comparison_card(master=None, lang="en"):
