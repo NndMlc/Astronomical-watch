@@ -44,7 +44,6 @@ def get_monospace_font(size=14):
 # Language options - all 20 languages from translations.py
 LANGUAGES = [
     ("English", "en"),
-    ("Српски (Serbian)", "sr"),
     ("Español", "es"),
     ("中文 (Chinese)", "zh"),
     ("العربية (Arabic)", "ar"),
@@ -62,7 +61,8 @@ LANGUAGES = [
     ("Ελληνικά (Greek)", "el"),
     ("Polski", "pl"),
     ("Italiano", "it"),
-    ("Nederlands", "nl")
+    ("Nederlands", "nl"),
+    ("Српски (Serbian)", "sr")
 ]
 
 def tr(key: str, lang: str = "en") -> str:

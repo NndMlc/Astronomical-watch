@@ -116,10 +116,26 @@ class ComparisonCard(Toplevel):
         
         # Update month/year label
         month_names = {
-            "en": ["January", "February", "March", "April", "May", "June", 
-                   "July", "August", "September", "October", "November", "December"],
-            "sr": ["Januar", "Februar", "Mart", "April", "Maj", "Jun",
-                   "Jul", "Avgust", "Septembar", "Oktobar", "Novembar", "Decembar"]
+            "en": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+            "sr": ["Januar", "Februar", "Mart", "April", "Maj", "Jun", "Jul", "Avgust", "Septembar", "Oktobar", "Novembar", "Decembar"],
+            "es": ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+            "zh": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+            "ar": ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
+            "pt": ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"],
+            "fr": ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"],
+            "de": ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+            "ru": ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+            "ja": ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"],
+            "hi": ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितंबर", "अक्टूबर", "नवंबर", "दिसंबर"],
+            "fa": ["ژانویه", "فوریه", "مارس", "آوریل", "مه", "ژوئن", "ژوئیه", "اوت", "سپتامبر", "اکتبر", "نوامبر", "دسامبر"],
+            "id": ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"],
+            "sw": ["Januari", "Februari", "Machi", "Aprili", "Mei", "Juni", "Julai", "Agosti", "Septemba", "Oktoba", "Novemba", "Desemba"],
+            "ha": ["Janairu", "Faburairu", "Maris", "Afirilu", "Mayu", "Yuni", "Yuli", "Agusta", "Satumba", "Oktoba", "Nuwamba", "Disamba"],
+            "tr": ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"],
+            "el": ["Ιανουάριος", "Φεβρουάριος", "Μάρτιος", "Απρίλιος", "Μάιος", "Ιούνιος", "Ιούλιος", "Αύγουστος", "Σεπτέμβριος", "Οκτώβριος", "Νοέμβριος", "Δεκέμβριος"],
+            "pl": ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"],
+            "it": ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"],
+            "nl": ["Januari", "Februari", "Maart", "April", "Mei", "Juni", "Juli", "Augustus", "September", "Oktober", "November", "December"]
         }
         lang_months = month_names.get(self.lang, month_names["en"])
         self.month_year_label.config(text=f"{lang_months[self.current_cal_month-1]} {self.current_cal_year}")
@@ -127,7 +143,25 @@ class ComparisonCard(Toplevel):
         # Day headers
         day_names = {
             "en": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-            "sr": ["Pon", "Uto", "Sre", "Čet", "Pet", "Sub", "Ned"]
+            "sr": ["Pon", "Uto", "Sre", "Čet", "Pet", "Sub", "Ned"],
+            "es": ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+            "zh": ["一", "二", "三", "四", "五", "六", "日"],
+            "ar": ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"],
+            "pt": ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
+            "fr": ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
+            "de": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+            "ru": ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+            "ja": ["月", "火", "水", "木", "金", "土", "日"],
+            "hi": ["सोम", "मंगल", "बुध", "गुरु", "शुक्र", "शनि", "रवि"],
+            "fa": ["دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه", "شنبه", "یکشنبه"],
+            "id": ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"],
+            "sw": ["Jtn", "Jnn", "Jnm", "Alh", "Iju", "Jmo", "Jpi"],
+            "ha": ["Lit", "Tal", "Lar", "Alh", "Jum", "Asa", "Lah"],
+            "tr": ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"],
+            "el": ["Δευ", "Τρί", "Τετ", "Πέμ", "Παρ", "Σάβ", "Κυρ"],
+            "pl": ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"],
+            "it": ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"],
+            "nl": ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"]
         }
         lang_days = day_names.get(self.lang, day_names["en"])
         
@@ -220,11 +254,11 @@ class ComparisonCard(Toplevel):
         text_color = self.theme.text_color
         frame_bg = self.theme.bottom_color
         
-        # Create main container with scrollable upper area and fixed converter at bottom
+        # Create main container with scrollable area for ALL content
         main_container = Frame(self, bg=frame_bg)
         main_container.pack(fill="both", expand=True)
         
-        # Scrollable area for timezone, calendar, and table
+        # Scrollable canvas and scrollbar
         scroll_canvas = Canvas(main_container, bg=frame_bg, highlightthickness=0)
         scrollbar = Scrollbar(main_container, orient="vertical", command=scroll_canvas.yview)
         scrollable_frame = Frame(scroll_canvas, bg=frame_bg)
@@ -240,7 +274,7 @@ class ComparisonCard(Toplevel):
         scroll_canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
-        # Timezone information at the top (now in scrollable area)
+        # All content goes in scrollable_frame
         parent_widget = scrollable_frame
         # Timezone information at the top (now in scrollable area)
         parent_widget = scrollable_frame
@@ -348,14 +382,9 @@ class ComparisonCard(Toplevel):
                 )
                 time_label.pack(pady=(1, 4))
 
-        # FIXED CONVERTER SECTION AT BOTTOM (outside scrollable area)
-        # Create fixed converter container directly on main window
-        fixed_converter_container = Frame(self, bg=frame_bg, relief="solid", borderwidth=2)
-        fixed_converter_container.pack(side="bottom", pady=(10, 10), padx=15, fill="x")
-        
-        # Conversion tool
-        converter_frame = Frame(fixed_converter_container, bg=frame_bg)
-        converter_frame.pack(pady=0, padx=0, fill="x")
+        # Conversion tool (in scrollable area)
+        converter_frame = Frame(parent_widget, bg=frame_bg, relief="solid", borderwidth=2)
+        converter_frame.pack(pady=(10, 10), padx=15, fill="x")
         
         # Inner frame for better layout with more vertical space
         inner_frame = Frame(converter_frame, bg=frame_bg)
@@ -367,7 +396,7 @@ class ComparisonCard(Toplevel):
         Label(left_frame, text="MiliDies:", font=("Arial", 11, "bold"), bg=frame_bg, fg=text_color).pack(pady=(0, 6))
         self.milidies_entry = Entry(left_frame, width=5, font=("Arial", 20, "bold"), justify="center")
         self.milidies_entry.config(highlightthickness=3, highlightbackground="#0066cc", relief="solid", bd=2)
-        self.milidies_entry.pack(ipady=18)
+        self.milidies_entry.pack(ipady=8)
         self.milidies_entry.bind('<KeyRelease>', self._validate_milidies)
         self.milidies_entry.bind('<Button-1>', lambda e: self._on_field_click('milidies'))
         self.milidies_entry.bind('<KeyPress>', self._handle_keypress)
@@ -390,7 +419,7 @@ class ComparisonCard(Toplevel):
         
         self.hours_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center")
         self.hours_entry.config(highlightthickness=3, highlightbackground="#0066cc", relief="solid", bd=2)
-        self.hours_entry.pack(side="left", ipady=18)
+        self.hours_entry.pack(side="left", ipady=8)
         self.hours_entry.bind('<KeyRelease>', self._validate_hours_and_move)
         self.hours_entry.bind('<Button-1>', lambda e: self._on_field_click('time'))
         self.hours_entry.bind('<KeyPress>', self._handle_keypress)
@@ -399,13 +428,13 @@ class ComparisonCard(Toplevel):
         
         self.minutes_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center")
         self.minutes_entry.config(highlightthickness=3, highlightbackground="#0066cc", relief="solid", bd=2)
-        self.minutes_entry.pack(side="left", ipady=18)
+        self.minutes_entry.pack(side="left", ipady=8)
         self.minutes_entry.bind('<KeyRelease>', self._validate_minutes)
         self.minutes_entry.bind('<Button-1>', lambda e: self._on_field_click('time'))
         self.minutes_entry.bind('<KeyPress>', self._handle_keypress)
         
         # Result/error message
-        self.converter_result = Label(fixed_converter_container, text="", font=("Arial", 10), 
+        self.converter_result = Label(converter_frame, text="", font=("Arial", 10), 
                                      bg=frame_bg, fg=text_color)
         self.converter_result.pack(pady=(5, 12))
 
