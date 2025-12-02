@@ -1,4 +1,4 @@
-from tkinter import Toplevel, Label, Frame, Entry, Button, Canvas
+from tkinter import Toplevel, Label, Frame, Entry, Button, Canvas, Scrollbar
 from datetime import datetime, timezone, timedelta
 import time
 import calendar as cal_module
@@ -24,11 +24,11 @@ class ComparisonCard(Toplevel):
         super().__init__(master)
         self.lang = lang
         self.title(f"{tr('comparison', self.lang)} — {tr('title', self.lang)}")
-        self.geometry("600x720")
-        self.minsize(580, 700)
+        self.geometry("620x750")
+        self.minsize(600, 700)
         
-        # Configure window to only show close button (disable minimize/maximize)
-        self.resizable(False, False)
+        # Configure window to allow vertical resizing
+        self.resizable(False, True)
         
         # Get sky theme
         self.theme = get_sky_theme(datetime.now(timezone.utc))
@@ -220,8 +220,32 @@ class ComparisonCard(Toplevel):
         text_color = self.theme.text_color
         frame_bg = self.theme.bottom_color
         
-        # Timezone information at the top
-        tz_frame = Frame(self, bg=frame_bg, relief="solid", borderwidth=1)
+        # Create main container with scrollable upper area and fixed converter at bottom
+        main_container = Frame(self, bg=frame_bg)
+        main_container.pack(fill="both", expand=True)
+        
+        # Scrollable area for timezone, calendar, and table
+        scroll_canvas = Canvas(main_container, bg=frame_bg, highlightthickness=0)
+        scrollbar = Scrollbar(main_container, orient="vertical", command=scroll_canvas.yview)
+        scrollable_frame = Frame(scroll_canvas, bg=frame_bg)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: scroll_canvas.configure(scrollregion=scroll_canvas.bbox("all"))
+        )
+        
+        scroll_canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        scroll_canvas.configure(yscrollcommand=scrollbar.set)
+        
+        scroll_canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Timezone information at the top (now in scrollable area)
+        parent_widget = scrollable_frame
+        # Timezone information at the top (now in scrollable area)
+        parent_widget = scrollable_frame
+        
+        tz_frame = Frame(parent_widget, bg=frame_bg, relief="solid", borderwidth=1)
         tz_frame.pack(pady=(6, 4), padx=12, fill="x")
         
         tz_label = Label(
@@ -243,11 +267,11 @@ class ComparisonCard(Toplevel):
         tz_note.pack(pady=(0, 3))
 
         # Calendar Widget - Read-only display with Dies
-        Label(self, text=tr("calendar_select_label", self.lang), font=("Arial", 9, "bold"), 
+        Label(parent_widget, text=tr("calendar_select_label", self.lang), font=("Arial", 9, "bold"), 
               bg=self.theme.top_color, fg=text_color).pack(pady=(6, 3))
         
         # Calendar frame
-        self.calendar_frame = Frame(self, relief="solid", borderwidth=1, bg=frame_bg)
+        self.calendar_frame = Frame(parent_widget, relief="solid", borderwidth=1, bg=frame_bg)
         self.calendar_frame.pack(pady=(0, 4), padx=12, fill="x")
         
         # Month/Year selector
@@ -267,11 +291,11 @@ class ComparisonCard(Toplevel):
         self._update_calendar()
 
         # MiliDies Time Table - 2 rows x 5 columns grid layout
-        Label(self, text=tr("milidies_time_table_label", self.lang), font=("Arial", 9, "bold"),
+        Label(parent_widget, text=tr("milidies_time_table_label", self.lang), font=("Arial", 9, "bold"),
               bg=self.theme.top_color, fg=text_color).pack(pady=(8, 4))
         
         # Grid container
-        grid_frame = Frame(self, bg=frame_bg)
+        grid_frame = Frame(parent_widget, bg=frame_bg)
         grid_frame.pack(pady=(0, 6), padx=12)
         
         # Create 2 rows x 5 columns grid
@@ -324,9 +348,14 @@ class ComparisonCard(Toplevel):
                 )
                 time_label.pack(pady=(1, 4))
 
+        # FIXED CONVERTER SECTION AT BOTTOM (outside scrollable area)
+        # Create fixed converter container directly on main window
+        fixed_converter_container = Frame(self, bg=frame_bg, relief="solid", borderwidth=2)
+        fixed_converter_container.pack(side="bottom", pady=(10, 10), padx=15, fill="x")
+        
         # Conversion tool
-        converter_frame = Frame(self, bg=frame_bg, relief="solid", borderwidth=2)
-        converter_frame.pack(pady=(10, 10), padx=15, fill="x")
+        converter_frame = Frame(fixed_converter_container, bg=frame_bg)
+        converter_frame.pack(pady=0, padx=0, fill="x")
         
         # Inner frame for better layout with more vertical space
         inner_frame = Frame(converter_frame, bg=frame_bg)
@@ -376,7 +405,7 @@ class ComparisonCard(Toplevel):
         self.minutes_entry.bind('<KeyPress>', self._handle_keypress)
         
         # Result/error message
-        self.converter_result = Label(converter_frame, text="", font=("Arial", 10), 
+        self.converter_result = Label(fixed_converter_container, text="", font=("Arial", 10), 
                                      bg=frame_bg, fg=text_color)
         self.converter_result.pack(pady=(5, 12))
 
