@@ -56,6 +56,9 @@ class AstronomicalWidgetMode:
         self._create_widgets()
         self._apply_theme()
         
+        # Load and apply settings
+        self._load_and_apply_settings()
+        
         # Bind click event to entire widget
         self._bind_click_events()
         
@@ -462,6 +465,48 @@ class AstronomicalWidgetMode:
         self.current_language = language
         # Force immediate update to reflect language change
         self._update_display()
+    
+    def _load_and_apply_settings(self):
+        """Load settings from config file and apply them."""
+        import json
+        import os
+        
+        config_path = os.path.expanduser("~/.astronomical_watch_config.json")
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, 'r') as f:
+                    settings = json.load(f)
+                    self.apply_settings(settings)
+            except Exception as e:
+                print(f"⚠️ Failed to load settings: {e}")
+    
+    def apply_settings(self, settings: dict):
+        """Apply settings to widget.
+        
+        Args:
+            settings: Dictionary with keys:
+                - always_on_top: bool
+                - opacity: int (50-100)
+                - widget_position: dict with x, y (or None for center)
+        """
+        # Always on top
+        if "always_on_top" in settings:
+            self._always_on_top = settings["always_on_top"]
+            self.master.attributes('-topmost', self._always_on_top)
+        
+        # Opacity (convert percentage to 0.0-1.0)
+        if "opacity" in settings:
+            opacity_value = settings["opacity"] / 100.0
+            self.master.attributes('-alpha', opacity_value)
+        
+        # Position
+        if "widget_position" in settings:
+            pos = settings["widget_position"]
+            if pos.get("x") is not None and pos.get("y") is not None:
+                self.master.geometry(f"+{pos['x']}+{pos['y']}")
+            # If None, leave at current position (already centered by default)
+        
+        print(f"✅ Applied settings to widget")
             
     def start_updates(self):
         """Start the periodic update cycle."""

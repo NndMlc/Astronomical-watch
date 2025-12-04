@@ -67,11 +67,12 @@ class AstronomicalWatchApp:
             # Set icon
             self._set_icon(self.normal_root)
             
-            # Create normal mode with language sync
+            # Create normal mode with language sync and widget reference
             self.normal_mode = create_normal_mode(
                 self.normal_root, 
                 on_back=self.close_normal_mode,
-                on_language=self.on_language_change
+                on_language=self.on_language_change,
+                widget_ref=self.widget  # Pass widget reference
             )
             self.normal_mode.start_updates()
             

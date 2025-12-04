@@ -16,7 +16,7 @@ from ..core.astro_time_core import AstroYear
 from .gradient import get_sky_theme, create_gradient_colors
 from .translations import TRANSLATIONS
 from .comparison_card import create_comparison_card
-from .calculation_card import create_calculation_card
+from .settings_card import create_settings_card
 
 # Detect available monospace font
 def get_monospace_font(size=14):
@@ -74,12 +74,13 @@ def tr(key: str, lang: str = "en") -> str:
 class ModernNormalMode:
     """Modern Normal Mode without window decorations."""
     
-    def __init__(self, parent, on_back=None, on_language=None):
+    def __init__(self, parent, on_back=None, on_language=None, widget_ref=None):
         print("🚀 ModernNormalMode.__init__ starting...")
         
         self.master = parent
         self.on_back = on_back
         self.on_language = on_language
+        self.widget_ref = widget_ref  # Store widget reference for settings
         
         # Data initialization first
         self.dies = 0
@@ -107,7 +108,6 @@ class ModernNormalMode:
         self.open_windows = {
             "explanation": None,
             "comparison": None,
-            "calculation": None,
             "settings": None
         }
         
@@ -423,7 +423,6 @@ class ModernNormalMode:
         tabs = [
             ("explanation", self.icons["info"], "Info"),
             ("comparison", self.icons["compare"], "Compare"), 
-            ("calculation", self.icons["calc"], "Calc"),
             ("settings", self.icons["settings"], "Settings")
         ]
         
@@ -653,43 +652,39 @@ class ModernNormalMode:
             tab_window.protocol("WM_DELETE_WINDOW", on_window_close)
             
             # Add content based on tab type
-            if tab_id == "calculation":
-                # Open calculation card
-                print(f"🔧 Opening calculation card for language: {self.lang}")
-                print(f"🔧 Creating calc_card with master=None...")
+            if tab_id == "settings":
+                # Open settings card
+                print(f"🔧 Opening settings card for language: {self.lang}")
                 try:
-                    # Create calc_card with None as master so it's independent
-                    calc_card = create_calculation_card(None, self.lang)
-                    print(f"🔧 calc_card created: {calc_card}")
-                    print(f"🔧 calc_card winfo_exists: {calc_card.winfo_exists()}")
-                    print(f"🔧 calc_card geometry: {calc_card.geometry()}")
+                    # Create settings card with widget reference
+                    settings_card = create_settings_card(None, self.lang, widget_ref=self.widget_ref)
+                    print(f"🔧 settings_card created: {settings_card}")
+                    
+                    # Close the placeholder window and track the settings card instead
+                    tab_window.destroy()
+                    self.open_windows[tab_id] = settings_card
+                    
+                    # Bring to front
+                    settings_card.lift()
+                    settings_card.focus_force()
+                    settings_card.attributes('-topmost', True)
+                    settings_card.after(100, lambda: settings_card.attributes('-topmost', False))
+                    
+                    # Update close handler for settings card
+                    def on_settings_close():
+                        self.open_windows[tab_id] = None
+                        self._highlight_active_tab()
+                        print(f"❌ Closed {tab_id} tab")
+                    
+                    settings_card.protocol("WM_DELETE_WINDOW", on_settings_close)
+                    print(f"✅ Settings card opened successfully")
+                    return
+                    
                 except Exception as e:
-                    print(f"❌ ERROR creating calc_card: {e}")
+                    print(f"❌ ERROR creating settings_card: {e}")
                     import traceback
                     traceback.print_exc()
-                    return
-                # Close the placeholder window and track the calc card instead
-                print(f"🔧 Destroying placeholder tab_window...")
-                tab_window.destroy()
-                print(f"🔧 Placeholder destroyed, storing calc_card in open_windows...")
-                self.open_windows[tab_id] = calc_card
-                
-                # Bring to front
-                calc_card.lift()
-                calc_card.focus_force()
-                calc_card.attributes('-topmost', True)
-                calc_card.after(100, lambda: calc_card.attributes('-topmost', False))
-                
-                # Update close handler for calc card
-                def on_calc_close():
-                    self.open_windows[tab_id] = None
-                    self._highlight_active_tab()
-                    print(f"❌ Closed {tab_id} tab")
-                
-                calc_card.protocol("WM_DELETE_WINDOW", on_calc_close)
-                print(f"✅ Calculation card opened successfully")
-                return
-            elif tab_id == "settings":
+                    
                 content = "Settings and preferences will be displayed here."
             else:
                 content = f"Content for {tab_id} tab."
@@ -1272,6 +1267,6 @@ class ModernNormalMode:
         self.fireworks_job = self.master.after(50, self._animate_fireworks)  # ~20 FPS
 
 
-def create_normal_mode(parent, on_back=None, on_language=None):
+def create_normal_mode(parent, on_back=None, on_language=None, widget_ref=None):
     """Factory function to create normal mode instance."""
-    return ModernNormalMode(parent, on_back, on_language)
+    return ModernNormalMode(parent, on_back, on_language, widget_ref)
