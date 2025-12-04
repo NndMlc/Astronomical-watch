@@ -24,8 +24,19 @@ class ComparisonCard(Toplevel):
         super().__init__(master)
         self.lang = lang
         self.title(f"{tr('comparison', self.lang)} — {tr('title', self.lang)}")
-        self.geometry("620x750")
-        self.minsize(600, 700)
+        
+        # Minimized dimensions - tight fit to content
+        # Calendar: 7 cols × ~63px = ~441px
+        # Table: 5 cols × 85px = 425px  
+        # Converter: ~450px
+        # Max content width: 450px
+        # Add scrollbar (20px) = 470px total
+        
+        window_width = 480
+        window_height = 700
+        
+        self.geometry(f"{window_width}x{window_height}")
+        self.minsize(470, 680)
         
         # Configure window to allow vertical resizing
         self.resizable(False, True)
@@ -34,7 +45,7 @@ class ComparisonCard(Toplevel):
         self.theme = get_sky_theme(datetime.now(timezone.utc))
         
         # Create canvas for gradient background
-        self.canvas = Canvas(self, width=600, height=720, highlightthickness=0)
+        self.canvas = Canvas(self, width=window_width, height=window_height, highlightthickness=0)
         self.canvas.place(x=0, y=0, relwidth=1, relheight=1)
         self._draw_gradient()
 
@@ -75,8 +86,9 @@ class ComparisonCard(Toplevel):
     
     def _draw_gradient(self):
         """Draw gradient background on canvas"""
-        width = 600
-        height = 720
+        # Use window dimensions
+        width = int(self.canvas.cget('width'))
+        height = int(self.canvas.cget('height'))
         
         # Create gradient colors
         colors = create_gradient_colors(self.theme, steps=height)

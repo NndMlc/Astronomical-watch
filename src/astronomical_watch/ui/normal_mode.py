@@ -16,6 +16,7 @@ from ..core.astro_time_core import AstroYear
 from .gradient import get_sky_theme, create_gradient_colors
 from .translations import TRANSLATIONS
 from .comparison_card import create_comparison_card
+from .calculation_card import create_calculation_card
 
 # Detect available monospace font
 def get_monospace_font(size=14):
@@ -85,6 +86,7 @@ class ModernNormalMode:
         self.miliDies = 0
         self.mikroDies = 0
         self.current_language = "en"
+        self.lang = "en"  # Alias for compatibility
         
         # Theme state
         self.current_theme = None
@@ -505,6 +507,7 @@ class ModernNormalMode:
     def _change_language(self, lang_code):
         """Change the display language and update all UI text."""
         self.current_language = lang_code
+        self.lang = lang_code  # Keep alias in sync
         self.lang_button.config(text=f"🌐 {lang_code.upper()}")
         
         # Update all translatable text in UI
@@ -651,7 +654,41 @@ class ModernNormalMode:
             
             # Add content based on tab type
             if tab_id == "calculation":
-                content = "Astronomical calculations will be displayed here."
+                # Open calculation card
+                print(f"🔧 Opening calculation card for language: {self.lang}")
+                print(f"🔧 Creating calc_card with master=None...")
+                try:
+                    # Create calc_card with None as master so it's independent
+                    calc_card = create_calculation_card(None, self.lang)
+                    print(f"🔧 calc_card created: {calc_card}")
+                    print(f"🔧 calc_card winfo_exists: {calc_card.winfo_exists()}")
+                    print(f"🔧 calc_card geometry: {calc_card.geometry()}")
+                except Exception as e:
+                    print(f"❌ ERROR creating calc_card: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    return
+                # Close the placeholder window and track the calc card instead
+                print(f"🔧 Destroying placeholder tab_window...")
+                tab_window.destroy()
+                print(f"🔧 Placeholder destroyed, storing calc_card in open_windows...")
+                self.open_windows[tab_id] = calc_card
+                
+                # Bring to front
+                calc_card.lift()
+                calc_card.focus_force()
+                calc_card.attributes('-topmost', True)
+                calc_card.after(100, lambda: calc_card.attributes('-topmost', False))
+                
+                # Update close handler for calc card
+                def on_calc_close():
+                    self.open_windows[tab_id] = None
+                    self._highlight_active_tab()
+                    print(f"❌ Closed {tab_id} tab")
+                
+                calc_card.protocol("WM_DELETE_WINDOW", on_calc_close)
+                print(f"✅ Calculation card opened successfully")
+                return
             elif tab_id == "settings":
                 content = "Settings and preferences will be displayed here."
             else:
@@ -1011,7 +1048,6 @@ class ModernNormalMode:
             
     def _update_display(self):
         """Update the astronomical time display."""
-        print("🔄 Updating display...")
         try:
             from ..core.equinox import compute_vernal_equinox
             
@@ -1109,8 +1145,6 @@ class ModernNormalMode:
                 self._start_fireworks()
             elif self.dies > 0 and self.fireworks_active:
                 self._stop_fireworks()
-            
-            print(f"🕐 Modern Normal Mode Updated: {self.dies:03d}.{self.miliDies:03d}.{mikroDies:03d}")
             
         except Exception as e:
             print(f"❌ Update error: {e}")
