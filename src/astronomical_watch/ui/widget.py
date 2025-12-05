@@ -2,6 +2,7 @@
 Astronomical Watch Widget - Small corner display
 """
 from __future__ import annotations
+import os
 import tkinter as tk
 from datetime import datetime, timezone
 from typing import Optional, Callable
@@ -24,6 +25,9 @@ class AstronomicalWidgetMode:
         
         # Remove title bar (navbar with minimize/maximize/close buttons)
         self.master.overrideredirect(True)
+        
+        # Make window support transparency
+        self.master.attributes('-alpha', 1.0)
         
         # Add drag support since there's no title bar
         self._drag_start_x = 0
@@ -73,14 +77,18 @@ class AstronomicalWidgetMode:
         self.frame.pack(fill="both", expand=True, padx=2, pady=2)
         
         # Single canvas for everything (time display + progress bar)
+        # Canvas MUST have highlightthickness=0 and bd=0 to avoid extra borders
         self.canvas = tk.Canvas(
             self.frame,
-            width=136,  # Fit in 140px widget width
-            height=66,  # Fit in 70px widget height
+            width=136,
+            height=66,
             highlightthickness=0,
             bd=0
         )
         self.canvas.pack(fill="both", expand=True)
+        
+        # Store original background for theme switching
+        self._original_bg = None
         
         # Create context menu
         self._create_context_menu()
@@ -204,12 +212,16 @@ class AstronomicalWidgetMode:
     def _on_mouse_enter(self, event):
         """Handle mouse entering widget area."""
         self._is_hovered = True
+        print(f"🖱️ Mouse ENTER, transparent_mode={self._transparent_mode}")
         if self._transparent_mode:
-            self._apply_theme()  # Show sky theme background
+            # Restore full opacity and show sky theme
+            self.master.attributes('-alpha', 1.0)
+            self._apply_theme()
     
     def _on_mouse_leave(self, event):
         """Handle mouse leaving widget area."""
         self._is_hovered = False
+        print(f"🖱️ Mouse LEAVE, transparent_mode={self._transparent_mode}")
         if self._transparent_mode:
             self._make_transparent()  # Hide background again
             
@@ -218,48 +230,59 @@ class AstronomicalWidgetMode:
         now_utc = datetime.now(timezone.utc)
         theme = get_sky_theme(now_utc)
         
-        # Use top color for widget background (could also blend top/bottom)
+        # Use top color for widget background
         bg_color = theme.top_color
+        self._original_bg = bg_color  # Store for later restoration
         
         self.master.configure(bg=bg_color)
         self.frame.configure(bg=bg_color)
-        
-        # Update canvas background
         self.canvas.configure(bg=bg_color)
         
         # Redraw time display with current background
         self._draw_time_display()
     
     def _make_transparent(self):
-        """Make widget background transparent (only show text and progress bar)."""
-        transparent_color = "#000001"  # Nearly black, used as transparency key
-        self.master.attributes('-transparentcolor', transparent_color)
+        """Make widget background transparent - works on Windows."""
+        import platform
         
-        self.master.configure(bg=transparent_color)
-        self.frame.configure(bg=transparent_color)
-        self.canvas.configure(bg=transparent_color)
+        print(f"🔍 _make_transparent called, platform: {platform.system()}")
         
-        # Redraw display
+        # Use specific color as transparency key
+        transparent_key = "#010101"
+        
+        # Apply transparentcolor attribute (Windows) or try on other platforms
+        try:
+            self.master.wm_attributes('-transparentcolor', transparent_key)
+            print(f"✅ transparentcolor attribute applied: {transparent_key}")
+        except:
+            print(f"⚠️ transparentcolor not supported on this platform")
+        
+        # Set all backgrounds to the transparent key color
+        self.master.configure(bg=transparent_key)
+        self.frame.configure(bg=transparent_key)
+        self.canvas.configure(bg=transparent_key)
+        
+        # Redraw text and progress bar (they will remain visible)
         self._draw_time_display()
     
     def set_transparent_mode(self, enabled: bool):
-        """Enable or disable transparent background mode.
-        
-        Args:
-            enabled: If True, background is transparent (hover to show).
-                    If False, normal sky theme background.
-        """
+        """Enable or disable transparent background mode."""
         self._transparent_mode = enabled
+        
+        print(f"🎨 set_transparent_mode: enabled={enabled}, hovered={self._is_hovered}")
         
         if enabled:
             if not self._is_hovered:
                 self._make_transparent()
             else:
-                self._apply_theme()  # Keep visible if currently hovered
+                self._apply_theme()
         else:
-            # Disable transparency
-            self.master.attributes('-transparentcolor', '')
-            self._apply_theme()  # Restore normal theme
+            # Disable transparency - restore normal theme
+            try:
+                self.master.wm_attributes('-transparentcolor', '')
+            except:
+                pass
+            self._apply_theme()
         
     def _draw_time_display(self):
         """Draw time text with black outline on canvas for better visibility."""
@@ -539,14 +562,7 @@ class AstronomicalWidgetMode:
                 print(f"⚠️ Failed to load settings: {e}")
     
     def apply_settings(self, settings: dict):
-        """Apply settings to widget.
-        
-        Args:
-            settings: Dictionary with keys:
-                - always_on_top: bool
-                - transparent_background: bool
-                - widget_position: dict with x, y (or None for center)
-        """
+        """Apply settings to widget."""
         # Always on top
         if "always_on_top" in settings:
             self._always_on_top = settings["always_on_top"]
@@ -561,7 +577,6 @@ class AstronomicalWidgetMode:
             pos = settings["widget_position"]
             if pos.get("x") is not None and pos.get("y") is not None:
                 self.master.geometry(f"+{pos['x']}+{pos['y']}")
-            # If None, leave at current position (already centered by default)
         
         print(f"✅ Applied settings to widget")
     

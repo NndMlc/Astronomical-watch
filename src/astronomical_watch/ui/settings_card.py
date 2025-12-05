@@ -90,10 +90,10 @@ class SettingsCard(tk.Toplevel):
         """Load settings from config file."""
         config_path = os.path.expanduser("~/.astronomical_watch_config.json")
         default_settings = {
-            "widget_position": {"x": None, "y": None},  # None = center, auto-saved on move
-            "always_on_top": False,  # Default: OFF
-            "load_on_startup": True,  # Default: ON
-            "transparent_background": False,  # Default: OFF (normal sky theme)
+            "widget_position": {"x": None, "y": None},
+            "always_on_top": False,
+            "load_on_startup": True,
+            "transparent_background": False,
             "language": "en"
         }
         
