@@ -25,18 +25,18 @@ class ComparisonCard(Toplevel):
         self.lang = lang
         self.title(f"{tr('comparison', self.lang)} — {tr('title', self.lang)}")
         
-        # Minimized dimensions - tight fit to content
+        # Optimized dimensions - balanced spacing
         # Calendar: 7 cols × ~63px = ~441px
         # Table: 5 cols × 85px = 425px  
-        # Converter: ~450px
-        # Max content width: 450px
-        # Add scrollbar (20px) = 470px total
+        # Converter: ~500px (HH:MM inputs + button + MiliDies)
+        # Max content width: 500px
+        # Add padding (20px left + 20px right) + scrollbar (15px) = 555px total
         
-        window_width = 480
+        window_width = 555
         window_height = 700
         
         self.geometry(f"{window_width}x{window_height}")
-        self.minsize(470, 680)
+        self.minsize(540, 680)
         
         # Configure window to allow vertical resizing
         self.resizable(False, True)
@@ -350,7 +350,7 @@ class ComparisonCard(Toplevel):
         parent_widget = scrollable_frame
         
         tz_frame = Frame(parent_widget, bg=frame_bg, relief="solid", borderwidth=1)
-        tz_frame.pack(pady=(6, 4), padx=12, fill="x")
+        tz_frame.pack(pady=(6, 4), padx=20, fill="x", expand=False)
         
         tz_label = Label(
             tz_frame, 
@@ -376,7 +376,7 @@ class ComparisonCard(Toplevel):
         
         # Calendar frame
         self.calendar_frame = Frame(parent_widget, relief="solid", borderwidth=1, bg=frame_bg)
-        self.calendar_frame.pack(pady=(0, 4), padx=12, fill="x")
+        self.calendar_frame.pack(pady=(0, 4), padx=20, fill="x", expand=False)
         
         # Month/Year selector
         month_frame = Frame(self.calendar_frame, bg=frame_bg)
@@ -398,9 +398,12 @@ class ComparisonCard(Toplevel):
         Label(parent_widget, text=tr("milidies_time_table_label", self.lang), font=("Arial", 9, "bold"),
               bg=self.theme.top_color, fg=text_color).pack(pady=(8, 4))
         
-        # Grid container
-        grid_frame = Frame(parent_widget, bg=frame_bg)
-        grid_frame.pack(pady=(0, 6), padx=12)
+        # Grid container (centered)
+        grid_container = Frame(parent_widget, bg=frame_bg)
+        grid_container.pack(pady=(0, 6), padx=20, fill="x")
+        
+        grid_frame = Frame(grid_container, bg=frame_bg)
+        grid_frame.pack()
         
         # Create 2 rows x 5 columns grid
         for row in range(2):
@@ -454,7 +457,7 @@ class ComparisonCard(Toplevel):
 
         # Conversion tool (in scrollable area)
         converter_frame = Frame(parent_widget, bg=frame_bg, relief="solid", borderwidth=2)
-        converter_frame.pack(pady=(10, 10), padx=(12, 0), fill="x")
+        converter_frame.pack(pady=(10, 10), padx=20, fill="x", expand=False)
         
         # Inner frame for better layout with more vertical space
         inner_frame = Frame(converter_frame, bg=frame_bg)

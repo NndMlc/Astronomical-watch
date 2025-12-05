@@ -3,6 +3,12 @@ Astronomski Sat — Objašnjenje
 
 Astronomski Sat je sat koji prikazuje vreme zasnovano na pravim astronomskim ciklusima, umesto klasičnog kalendarskog vremena. Ovakav sat je namenjen svima koji žele da razumeju i prate vreme prema kretanju Zemlje oko Sunca, bez konvencionalnih ograničenja poput kalendara, vremenskih zona i lokalnog vremena.
 
+Šta je Dies?
+------------
+Dies je reč latinskog porekla koja znači "dan". Za razliku od klasičnog dana koji je lokalnog karaktera — gde svaka vremenska zona ima poseban početak dana kada je Sunce na suprotnoj strani planete — **Dies je globalnog karaktera**. Dies počinje kada je podne iznad Beringovog mora, koje predstavlja prirodnu podelu između istočne i zapadne hemisfere. Dies je svakome na planeti **isti u istom trenutku**.
+
+**MiliDies** je podela Diesa na hiljadu delova. Promena miliDiesa od nule do hiljadu prati kretanje Sunca od istoka ka zapadu dok se ne vrati na istu tačku iznad referentnog meridijana. Prvi Dies (Dies 0) počinje da se broji od trenutka **prolećne ravnodnevnice**, koja označava astronomski početak nove godine.
+
 Zašto godina počinje od prolećne ravnodnevnice?
 -------------------------------------------------
 Za razliku od standardnog kalendara gde godina počinje 1. januara, astronomska godina na ovom satu počinje od trenutka kada Sunce pređe nebeski ekvator — prolećne ravnodnevnice. Ovaj trenutak je prirodna nulta tačka za astronomske cikluse, jer označava početak novog "solarnog kruga" i najbolje prati stvarne promene u dužini dana i noći. To je period kada dan i noć traju približno isto, što ga čini univerzalnim polazištem za merenje vremena.
@@ -55,6 +61,8 @@ Astronomski Sat je koristan za naučnike, astronome, edukatore, ljubitelje priro
 Zašto pratiti vreme astronomski?
 ---------------------------------
 Astronomki Sat omogućava korisnicima da prate vreme na način koji je najbliži stvarnim astronomskim ciklusima i kretanjima Zemlje oko Sunca. Takav pristup daje dublje razumevanje prirodnih ritmova, pomaže u edukaciji, podstiče povezivanje sa prirodom i omogućava globalnu koordinaciju bez veštačkih razlika u vremenu.
+
+Najveća korist od Astronomskog Sata je njegova **globalnost**. Pošto je u svakom trenutku svakome na planeti isti, može pomoći da se usklade razna dešavanja, kako na internetu, tako i van njega. Razne akcije i događaji kojima je potreban sinhronitet mogu da se usklade pomoću Astronomskog Sata — bilo da se radi o međunarodnim konferencijama, virtuelnim događajima, lansiranju globalnih projekata ili koordinaciji naučnih istraživanja. Umesto prevodjenja vremenskih zona i računanja lokalnih razlika, Astronomski Sat pruža jedan, jasan i univerzalan vremenski sistem koji svi mogu koristiti istovremeno.
 
 Ukratko, Astronomki Sat je sat budućnosti — univerzalan, precizan, edukativan i inspirativan.
 """

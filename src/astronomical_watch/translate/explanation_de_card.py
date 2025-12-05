@@ -3,6 +3,12 @@ Astronomische Uhr — Erklärung
 
 Die Astronomische Uhr ist eine Uhr, die die Zeit auf Basis echter astronomischer Zyklen und nicht der konventionellen Kalenderzeit anzeigt. Diese Uhr ist für alle gedacht, die die Zeit gemäß der Bewegung der Erde um die Sonne verstehen und verfolgen möchten, ohne die herkömmlichen Beschränkungen wie Kalender, Zeitzonen und lokale Zeit.
 
+Was ist Dies?
+------------
+Dies ist ein Wort lateinischen Ursprungs, das „Tag" bedeutet. Im Gegensatz zum klassischen Tag, der lokaler Natur ist — wobei jede Zeitzone einen eigenen Tagesbeginn hat, wenn die Sonne auf der gegenüberliegenden Seite des Planeten steht — ist **Dies globaler Natur**. Dies beginnt, wenn Mittag über der Beringstraße ist, die die natürliche Grenze zwischen östlicher und westlicher Hemisphäre darstellt. Dies ist für jeden auf dem Planeten **im selben Moment gleich**.
+
+**MiliDies** ist die Unterteilung eines Dies in tausend Teile. Die Änderung von miliDies von null bis tausend folgt der Bewegung der Sonne von Osten nach Westen, bis sie zum gleichen Punkt über dem Referenzmeridian zurückkehrt. Der erste Dies (Dies 0) beginnt ab dem Moment der **Frühlings-Tagundnachtgleiche**, die den astronomischen Beginn des neuen Jahres markiert.
+
 Warum beginnt das Jahr mit der Frühlings-Tagundnachtgleiche?
 -------------------------------------------------
 Im Gegensatz zum Standardkalender, bei dem das Jahr am 1. Januar beginnt, startet das astronomische Jahr dieser Uhr zu dem Zeitpunkt, an dem die Sonne den Himmelsäquator überquert — der Frühlings-Tagundnachtgleiche. Dieser Moment ist ein natürlicher Nullpunkt für astronomische Zyklen, kennzeichnet den Beginn eines neuen "Sonnenkreises" und spiegelt die tatsächlichen Veränderungen in der Länge von Tag und Nacht am besten wider. In dieser Zeit sind Tag und Nacht etwa gleich lang, was sie zu einem universellen Ausgangspunkt für die Zeitmessung macht.
@@ -55,6 +61,8 @@ Die Astronomische Uhr ist nützlich für Wissenschaftler, Astronomen, Lehrer, Na
 Warum die Zeit astronomisch verfolgen?
 ---------------------------------
 Die Astronomische Uhr ermöglicht es Nutzern, die Zeit auf die Weise zu verfolgen, die den tatsächlichen astronomischen Zyklen und der Bewegung der Erde um die Sonne am nächsten kommt. Dieser Ansatz ermöglicht ein tieferes Verständnis der natürlichen Rhythmen, hilft bei der Bildung, fördert die Verbundenheit mit der Natur und ermöglicht eine globale Koordination der Zeit ohne künstliche Unterschiede.
+
+Der größte Vorteil der Astronomischen Uhr ist ihre **Globalität**. Da sie zu jedem Zeitpunkt für jeden auf dem Planeten gleich ist, kann sie helfen, verschiedene Ereignisse sowohl im Internet als auch außerhalb zu koordinieren. Verschiedene Aktionen und Ereignisse, die Synchronität erfordern, können mit der Astronomischen Uhr abgestimmt werden — sei es bei internationalen Konferenzen, virtuellen Veranstaltungen, dem Start globaler Projekte oder der Koordinierung wissenschaftlicher Forschung. Anstatt Zeitzonen umzurechnen und lokale Unterschiede zu berechnen, bietet die Astronomische Uhr ein einziges, klares und universelles Zeitsystem, das alle gleichzeitig nutzen können.
 
 Kurz gesagt: Die Astronomische Uhr ist die Uhr der Zukunft — universell, präzise, lehrreich und inspirierend.
 """

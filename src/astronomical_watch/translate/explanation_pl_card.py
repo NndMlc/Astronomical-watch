@@ -3,6 +3,12 @@ Zegar Astronomiczny — Wyjaśnienie
 
 Zegar astronomiczny to zegar, który pokazuje czas oparty na rzeczywistych cyklach astronomicznych, a nie na konwencjonalnym czasie kalendarzowym. Takie urządzenie jest przeznaczone dla każdego, kto chce zrozumieć i śledzić czas zgodnie z ruchem Ziemi wokół Słońca, bez ograniczeń związanych z kalendarzem, strefami czasowymi czy czasem lokalnym.
 
+Czym jest Dies?
+------------
+Dies to słowo pochodzenia łacińskiego, które oznacza "dzień". W przeciwieństwie do klasycznego dnia, który ma charakter lokalny — każda strefa czasowa ma osobny początek dnia, gdy Słońce znajduje się po przeciwnej stronie planety — **Dies ma charakter globalny**. Dies zaczyna się, gdy jest południe nad Morzem Beringa, które stanowi naturalną granicę między wschodnią a zachodnią półkulą. Dies jest dla każdego na planecie **taki sam w tym samym momencie**.
+
+**MiliDies** to podział Diesa na tysiąc części. Zmiana miliDiesa od zera do tysiąca śledzi ruch Słońca ze wschodu na zachód, aż powróci do tego samego punktu nad meridianem referencyjnym. Pierwszy Dies (Dies 0) zaczyna się w momencie **równonocy wiosennej**, która oznacza astronomiczny początek nowego roku.
+
 Dlaczego rok zaczyna się od równonocy wiosennej?
 -------------------------------------------------
 W przeciwieństwie do standardowego kalendarza, w którym rok zaczyna się 1 stycznia, rok astronomiczny na tym zegarze rozpoczyna się w chwili, gdy Słońce przekracza równik niebieski — czyli podczas równonocy wiosennej. Ten moment jest naturalnym punktem zerowym dla cykli astronomicznych, oznacza początek nowego „kręgu słonecznego” i najlepiej oddaje rzeczywiste zmiany długości dnia i nocy. To okres, kiedy dzień i noc trwają prawie tyle samo, co czyni go uniwersalnym początkiem pomiaru czasu.
@@ -55,6 +61,8 @@ Zegar astronomiczny jest przydatny dla naukowców, astronomów, nauczycieli, mi�
 Dlaczego warto śledzić czas astronomicznie?
 ---------------------------------
 Zegar astronomiczny pozwala użytkownikom śledzić czas w sposób najbardziej zbliżony do rzeczywistych cykli astronomicznych i ruchu Ziemi wokół Słońca. Takie podejście daje głębsze zrozumienie naturalnych rytmów, pomaga w edukacji, wzmacnia więź z naturą i umożliwia globalną koordynację czasu bez sztucznych różnic.
+
+Największą korzyścią Zegara Astronomicznego jest jego **uniwersalność**. Ponieważ w każdym momencie pokazuje ten sam czas dla wszystkich na planecie, może pomóc w koordynacji różnych wydarzeń, zarówno w internecie, jak i poza nim. Różne akcje i wydarzenia wymagające synchronizacji mogą być koordynowane za pomocą Zegara Astronomicznego — czy to międzynarodowe konferencje, wydarzenia wirtualne, uruchamianie globalnych projektów czy koordynacja badań naukowych. Zamiast przeliczania stref czasowych i obliczania lokalnych różnic, Zegar Astronomiczny zapewnia jeden, jasny i uniwersalny system czasu, z którego wszyscy mogą korzystać jednocześnie.
 
 W skrócie, Zegar Astronomiczny to zegar przyszłości — uniwersalny, precyzyjny, edukacyjny i inspirujący.
 """

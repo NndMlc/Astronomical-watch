@@ -3,6 +3,12 @@ Agogon Taurari — Bayani
 
 Agogon Taurari agogo ne da ke nuna lokaci bisa ga zagayowar taurari na gaske, ba na kalanda na gargajiya ba. An ƙirƙira wannan agogo don duk wanda ke son fahimta da bin lokaci bisa ga yadda Duniya ke yawo a kusa da Rana, ba tare da takunkumin kalanda, yankunan lokaci, ko lokaci na gida ba.
 
+Me ne Dies?
+------------
+Dies kalma ce ta Latin da ke nufin "yini". Sabanin yini na gargajiya wanda yake da yanayi na gida — inda kowace yanki na lokaci yana da farkon yini na musamman lokacin da Rana ke a daya bangaren duniya — **Dies yana da yanayi na duniya**. Dies yana farawa ne lokacin da rana ta tsaka a saman Tekun Bering, wanda ke wakiltar rarrabuwar halitta tsakanin gabashin da yammacin duniya. Dies yana **daidai ga kowa a duniya a lokaci guda**.
+
+**miliDies** shine rarraba Dies zuwa kashi dubu. Canjin miliDies daga sifili zuwa dubu yana bin motsin Rana daga gabas zuwa yamma har ya dawo wuri guda a saman meridian na musamman. Dies na farko (Dies 0) yana farawa ne daga lokacin **daidaiton bazara**, wanda ke nuna farkon astronomiya na sabuwar shekara.
+
 Me ya sa shekara take farawa da daidaiton bazara?
 -------------------------------------------------
 Saboda bambanci da kalanda na yau da kullum wanda yake fara shekara a ranar 1 ga Janairu, shekara ta taurari a wannan agogo tana farawa ne daga lokacin da Rana ta ketare daidaiton sama — wato daidaiton bazara. Wannan lokaci shi ne asalin tushe na zagayowar taurari, yana nuna sabon "zobe na rana" kuma yana fi nuna canje-canje na gaske a tsawon yini da dare. Wannan ita ce lokacin da yini da dare ke kusan daidai, don haka shi ne tushe na duniya don auna lokaci.
@@ -55,6 +61,8 @@ Agogon Taurari yana da amfani ga masana kimiyya, taurari, malamai, masu sha'awar
 Me ya sa a bi lokaci ta taurari?
 ---------------------------------
 Agogon Taurari yana ba wa masu amfani damar bin lokaci yadda ya fi kusa da zagayowar taurari na gaske da motsin Duniya a kusa da Rana. Wannan hanyar tana ba da fahimta mai zurfi game da tsarin lokaci na halitta, yana taimakawa ilimi, yana ƙarfafa haɗin kai da yanayi, kuma yana ba da damar daidaita lokaci na duniya ba tare da bambance-bambancen da aka ƙirƙira ba.
+
+Babbar fa'idar Agogon Taurari ita ce **yanayin duniyarsa**. Da yake daidai ga kowa a duniya a kowane lokaci, zai iya taimakawa wajen daidaita abubuwa daban-daban, ko a intanet ko a wajen ta. Ana iya daidaita ayyuka da al'amuran daban-daban da ke buƙatar daidaitawa ta hanyar Agogon Taurari — ko dai tarurrukan ƙasa da ƙasa, abubuwan kama-da-wane, ƙaddamar da ayyukan duniya ko daidaita binciken kimiyya. Maimakon juyar da yankunan lokaci da ƙididdige bambance-bambancen gida, Agogon Taurari yana ba da tsarin lokaci guda ɗaya, bayyananne kuma na duniya wanda kowa zai iya amfani dashi lokaci guda.
 
 A takaice, Agogon Taurari agogon gaba ne — na duniya, daidai, na ilimi, kuma mai ba da ƙarfafawa.
 """
