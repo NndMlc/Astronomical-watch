@@ -211,10 +211,23 @@ class AstronomicalWidgetMode:
     
     def _on_mouse_enter(self, event):
         """Handle mouse entering widget area."""
+        import platform
         self._is_hovered = True
         print(f"🖱️ Mouse ENTER, transparent_mode={self._transparent_mode}")
         if self._transparent_mode:
-            # Show sky theme when hovering over transparent widget
+            # Show sky theme when hovering
+            if platform.system() == "Windows":
+                # Clear transparentcolor temporarily
+                try:
+                    self.master.wm_attributes('-transparentcolor', '')
+                except:
+                    pass
+            else:
+                # Restore full alpha
+                try:
+                    self.master.attributes('-alpha', 1.0)
+                except:
+                    pass
             self._apply_theme_temporary()
     
     def _on_mouse_leave(self, event):
@@ -227,8 +240,9 @@ class AstronomicalWidgetMode:
             
     def _apply_theme(self):
         """Apply sky gradient theme based on current time."""
-        # Don't apply theme if in transparent mode and not hovered
+        # In transparent mode: only update time display, skip background
         if self._transparent_mode and not self._is_hovered:
+            self._draw_time_display()  # Update time even in transparent mode
             return
             
         now_utc = datetime.now(timezone.utc)
@@ -264,34 +278,51 @@ class AstronomicalWidgetMode:
         self._draw_time_display()
     
     def _make_transparent(self):
-        """Make widget background transparent - works on Windows."""
+        """Make widget background transparent - cross-platform implementation."""
         import platform
+        from datetime import datetime, timezone
         
-        print(f"🔍 _make_transparent called, platform: {platform.system()}")
+        system = platform.system()
+        print(f"🔍 _make_transparent called, platform: {system}")
         
-        # Use specific color as transparency key
-        transparent_key = "#010101"
+        if system == "Windows":
+            # Windows: Use transparentcolor (real transparency)
+            transparent_key = "#010101"
+            try:
+                self.master.wm_attributes('-transparentcolor', transparent_key)
+                self.master.configure(bg=transparent_key)
+                self.frame.configure(bg=transparent_key)
+                self.canvas.configure(bg=transparent_key)
+                print(f"✅ Windows: transparentcolor applied - background invisible")
+            except Exception as e:
+                print(f"⚠️ Windows transparentcolor failed: {e}")
+        else:
+            # Linux/macOS: Use semi-transparent sky theme
+            try:
+                # Get current sky theme
+                now_utc = datetime.now(timezone.utc)
+                theme = get_sky_theme(now_utc)
+                
+                # Apply sky gradient background
+                self.master.configure(bg=theme.top_color)
+                self.frame.configure(bg=theme.top_color)
+                self.canvas.configure(bg=theme.top_color)
+                
+                # Use semi-transparency to blend with desktop
+                self.master.attributes('-alpha', 0.7)
+                print(f"✅ Linux/macOS: alpha 0.7 with sky theme applied")
+            except Exception as e:
+                print(f"⚠️ Linux transparency failed: {e}")
         
-        # Apply transparentcolor attribute (Windows) or try on other platforms
-        try:
-            self.master.wm_attributes('-transparentcolor', transparent_key)
-            print(f"✅ transparentcolor attribute applied: {transparent_key}")
-        except:
-            print(f"⚠️ transparentcolor not supported on this platform")
-        
-        # Set all backgrounds to the transparent key color
-        self.master.configure(bg=transparent_key)
-        self.frame.configure(bg=transparent_key)
-        self.canvas.configure(bg=transparent_key)
-        
-        # Redraw text and progress bar (they will remain visible)
+        # Redraw display
         self._draw_time_display()
     
     def set_transparent_mode(self, enabled: bool):
-        """Enable or disable transparent background mode."""
+        """Enable or disable transparent background mode - cross-platform."""
+        import platform
         self._transparent_mode = enabled
         
-        print(f"🎨 set_transparent_mode: enabled={enabled}, hovered={self._is_hovered}")
+        print(f"🎨 set_transparent_mode: enabled={enabled}, hovered={self._is_hovered}, platform={platform.system()}")
         
         if enabled:
             # Enable transparency immediately (unless currently hovered)
@@ -302,10 +333,19 @@ class AstronomicalWidgetMode:
                 self._apply_theme_temporary()
         else:
             # Disable transparency - restore normal theme
-            try:
-                self.master.wm_attributes('-transparentcolor', '')
-            except:
-                pass
+            system = platform.system()
+            if system == "Windows":
+                try:
+                    self.master.wm_attributes('-transparentcolor', '')
+                except:
+                    pass
+            else:
+                # Linux/macOS: restore full alpha
+                try:
+                    self.master.attributes('-alpha', 1.0)
+                except:
+                    pass
+            
             # Force theme update
             now_utc = datetime.now(timezone.utc)
             theme = get_sky_theme(now_utc)

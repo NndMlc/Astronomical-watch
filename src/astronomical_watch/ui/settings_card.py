@@ -215,20 +215,24 @@ class SettingsCard(tk.Toplevel):
         )
         load_on_startup_cb.pack(anchor="w", pady=2)
         
-        # Transparent background checkbox
-        self.transparent_var = tk.BooleanVar(value=self.settings.get("transparent_background", False))
-        transparent_checkbutton = tk.Checkbutton(
-            widget_frame,
-            text="Transparent background (hover to show)",
-            variable=self.transparent_var,
-            command=self._update_transparency_live,
-            bg=self.bg_color,
-            fg=self.text_color,
-            selectcolor="#333333",
-            activebackground=self.bg_color,
-            font=("Arial", 10)
-        )
-        transparent_checkbutton.pack(anchor="w", pady=5)
+        # Transparent background checkbox - Windows only
+        if platform.system() == "Windows":
+            self.transparent_var = tk.BooleanVar(value=self.settings.get("transparent_background", False))
+            transparent_checkbutton = tk.Checkbutton(
+                widget_frame,
+                text="Transparent background (hover to show)",
+                variable=self.transparent_var,
+                command=self._update_transparency_live,
+                bg=self.bg_color,
+                fg=self.text_color,
+                selectcolor="#333333",
+                activebackground=self.bg_color,
+                font=("Arial", 10)
+            )
+            transparent_checkbutton.pack(anchor="w", pady=5)
+        else:
+            # Linux/macOS: Feature not available
+            self.transparent_var = tk.BooleanVar(value=False)
         
         # === Info Section ===
         self._create_section(main_frame, "Application Info")
