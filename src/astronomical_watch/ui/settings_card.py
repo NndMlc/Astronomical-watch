@@ -23,14 +23,17 @@ class SettingsCard(tk.Toplevel):
         self.widget_ref = widget_ref  # Reference to widget for applying settings
         
         self.title("Settings — Astronomical Watch")
-        self.geometry("650x700")
-        self.minsize(600, 650)
+        self.geometry("400x700")
+        self.minsize(380, 650)
+        
+        # Remove window decorations (minimize/maximize buttons)
+        self.overrideredirect(True)
         
         # Get sky theme for gradient
         self.theme = get_sky_theme(datetime.now(timezone.utc))
         
         # Create canvas for gradient background
-        self.canvas = tk.Canvas(self, width=650, height=700, highlightthickness=0)
+        self.canvas = tk.Canvas(self, width=400, height=700, highlightthickness=0)
         self.canvas.place(x=0, y=0, relwidth=1, relheight=1)
         self._draw_gradient()
         
@@ -44,9 +47,12 @@ class SettingsCard(tk.Toplevel):
         # Create UI
         self._make_widgets()
         
+        # Setup drag functionality
+        self._setup_dragging()
+        
     def _draw_gradient(self):
         """Draw gradient background on canvas."""
-        width = 650
+        width = 400
         height = 700
         
         # Create gradient colors
@@ -56,14 +62,38 @@ class SettingsCard(tk.Toplevel):
         for i, color in enumerate(colors):
             self.canvas.create_line(0, i, width, i, fill=color, width=1)
     
+    def _setup_dragging(self):
+        """Setup window dragging functionality on background elements."""
+        self._drag_data = {"x": 0, "y": 0}
+        
+        def start_drag(event):
+            self._drag_data["x"] = event.x_root
+            self._drag_data["y"] = event.y_root
+            
+        def do_drag(event):
+            deltax = event.x_root - self._drag_data["x"]
+            deltay = event.y_root - self._drag_data["y"]
+            
+            x = self.winfo_x() + deltax
+            y = self.winfo_y() + deltay
+            
+            self.geometry(f"+{x}+{y}")
+            
+            self._drag_data["x"] = event.x_root
+            self._drag_data["y"] = event.y_root
+        
+        # Bind to canvas background
+        self.canvas.bind("<Button-1>", start_drag)
+        self.canvas.bind("<B1-Motion>", do_drag)
+    
     def _load_settings(self):
         """Load settings from config file."""
         config_path = os.path.expanduser("~/.astronomical_watch_config.json")
         default_settings = {
-            "widget_position": {"x": None, "y": None},  # None = center
-            "always_on_top": False,
-            "load_on_startup": False,
-            "opacity": 100,
+            "widget_position": {"x": None, "y": None},  # None = center, auto-saved on move
+            "always_on_top": False,  # Default: OFF
+            "load_on_startup": True,  # Default: ON
+            "transparent_background": False,  # Default: OFF (normal sky theme)
             "language": "en"
         }
         
@@ -90,19 +120,66 @@ class SettingsCard(tk.Toplevel):
     
     def _make_widgets(self):
         """Create all settings widgets."""
-        # Main scrollable container
-        main_frame = tk.Frame(self, bg=self.bg_color)
-        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        # Main container
+        outer_frame = tk.Frame(self, bg=self.bg_color)
+        outer_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        # Title
+        # === Top: Title with close button (fixed) ===
+        title_frame = tk.Frame(outer_frame, bg=self.bg_color)
+        title_frame.pack(fill=tk.X, pady=(0, 15))
+        
         title = tk.Label(
-            main_frame,
+            title_frame,
             text="⚙️ Settings",
             font=("Arial", 18, "bold"),
             bg=self.bg_color,
             fg=self.text_color
         )
-        title.pack(pady=(0, 20))
+        title.pack(side=tk.LEFT)
+        
+        close_btn = tk.Button(
+            title_frame,
+            text="✕",
+            command=self.destroy,
+            bg="#FF5252",
+            fg="white",
+            font=("Arial", 14, "bold"),
+            width=3,
+            relief=tk.FLAT
+        )
+        close_btn.pack(side=tk.RIGHT)
+        
+        # === Middle: Scrollable content ===
+        scroll_container = tk.Frame(outer_frame, bg=self.bg_color)
+        scroll_container.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
+        
+        # Create canvas for scrolling
+        canvas = tk.Canvas(scroll_container, bg=self.bg_color, highlightthickness=0)
+        scrollbar = tk.Scrollbar(scroll_container, orient="vertical", command=canvas.yview)
+        
+        # Scrollable frame inside canvas
+        scrollable_frame = tk.Frame(canvas, bg=self.bg_color)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Pack canvas and scrollbar
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Enable mousewheel scrolling
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        
+        # Content frame (this will be scrollable)
+        main_frame = tk.Frame(scrollable_frame, bg=self.bg_color)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=5)
         
         # === Widget Settings Section ===
         self._create_section(main_frame, "Widget Settings")
@@ -138,65 +215,20 @@ class SettingsCard(tk.Toplevel):
         )
         load_on_startup_cb.pack(anchor="w", pady=2)
         
-        # Opacity slider
-        opacity_frame = tk.Frame(widget_frame, bg=self.bg_color)
-        opacity_frame.pack(fill=tk.X, pady=(10, 5))
-        
-        tk.Label(
-            opacity_frame,
-            text="Widget Opacity:",
-            bg=self.bg_color,
-            fg=self.text_color,
-            font=("Arial", 10)
-        ).pack(side=tk.LEFT, padx=(0, 10))
-        
-        self.opacity_var = tk.IntVar(value=self.settings["opacity"])
-        self.opacity_label = tk.Label(
-            opacity_frame,
-            text=f"{self.settings['opacity']}%",
-            bg=self.bg_color,
-            fg=self.text_color,
-            font=("Arial", 10, "bold")
-        )
-        self.opacity_label.pack(side=tk.RIGHT)
-        
-        opacity_slider = tk.Scale(
+        # Transparent background checkbox
+        self.transparent_var = tk.BooleanVar(value=self.settings.get("transparent_background", False))
+        transparent_checkbutton = tk.Checkbutton(
             widget_frame,
-            from_=50,
-            to=100,
-            orient=tk.HORIZONTAL,
-            variable=self.opacity_var,
-            command=self._update_opacity_label,
+            text="Transparent background (hover to show)",
+            variable=self.transparent_var,
+            command=self._update_transparency_live,
             bg=self.bg_color,
             fg=self.text_color,
-            highlightthickness=0,
-            troughcolor="#555555"
-        )
-        opacity_slider.pack(fill=tk.X, pady=(0, 5))
-        
-        # Widget position
-        position_frame = tk.Frame(widget_frame, bg=self.bg_color)
-        position_frame.pack(fill=tk.X, pady=(10, 0))
-        
-        tk.Label(
-            position_frame,
-            text="Widget Position:",
-            bg=self.bg_color,
-            fg=self.text_color,
+            selectcolor="#333333",
+            activebackground=self.bg_color,
             font=("Arial", 10)
-        ).pack(side=tk.LEFT, padx=(0, 10))
-        
-        reset_pos_btn = tk.Button(
-            position_frame,
-            text="Reset to Center",
-            command=self._reset_position,
-            bg="#4CAF50",
-            fg="white",
-            font=("Arial", 9),
-            padx=10,
-            pady=3
         )
-        reset_pos_btn.pack(side=tk.RIGHT)
+        transparent_checkbutton.pack(anchor="w", pady=5)
         
         # === Info Section ===
         self._create_section(main_frame, "Application Info")
@@ -255,48 +287,22 @@ class SettingsCard(tk.Toplevel):
         )
         privacy_text.pack(anchor="w")
         
-        # === Action Buttons ===
-        button_frame = tk.Frame(main_frame, bg=self.bg_color)
-        button_frame.pack(fill=tk.X, pady=(20, 0))
+        # === Bottom: Action Buttons (fixed) ===
+        button_frame = tk.Frame(outer_frame, bg=self.bg_color)
+        button_frame.pack(fill=tk.X, pady=(10, 0))
         
-        # Export settings
-        export_btn = tk.Button(
-            button_frame,
-            text="📤 Export Settings",
-            command=self._export_settings,
-            bg="#2196F3",
-            fg="white",
-            font=("Arial", 10),
-            padx=15,
-            pady=8
-        )
-        export_btn.pack(side=tk.LEFT, padx=(0, 10))
-        
-        # Reset to defaults
-        reset_btn = tk.Button(
-            button_frame,
-            text="🔄 Reset to Defaults",
-            command=self._reset_to_defaults,
-            bg="#FF9800",
-            fg="white",
-            font=("Arial", 10),
-            padx=15,
-            pady=8
-        )
-        reset_btn.pack(side=tk.LEFT, padx=(0, 10))
-        
-        # Save & Close
+        # Save & Close (centered)
         save_btn = tk.Button(
             button_frame,
             text="💾 Save & Close",
             command=self._save_and_close,
             bg="#4CAF50",
             fg="white",
-            font=("Arial", 10, "bold"),
-            padx=20,
-            pady=8
+            font=("Arial", 11, "bold"),
+            padx=30,
+            pady=10
         )
-        save_btn.pack(side=tk.RIGHT)
+        save_btn.pack(expand=True)
     
     def _create_section(self, parent, title):
         """Create a section header."""
@@ -341,14 +347,17 @@ class SettingsCard(tk.Toplevel):
         )
         value.pack(side=tk.LEFT)
     
-    def _update_opacity_label(self, value):
-        """Update opacity label when slider moves."""
-        self.opacity_label.config(text=f"{int(float(value))}%")
-    
-    def _reset_position(self):
-        """Reset widget position to center."""
-        self.settings["widget_position"] = {"x": None, "y": None}
-        messagebox.showinfo("Position Reset", "Widget position will be centered on next launch.")
+    def _update_transparency_live(self):
+        """Update transparency setting and apply to widget immediately."""
+        transparent = self.transparent_var.get()
+        
+        # Apply to widget in real-time
+        if self.widget_ref and hasattr(self.widget_ref, 'set_transparent_mode'):
+            try:
+                self.widget_ref.set_transparent_mode(transparent)
+            except Exception as e:
+                print(f"⚠️ Could not update widget transparency: {e}")
+                pass
     
     def _export_settings(self):
         """Export settings to a JSON file."""
@@ -381,14 +390,14 @@ class SettingsCard(tk.Toplevel):
                 "widget_position": {"x": None, "y": None},
                 "always_on_top": False,
                 "load_on_startup": False,
-                "opacity": 100,
+                "transparent_background": False,
                 "language": "en"
             }
             
             # Update UI
             self.always_on_top_var.set(False)
             self.load_on_startup_var.set(False)
-            self.opacity_var.set(100)
+            self.transparent_var.set(False)
             
             messagebox.showinfo("Reset Complete", "Settings have been reset to defaults.")
     
@@ -397,7 +406,7 @@ class SettingsCard(tk.Toplevel):
         # Update settings from UI
         self.settings["always_on_top"] = self.always_on_top_var.get()
         self.settings["load_on_startup"] = self.load_on_startup_var.get()
-        self.settings["opacity"] = self.opacity_var.get()
+        self.settings["transparent_background"] = self.transparent_var.get()
         
         # Save to file
         if self._save_settings():
@@ -405,8 +414,9 @@ class SettingsCard(tk.Toplevel):
             if self.widget_ref and hasattr(self.widget_ref, 'apply_settings'):
                 self.widget_ref.apply_settings(self.settings)
             
-            messagebox.showinfo("Settings Saved", "Settings have been saved successfully.")
+            # Destroy window without showing message box (it blocks)
             self.destroy()
+            print("✅ Settings saved and applied")
 
 
 def create_settings_card(master=None, lang="en", widget_ref=None):

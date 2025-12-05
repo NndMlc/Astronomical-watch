@@ -540,6 +540,7 @@ class ModernNormalMode:
         
     def _highlight_active_tab(self):
         """Highlight the active tab button and show window status."""
+        print(f"🔍 _highlight_active_tab called, open_windows: {list(self.open_windows.keys())}")
         for tab_id, button in self.tab_buttons.items():
             # Check if window is open for this tab
             window_open = False
@@ -547,17 +548,25 @@ class ModernNormalMode:
                 try:
                     self.open_windows[tab_id].winfo_exists()
                     window_open = True
+                    print(f"  ✅ {tab_id}: window exists and is open")
                 except tk.TclError:
                     # Window was closed, clear reference
                     self.open_windows[tab_id] = None
                     window_open = False
+                    print(f"  ❌ {tab_id}: window was closed (TclError)")
+            else:
+                print(f"  ⭕ {tab_id}: no window open")
             
             if window_open:
                 # Window is open - show as inactive/disabled
                 button.config(bg="#2a2a2a", fg="#666666", state="disabled")
+                button.update_idletasks()  # Force immediate update
+                print(f"  🔒 {tab_id} button DISABLED")
             else:
                 # Normal state - use original colors
                 button.config(bg="#4a5568", fg="#e2e8f0", state="normal")
+                button.update_idletasks()  # Force immediate update
+                print(f"  🔓 {tab_id} button ENABLED")
                 
     def _open_tab_window(self, tab_id):
         """Open tab content in a separate window."""
@@ -582,48 +591,31 @@ class ModernNormalMode:
             self._show_explanation()
         elif tab_id == "comparison":
             # Create functional comparison card
-            comparison_window = create_comparison_card(self.master, self.current_language)
-            
-            # Force window to appear above normal mode
-            comparison_window.transient(self.master)
-            comparison_window.lift()
-            comparison_window.focus_force()
-            comparison_window.wm_attributes("-topmost", True)
-            comparison_window.after(200, lambda: comparison_window.wm_attributes("-topmost", False))
+            comparison_window = create_comparison_card(None, self.current_language)
             
             # Store reference to prevent duplicates
             self.open_windows[tab_id] = comparison_window
             
-            # Set up proper cleanup when window is closed (any method)
-            def on_comparison_close():
-                print(f"🗑️ Comparison window closing...")
-                if self.open_windows[tab_id] is not None:
+            # Update button state immediately
+            self._highlight_active_tab()
+            
+            # Bring to front with temporary topmost
+            comparison_window.lift()
+            comparison_window.focus_force()
+            comparison_window.attributes('-topmost', True)
+            comparison_window.after(100, lambda: comparison_window.attributes('-topmost', False))
+            
+            # Bind to <Destroy> event to clean up when window is destroyed
+            def on_comparison_destroy(event):
+                # Only handle the main window destroy, not child widgets
+                if event.widget == comparison_window:
+                    print(f"🔄 Comparison <Destroy> event triggered")
                     self.open_windows[tab_id] = None
-                    print(f"✅ Closed {tab_id} card")
-                    # Schedule button update after window is destroyed
-                    self.master.after(10, self._highlight_active_tab)
-                    self.master.after(50, self.bring_to_front)
-                comparison_window.destroy()
+                    print(f"🔄 Calling _highlight_active_tab to re-enable button")
+                    self._highlight_active_tab()
+                    print(f"❌ Closed {tab_id} tab")
             
-            # Override both destroy and WM_DELETE_WINDOW protocol
-            comparison_window.protocol("WM_DELETE_WINDOW", on_comparison_close)
-            
-            # Also override destroy method for close button
-            original_destroy = comparison_window.destroy
-            def enhanced_destroy():
-                print(f"🗑️ Enhanced destroy called for {tab_id}")
-                if self.open_windows[tab_id] is not None:
-                    self.open_windows[tab_id] = None
-                    print(f"✅ Closed {tab_id} card (via destroy)")
-                    # Schedule button update after window is destroyed
-                    self.master.after(10, self._highlight_active_tab)
-                    self.master.after(50, self.bring_to_front)
-                try:
-                    original_destroy()
-                except:
-                    pass  # Already destroyed
-            
-            comparison_window.destroy = enhanced_destroy
+            comparison_window.bind('<Destroy>', on_comparison_destroy)
             
         else:
             # Create simple window for other tabs
@@ -656,13 +648,18 @@ class ModernNormalMode:
                 # Open settings card
                 print(f"🔧 Opening settings card for language: {self.lang}")
                 try:
+                    # Close the placeholder window first
+                    tab_window.destroy()
+                    
                     # Create settings card with widget reference
                     settings_card = create_settings_card(None, self.lang, widget_ref=self.widget_ref)
                     print(f"🔧 settings_card created: {settings_card}")
                     
-                    # Close the placeholder window and track the settings card instead
-                    tab_window.destroy()
+                    # Track the settings card
                     self.open_windows[tab_id] = settings_card
+                    
+                    # Update button state immediately
+                    self._highlight_active_tab()
                     
                     # Bring to front
                     settings_card.lift()
@@ -670,13 +667,17 @@ class ModernNormalMode:
                     settings_card.attributes('-topmost', True)
                     settings_card.after(100, lambda: settings_card.attributes('-topmost', False))
                     
-                    # Update close handler for settings card
-                    def on_settings_close():
-                        self.open_windows[tab_id] = None
-                        self._highlight_active_tab()
-                        print(f"❌ Closed {tab_id} tab")
+                    # Bind to <Destroy> event to clean up when window is destroyed
+                    def on_settings_destroy(event):
+                        # Only handle the main window destroy, not child widgets
+                        if event.widget == settings_card:
+                            print(f"🔄 Settings <Destroy> event triggered")
+                            self.open_windows[tab_id] = None
+                            print(f"🔄 Calling _highlight_active_tab to re-enable button")
+                            self._highlight_active_tab()
+                            print(f"❌ Closed {tab_id} tab")
                     
-                    settings_card.protocol("WM_DELETE_WINDOW", on_settings_close)
+                    settings_card.bind('<Destroy>', on_settings_destroy)
                     print(f"✅ Settings card opened successfully")
                     return
                     
@@ -693,9 +694,6 @@ class ModernNormalMode:
             label.pack(expand=True, pady=50)
             
             print(f"🗂️ Opened {tab_id} tab")
-            
-        # Update button states after opening window
-        self._highlight_active_tab()
         
     def _show_explanation(self):
         """Show explanation window with content based on current language."""
@@ -729,33 +727,111 @@ class ModernNormalMode:
             explanation_window.geometry("700x600")
             explanation_window.minsize(600, 500)
             
+            # Remove window decorations (minimize/maximize buttons)
+            explanation_window.overrideredirect(True)
+            
+            # Store reference to prevent duplicates
+            self.open_windows["explanation"] = explanation_window
+            
+            # Update button state immediately
+            self._highlight_active_tab()
+            
             # Bring window to front with temporary topmost
             explanation_window.lift()
             explanation_window.focus_force()
             explanation_window.attributes('-topmost', True)
             explanation_window.after(100, lambda: explanation_window.attributes('-topmost', False))
             
-            # Store reference to prevent duplicates
-            self.open_windows["explanation"] = explanation_window
+            # Bind to <Destroy> event to clean up when window is destroyed
+            def on_explanation_destroy(event):
+                # Only handle the main window destroy, not child widgets
+                if event.widget == explanation_window:
+                    print(f"🔄 Explanation <Destroy> event triggered")
+                    self.open_windows["explanation"] = None
+                    print(f"🔄 Calling _highlight_active_tab to re-enable button")
+                    self._highlight_active_tab()
+                    print(f"❌ Closed explanation tab")
             
-            # Add cleanup when window is closed
-            def on_explanation_close():
-                self.open_windows["explanation"] = None
-                explanation_window.destroy()
-                # Update button states when window closes
-                self._highlight_active_tab()
-                # Bring Normal Mode to front when card closes
-                self.bring_to_front()
-            
-            explanation_window.protocol("WM_DELETE_WINDOW", on_explanation_close)
+            explanation_window.bind('<Destroy>', on_explanation_destroy)
             
             # Apply theme to explanation window
             theme = get_sky_theme()
             explanation_window.configure(bg=theme.bottom_color)
             
+            # Setup drag functionality first
+            drag_data = {"x": 0, "y": 0}
+            
+            def start_drag(event):
+                drag_data["x"] = event.x_root
+                drag_data["y"] = event.y_root
+                
+            def do_drag(event):
+                deltax = event.x_root - drag_data["x"]
+                deltay = event.y_root - drag_data["y"]
+                
+                x = explanation_window.winfo_x() + deltax
+                y = explanation_window.winfo_y() + deltay
+                
+                explanation_window.geometry(f"+{x}+{y}")
+                
+                drag_data["x"] = event.x_root
+                drag_data["y"] = event.y_root
+            
+            # Bind to window background
+            explanation_window.bind("<Button-1>", start_drag)
+            explanation_window.bind("<B1-Motion>", do_drag)
+            
+            # Main container
+            outer_frame = tk.Frame(explanation_window, bg=theme.bottom_color)
+            outer_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+            
+            # Bind drag to outer frame
+            outer_frame.bind("<Button-1>", start_drag)
+            outer_frame.bind("<B1-Motion>", do_drag)
+            
+            # === Top: Title with close button (fixed) ===
+            title_frame = tk.Frame(outer_frame, bg=theme.bottom_color)
+            title_frame.pack(fill=tk.X, pady=(0, 15))
+            
+            title = tk.Label(
+                title_frame,
+                text=f"📖 {tr('explanation', self.current_language)}",
+                font=("Arial", 18, "bold"),
+                bg=theme.bottom_color,
+                fg=theme.text_color
+            )
+            title.pack(side=tk.LEFT)
+            
+            # Make title label draggable - this allows dragging by clicking on the text
+            title.bind("<Button-1>", lambda e: (start_drag(e), "break"))
+            title.bind("<B1-Motion>", lambda e: (do_drag(e), "break"))
+            
+            close_btn = tk.Button(
+                title_frame,
+                text="✕",
+                command=explanation_window.destroy,
+                bg="#FF5252",
+                fg="white",
+                font=("Arial", 14, "bold"),
+                width=3,
+                relief=tk.FLAT
+            )
+            close_btn.pack(side=tk.RIGHT)
+            
+            # Make the empty space in title_frame draggable (between title and close button)
+            # We need to create a filler frame
+            filler = tk.Frame(title_frame, bg=theme.bottom_color)
+            filler.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            filler.bind("<Button-1>", start_drag)
+            filler.bind("<B1-Motion>", do_drag)
+            
             # Create scrollable text widget
-            text_frame = tk.Frame(explanation_window, bg=theme.bottom_color)
-            text_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+            text_frame = tk.Frame(outer_frame, bg=theme.bottom_color)
+            text_frame.pack(fill=tk.BOTH, expand=True)
+            
+            # Bind drag to frame as well
+            text_frame.bind("<Button-1>", start_drag)
+            text_frame.bind("<B1-Motion>", do_drag)
             
             # Text widget with scrollbar
             text_widget = tk.Text(
@@ -779,10 +855,15 @@ class ModernNormalMode:
             text_widget.insert(tk.END, explanation_text)
             text_widget.config(state=tk.DISABLED)
             
-            print(f"📖 Opened explanation in {self.current_language}")
+            # Bind drag to text widget as well (works even when disabled)
+            text_widget.bind("<Button-1>", start_drag)
+            text_widget.bind("<B1-Motion>", do_drag)
             
-            # Update button states after opening window
-            self._highlight_active_tab()
+            # Bind drag to scrollbar
+            scrollbar.bind("<Button-1>", start_drag)
+            scrollbar.bind("<B1-Motion>", do_drag)
+            
+            print(f"📖 Opened explanation in {self.current_language}")
             
         except Exception as e:
             print(f"❌ Could not load explanation for {self.current_language}: {e}")
@@ -801,22 +882,27 @@ class ModernNormalMode:
             
     def _close_window(self):
         """Close the normal mode window and all open cards."""
+        print("📴 Closing Normal Mode and all cards...")
         # First, close all open card windows
-        for tab_id, window in self.open_windows.items():
+        # We need to clear the references BEFORE calling destroy to trigger button updates
+        windows_to_close = list(self.open_windows.items())
+        
+        # Clear all references first
+        for tab_id in self.open_windows.keys():
+            self.open_windows[tab_id] = None
+        
+        # Update button states to show all as enabled
+        self._highlight_active_tab()
+        
+        # Now destroy the actual windows
+        for tab_id, window in windows_to_close:
             if window is not None:
                 try:
-                    window.destroy()
-                    print(f"✅ Closed {tab_id} card")
-                except:
-                    pass
-        
-        # Clear all window references
-        self.open_windows = {
-            "explanation": None,
-            "comparison": None,
-            "calculation": None,
-            "settings": None
-        }
+                    if window.winfo_exists():
+                        print(f"🔄 Destroying {tab_id} card...")
+                        window.destroy()
+                except Exception as e:
+                    print(f"⚠️ Error closing {tab_id}: {e}")
         
         # Stop any updates
         self.stop_updates()

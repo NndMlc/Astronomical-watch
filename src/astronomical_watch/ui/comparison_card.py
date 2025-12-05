@@ -41,6 +41,9 @@ class ComparisonCard(Toplevel):
         # Configure window to allow vertical resizing
         self.resizable(False, True)
         
+        # Remove window decorations (minimize/maximize buttons)
+        self.overrideredirect(True)
+        
         # Get sky theme
         self.theme = get_sky_theme(datetime.now(timezone.utc))
         
@@ -61,6 +64,9 @@ class ComparisonCard(Toplevel):
         self.current_cal_year = datetime.now().year
         
         self._make_widgets()
+        
+        # Setup drag functionality
+        self._setup_dragging()
     
     def _get_timezone_name(self):
         """Get full timezone name from system"""
@@ -99,6 +105,30 @@ class ComparisonCard(Toplevel):
         
         # Update text color for better contrast
         self.text_color = self.theme.text_color
+    
+    def _setup_dragging(self):
+        """Setup window dragging functionality on background elements."""
+        self._drag_data = {"x": 0, "y": 0}
+        
+        def start_drag(event):
+            self._drag_data["x"] = event.x_root
+            self._drag_data["y"] = event.y_root
+            
+        def do_drag(event):
+            deltax = event.x_root - self._drag_data["x"]
+            deltay = event.y_root - self._drag_data["y"]
+            
+            x = self.winfo_x() + deltax
+            y = self.winfo_y() + deltay
+            
+            self.geometry(f"+{x}+{y}")
+            
+            self._drag_data["x"] = event.x_root
+            self._drag_data["y"] = event.y_root
+        
+        # Bind to canvas background
+        self.canvas.bind("<Button-1>", start_drag)
+        self.canvas.bind("<B1-Motion>", do_drag)
 
     def _prev_month(self):
         """Navigate to previous month"""
@@ -266,8 +296,38 @@ class ComparisonCard(Toplevel):
         text_color = self.theme.text_color
         frame_bg = self.theme.bottom_color
         
+        # Create outer container
+        outer_frame = Frame(self, bg=frame_bg)
+        outer_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        # === Top: Title with close button (fixed) ===
+        title_frame = Frame(outer_frame, bg=frame_bg)
+        title_frame.pack(fill="x", pady=(0, 15))
+        
+        title = Label(
+            title_frame,
+            text=f"📊 {tr('comparison', self.lang)}",
+            font=("Arial", 18, "bold"),
+            bg=frame_bg,
+            fg=text_color
+        )
+        title.pack(side="left")
+        
+        close_btn = Button(
+            title_frame,
+            text="✕",
+            command=self.destroy,
+            bg="#FF5252",
+            fg="white",
+            font=("Arial", 14, "bold"),
+            width=3,
+            relief="flat"
+        )
+        close_btn.pack(side="right")
+        
+        # === Middle: Scrollable content ===
         # Create main container with scrollable area for ALL content
-        main_container = Frame(self, bg=frame_bg)
+        main_container = Frame(outer_frame, bg=frame_bg)
         main_container.pack(fill="both", expand=True)
         
         # Scrollable canvas and scrollbar

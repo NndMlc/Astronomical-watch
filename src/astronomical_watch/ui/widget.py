@@ -48,6 +48,10 @@ class AstronomicalWidgetMode:
         # Update job reference
         self.update_job = None
         
+        # Transparency mode state
+        self._transparent_mode = False
+        self._is_hovered = False
+        
         # Fireworks state
         self.fireworks_active = False
         self.fireworks_particles = []
@@ -166,6 +170,12 @@ class AstronomicalWidgetMode:
                 self.master.geometry(f"+{x}+{y}")
                 self._drag_start_x = event.x_root
                 self._drag_start_y = event.y_root
+        
+        def on_drag_end(event):
+            # Save position when drag ends
+            if self._drag_moved:
+                self._save_widget_position()
+                self._drag_moved = False
                 
         def on_double_click(event):
             # Double click to open Normal Mode (prevents accidental activation)
@@ -183,8 +193,25 @@ class AstronomicalWidgetMode:
         for widget in widgets_for_interaction:
             widget.bind("<ButtonPress-1>", on_drag_start)
             widget.bind("<B1-Motion>", on_drag)
+            widget.bind("<ButtonRelease-1>", on_drag_end)  # Save position when drag ends
             widget.bind("<Double-Button-1>", on_double_click)
             widget.bind("<Button-3>", lambda e: self._show_context_menu(e))  # Right click
+            
+            # Hover events for transparency mode
+            widget.bind("<Enter>", self._on_mouse_enter)
+            widget.bind("<Leave>", self._on_mouse_leave)
+    
+    def _on_mouse_enter(self, event):
+        """Handle mouse entering widget area."""
+        self._is_hovered = True
+        if self._transparent_mode:
+            self._apply_theme()  # Show sky theme background
+    
+    def _on_mouse_leave(self, event):
+        """Handle mouse leaving widget area."""
+        self._is_hovered = False
+        if self._transparent_mode:
+            self._make_transparent()  # Hide background again
             
     def _apply_theme(self):
         """Apply sky gradient theme based on current time."""
@@ -202,6 +229,37 @@ class AstronomicalWidgetMode:
         
         # Redraw time display with current background
         self._draw_time_display()
+    
+    def _make_transparent(self):
+        """Make widget background transparent (only show text and progress bar)."""
+        transparent_color = "#000001"  # Nearly black, used as transparency key
+        self.master.attributes('-transparentcolor', transparent_color)
+        
+        self.master.configure(bg=transparent_color)
+        self.frame.configure(bg=transparent_color)
+        self.canvas.configure(bg=transparent_color)
+        
+        # Redraw display
+        self._draw_time_display()
+    
+    def set_transparent_mode(self, enabled: bool):
+        """Enable or disable transparent background mode.
+        
+        Args:
+            enabled: If True, background is transparent (hover to show).
+                    If False, normal sky theme background.
+        """
+        self._transparent_mode = enabled
+        
+        if enabled:
+            if not self._is_hovered:
+                self._make_transparent()
+            else:
+                self._apply_theme()  # Keep visible if currently hovered
+        else:
+            # Disable transparency
+            self.master.attributes('-transparentcolor', '')
+            self._apply_theme()  # Restore normal theme
         
     def _draw_time_display(self):
         """Draw time text with black outline on canvas for better visibility."""
@@ -486,7 +544,7 @@ class AstronomicalWidgetMode:
         Args:
             settings: Dictionary with keys:
                 - always_on_top: bool
-                - opacity: int (50-100)
+                - transparent_background: bool
                 - widget_position: dict with x, y (or None for center)
         """
         # Always on top
@@ -494,10 +552,9 @@ class AstronomicalWidgetMode:
             self._always_on_top = settings["always_on_top"]
             self.master.attributes('-topmost', self._always_on_top)
         
-        # Opacity (convert percentage to 0.0-1.0)
-        if "opacity" in settings:
-            opacity_value = settings["opacity"] / 100.0
-            self.master.attributes('-alpha', opacity_value)
+        # Transparent background
+        if "transparent_background" in settings:
+            self.set_transparent_mode(settings["transparent_background"])
         
         # Position
         if "widget_position" in settings:
@@ -507,6 +564,30 @@ class AstronomicalWidgetMode:
             # If None, leave at current position (already centered by default)
         
         print(f"✅ Applied settings to widget")
+    
+    def _save_widget_position(self):
+        """Save current widget position to config file."""
+        import json
+        config_path = os.path.expanduser("~/.astronomical_watch_config.json")
+        
+        try:
+            # Load existing settings
+            settings = {}
+            if os.path.exists(config_path):
+                with open(config_path, 'r') as f:
+                    settings = json.load(f)
+            
+            # Update position
+            x = self.master.winfo_x()
+            y = self.master.winfo_y()
+            settings["widget_position"] = {"x": x, "y": y}
+            
+            # Save back to file
+            with open(config_path, 'w') as f:
+                json.dump(settings, f, indent=2)
+                
+        except Exception as e:
+            print(f"⚠️ Failed to save widget position: {e}")
             
     def start_updates(self):
         """Start the periodic update cycle."""
