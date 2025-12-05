@@ -214,31 +214,53 @@ class AstronomicalWidgetMode:
         self._is_hovered = True
         print(f"🖱️ Mouse ENTER, transparent_mode={self._transparent_mode}")
         if self._transparent_mode:
-            # Restore full opacity and show sky theme
-            self.master.attributes('-alpha', 1.0)
-            self._apply_theme()
+            # Show sky theme when hovering over transparent widget
+            self._apply_theme_temporary()
     
     def _on_mouse_leave(self, event):
         """Handle mouse leaving widget area."""
         self._is_hovered = False
         print(f"🖱️ Mouse LEAVE, transparent_mode={self._transparent_mode}")
         if self._transparent_mode:
-            self._make_transparent()  # Hide background again
+            # Return to transparent mode
+            self._make_transparent()
             
     def _apply_theme(self):
         """Apply sky gradient theme based on current time."""
+        # Don't apply theme if in transparent mode and not hovered
+        if self._transparent_mode and not self._is_hovered:
+            return
+            
         now_utc = datetime.now(timezone.utc)
         theme = get_sky_theme(now_utc)
         
         # Use top color for widget background
         bg_color = theme.top_color
-        self._original_bg = bg_color  # Store for later restoration
+        self._original_bg = bg_color
         
         self.master.configure(bg=bg_color)
         self.frame.configure(bg=bg_color)
         self.canvas.configure(bg=bg_color)
         
         # Redraw time display with current background
+        self._draw_time_display()
+    
+    def _apply_theme_temporary(self):
+        """Apply sky theme temporarily (for hover in transparent mode)."""
+        # Clear transparentcolor temporarily
+        try:
+            self.master.wm_attributes('-transparentcolor', '')
+        except:
+            pass
+            
+        now_utc = datetime.now(timezone.utc)
+        theme = get_sky_theme(now_utc)
+        bg_color = theme.top_color
+        
+        self.master.configure(bg=bg_color)
+        self.frame.configure(bg=bg_color)
+        self.canvas.configure(bg=bg_color)
+        
         self._draw_time_display()
     
     def _make_transparent(self):
@@ -272,17 +294,26 @@ class AstronomicalWidgetMode:
         print(f"🎨 set_transparent_mode: enabled={enabled}, hovered={self._is_hovered}")
         
         if enabled:
+            # Enable transparency immediately (unless currently hovered)
             if not self._is_hovered:
                 self._make_transparent()
             else:
-                self._apply_theme()
+                # Keep theme visible during hover
+                self._apply_theme_temporary()
         else:
             # Disable transparency - restore normal theme
             try:
                 self.master.wm_attributes('-transparentcolor', '')
             except:
                 pass
-            self._apply_theme()
+            # Force theme update
+            now_utc = datetime.now(timezone.utc)
+            theme = get_sky_theme(now_utc)
+            bg_color = theme.top_color
+            self.master.configure(bg=bg_color)
+            self.frame.configure(bg=bg_color)
+            self.canvas.configure(bg=bg_color)
+            self._draw_time_display()
         
     def _draw_time_display(self):
         """Draw time text with black outline on canvas for better visibility."""
