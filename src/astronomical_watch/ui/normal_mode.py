@@ -181,8 +181,8 @@ class ModernNormalMode:
     def _create_icons(self):
         """Create simple text-based icons."""
         self.icons = {
-            "info": "ℹ️",
-            "compare": "⚖️", 
+            "info": "ⓘ",
+            "compare": "⇄", 
             "calc": "🧮",
             "settings": "⚙️"
         }
@@ -438,7 +438,7 @@ class ModernNormalMode:
             btn = tk.Button(
                 button_container,
                 text=icon,
-                font=("Arial", 16),
+                font=("Arial", 24, "bold"),
                 relief=tk.FLAT,
                 width=4,
                 height=2,
