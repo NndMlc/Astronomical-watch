@@ -177,7 +177,15 @@ class ComparisonCard(Toplevel):
             "el": ["Ιανουάριος", "Φεβρουάριος", "Μάρτιος", "Απρίλιος", "Μάιος", "Ιούνιος", "Ιούλιος", "Αύγουστος", "Σεπτέμβριος", "Οκτώβριος", "Νοέμβριος", "Δεκέμβριος"],
             "pl": ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"],
             "it": ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"],
-            "nl": ["Januari", "Februari", "Maart", "April", "Mei", "Juni", "Juli", "Augustus", "September", "Oktober", "November", "December"]
+            "nl": ["Januari", "Februari", "Maart", "April", "Mei", "Juni", "Juli", "Augustus", "September", "Oktober", "November", "December"],
+            "ro": ["Ianuarie", "Februarie", "Martie", "Aprilie", "Mai", "Iunie", "Iulie", "August", "Septembrie", "Octombrie", "Noiembrie", "Decembrie"],
+            "he": ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"],
+            "bn": ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"],
+            "ku": ["Çile", "Sibat", "Adar", "Nîsan", "Gulan", "Hezîran", "Tîrmeh", "Tebax", "Îlon", "Çiriya Pêşîn", "Çiriya Paşîn", "Kanûn"],
+            "zu": ["Januwari", "Februwari", "Mashi", "Ephreli", "Meyi", "Juni", "Julayi", "Agasti", "Septhemba", "Okthoba", "Novemba", "Disemba"],
+            "vi": ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"],
+            "ko": ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+            "ur": ["جنوری", "فروری", "مارچ", "اپریل", "مئی", "جون", "جولائی", "اگست", "ستمبر", "اکتوبر", "نومبر", "دسمبر"]
         }
         lang_months = month_names.get(self.lang, month_names["en"])
         self.month_year_label.config(text=f"{lang_months[self.current_cal_month-1]} {self.current_cal_year}")
@@ -203,7 +211,15 @@ class ComparisonCard(Toplevel):
             "el": ["Δευ", "Τρί", "Τετ", "Πέμ", "Παρ", "Σάβ", "Κυρ"],
             "pl": ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"],
             "it": ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"],
-            "nl": ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"]
+            "nl": ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"],
+            "ro": ["Lun", "Mar", "Mie", "Joi", "Vin", "Sâm", "Dum"],
+            "he": ["ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳", "א׳"],
+            "bn": ["সোম", "মঙ্গল", "বুধ", "বৃহ", "শুক্র", "শনি", "রবি"],
+            "ku": ["Dş", "Sş", "Çş", "Pş", "În", "Şe", "Yek"],
+            "zu": ["Mso", "Lwe", "Lsi", "Lsi", "Lsi", "Mgo", "Son"],
+            "vi": ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
+            "ko": ["월", "화", "수", "목", "금", "토", "일"],
+            "ur": ["پیر", "منگل", "بدھ", "جمعرات", "جمعہ", "ہفتہ", "اتوار"]
         }
         lang_days = day_names.get(self.lang, day_names["en"])
         
@@ -474,13 +490,16 @@ class ComparisonCard(Toplevel):
         self.milidies_entry.bind('<Button-1>', lambda e: self._on_field_click('milidies'))
         self.milidies_entry.bind('<KeyPress>', self._handle_keypress)
         
-        # Middle: Convert button
+        # Middle: Convert button with dynamic arrow
         middle_frame = Frame(inner_frame, bg=frame_bg)
         middle_frame.pack(side="left", padx=15)
-        Label(middle_frame, text="", font=("Arial", 10), bg=frame_bg).pack()  # Spacer for alignment
-        Button(middle_frame, text=tr("convert_button", self.lang), 
+        Label(middle_frame, text="", font=("Arial", 11, "bold"), bg=frame_bg).pack(pady=(0, 6))  # Spacer to align with labels
+        
+        # Single button that changes arrow based on active field - matched height with entry fields
+        self.convert_button = Button(middle_frame, text="→", 
                command=self._convert_bidirectional,
-               font=("Arial", 12, "bold"), padx=30, pady=22).pack()
+               font=("Arial", 28, "bold"), width=3, height=1, bd=2, relief="solid")
+        self.convert_button.pack()
         
         # Right: Hours and Minutes inputs
         right_frame = Frame(inner_frame, bg=frame_bg)
@@ -536,6 +555,12 @@ class ComparisonCard(Toplevel):
         
         # Set active field
         self.active_field = field_type
+        
+        # Update button arrow based on active field
+        if field_type == 'milidies':
+            self.convert_button.config(text="→")  # Arrow right: miliDies → Time
+        else:  # time
+            self.convert_button.config(text="←")  # Arrow left: Time → miliDies
     
     def _validate_milidies(self, event=None):
         """Allow only 3-digit numbers in miliDies field"""
@@ -581,6 +606,78 @@ class ComparisonCard(Toplevel):
             self.minutes_entry.delete(0, 'end')
             self.minutes_entry.insert(0, cleaned)
     
+    def _convert_milidies_to_time(self):
+        """Convert miliDies to HH:MM (arrow right →)"""
+        milidies_text = self.milidies_entry.get().strip()
+        
+        if not milidies_text:
+            return
+        
+        try:
+            milidies = int(milidies_text)
+            if milidies > 999:
+                return
+            
+            # Use AstroYear to get accurate time based on timezone
+            try:
+                test_dt = self.astro_year.approximate_utc_from_day_miliDies(100, milidies)
+                local_dt = test_dt.astimezone()
+                hours = local_dt.hour
+                minutes = local_dt.minute
+            except:
+                # Fallback calculation
+                total_minutes = 16 + (milidies * 1.44)  # Start at 00:16 local
+                hours = int(total_minutes // 60) % 24
+                minutes = int(total_minutes % 60)
+            
+            self.hours_entry.delete(0, 'end')
+            self.hours_entry.insert(0, f"{hours:02d}")
+            self.minutes_entry.delete(0, 'end')
+            self.minutes_entry.insert(0, f"{minutes:02d}")
+            
+        except Exception:
+            pass  # Silently ignore errors
+    
+    def _convert_time_to_milidies(self):
+        """Convert HH:MM to miliDies (arrow left ←)"""
+        hours_text = self.hours_entry.get().strip()
+        minutes_text = self.minutes_entry.get().strip()
+        
+        if not hours_text or not minutes_text:
+            return
+        
+        try:
+            hours = int(hours_text)
+            minutes = int(minutes_text)
+            
+            if hours > 23 or minutes > 59:
+                return
+            
+            # Calculate miliDies from local time
+            # Local Dies starts at 00:15:54 (round to 00:16)
+            # Convert input time to minutes from Dies start
+            input_minutes = hours * 60 + minutes
+            dies_start_minutes = 0 * 60 + 16  # 00:16
+            
+            # Handle day wrap
+            if input_minutes < dies_start_minutes:
+                input_minutes += 24 * 60  # Add 24 hours
+            
+            minutes_from_start = input_minutes - dies_start_minutes
+            milidies = int(round(minutes_from_start / 1.44))
+            
+            # Clamp to 0-999
+            if milidies < 0:
+                milidies = 0
+            if milidies > 999:
+                milidies = 999
+            
+            self.milidies_entry.delete(0, 'end')
+            self.milidies_entry.insert(0, f"{milidies:03d}")
+            
+        except Exception:
+            pass  # Silently ignore errors
+    
     def _convert_bidirectional(self):
         """Convert between miliDies and HH:MM based on which field has input"""
         milidies_text = self.milidies_entry.get().strip()
@@ -590,56 +687,11 @@ class ComparisonCard(Toplevel):
         try:
             # If miliDies has input, convert to time
             if milidies_text:
-                milidies = int(milidies_text)
-                if milidies > 999:
-                    return
-                
-                # Use AstroYear to get accurate time based on timezone
-                try:
-                    test_dt = self.astro_year.approximate_utc_from_day_miliDies(100, milidies)
-                    local_dt = test_dt.astimezone()
-                    hours = local_dt.hour
-                    minutes = local_dt.minute
-                except:
-                    # Fallback calculation
-                    total_minutes = 16 + (milidies * 1.44)  # Start at 00:16 local
-                    hours = int(total_minutes // 60) % 24
-                    minutes = int(total_minutes % 60)
-                
-                self.hours_entry.delete(0, 'end')
-                self.hours_entry.insert(0, f"{hours:02d}")
-                self.minutes_entry.delete(0, 'end')
-                self.minutes_entry.insert(0, f"{minutes:02d}")
+                self._convert_milidies_to_time()
                 
             # If time has input, convert to miliDies
             elif hours_text and minutes_text:
-                hours = int(hours_text)
-                minutes = int(minutes_text)
-                
-                if hours > 23 or minutes > 59:
-                    return
-                
-                # Calculate miliDies from local time
-                # Local Dies starts at 00:15:54 (round to 00:16)
-                # Convert input time to minutes from Dies start
-                input_minutes = hours * 60 + minutes
-                dies_start_minutes = 0 * 60 + 16  # 00:16
-                
-                # Handle day wrap
-                if input_minutes < dies_start_minutes:
-                    input_minutes += 24 * 60  # Add 24 hours
-                
-                minutes_from_start = input_minutes - dies_start_minutes
-                milidies = int(round(minutes_from_start / 1.44))
-                
-                # Clamp to 0-999
-                if milidies < 0:
-                    milidies = 0
-                if milidies > 999:
-                    milidies = 999
-                
-                self.milidies_entry.delete(0, 'end')
-                self.milidies_entry.insert(0, f"{milidies:03d}")
+                self._convert_time_to_milidies()
                 
         except Exception as e:
             pass  # Silently ignore errors

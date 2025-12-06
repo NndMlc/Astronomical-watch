@@ -13,28 +13,36 @@ from .translations import TRANSLATIONS
 
 from ..core.astro_time_core import AstroYear
 
-# Simple language list for language menu - all 20 languages from translations.py
+# Simple language list for language menu - all 28 languages from translations.py
 LANGUAGES = [
     ("English", "en"),
-    ("Српски (Serbian)", "sr"),
-    ("Español", "es"),
     ("中文 (Chinese)", "zh"),
-    ("العربية (Arabic)", "ar"),
-    ("Português", "pt"),
-    ("Français", "fr"),
-    ("Deutsch", "de"),
-    ("Русский (Russian)", "ru"),
-    ("日本語 (Japanese)", "ja"),
     ("हिन्दी (Hindi)", "hi"),
-    ("فارسی (Persian)", "fa"),
+    ("Español", "es"),
+    ("Français", "fr"),
+    ("العربية (Arabic)", "ar"),
+    ("বাংলা (Bengali)", "bn"),
+    ("Português", "pt"),
+    ("Русский (Russian)", "ru"),
+    ("اردو (Urdu)", "ur"),
     ("Bahasa Indonesia", "id"),
+    ("Deutsch", "de"),
+    ("日本語 (Japanese)", "ja"),
     ("Kiswahili", "sw"),
-    ("Hausa", "ha"),
     ("Türkçe", "tr"),
-    ("Ελληνικά (Greek)", "el"),
-    ("Polski", "pl"),
+    ("한국어 (Korean)", "ko"),
+    ("Tiếng Việt (Vietnamese)", "vi"),
     ("Italiano", "it"),
-    ("Nederlands", "nl")
+    ("فارسی (Persian)", "fa"),
+    ("Polski", "pl"),
+    ("Hausa", "ha"),
+    ("Kurdî (Kurdish)", "ku"),
+    ("Nederlands", "nl"),
+    ("Română (Romanian)", "ro"),
+    ("Српскохрватски (Serbo-Croatian)", "sr"),
+    ("isiZulu (Zulu)", "zu"),
+    ("עברית (Hebrew)", "he"),
+    ("Ελληνικά (Greek)", "el")
 ]
 
 def tr(key: str, lang: str = "en") -> str:

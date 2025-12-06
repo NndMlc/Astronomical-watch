@@ -12,6 +12,11 @@ import sys
 import platform
 from datetime import datetime, timezone
 from .gradient import get_sky_theme, create_gradient_colors
+from .translations import TRANSLATIONS
+
+def tr(key: str, lang: str = "en") -> str:
+    """Simple translation function."""
+    return TRANSLATIONS.get(lang, {}).get(key, TRANSLATIONS.get("en", {}).get(key, key))
 
 
 class SettingsCard(tk.Toplevel):
@@ -130,7 +135,7 @@ class SettingsCard(tk.Toplevel):
         
         title = tk.Label(
             title_frame,
-            text="⚙️ Settings",
+            text=tr("settings_title", self.lang),
             font=("Arial", 18, "bold"),
             bg=self.bg_color,
             fg=self.text_color
@@ -182,7 +187,7 @@ class SettingsCard(tk.Toplevel):
         main_frame.pack(fill=tk.BOTH, expand=True, padx=5)
         
         # === Widget Settings Section ===
-        self._create_section(main_frame, "Widget Settings")
+        self._create_section(main_frame, tr("widget_settings", self.lang))
         
         widget_frame = tk.Frame(main_frame, bg=self.bg_color)
         widget_frame.pack(fill=tk.X, pady=(0, 15))
@@ -191,7 +196,7 @@ class SettingsCard(tk.Toplevel):
         self.always_on_top_var = tk.BooleanVar(value=self.settings["always_on_top"])
         always_on_top_cb = tk.Checkbutton(
             widget_frame,
-            text="Keep widget always on top",
+            text=tr("always_on_top", self.lang),
             variable=self.always_on_top_var,
             bg=self.bg_color,
             fg=self.text_color,
@@ -205,7 +210,7 @@ class SettingsCard(tk.Toplevel):
         self.load_on_startup_var = tk.BooleanVar(value=self.settings["load_on_startup"])
         load_on_startup_cb = tk.Checkbutton(
             widget_frame,
-            text="Load widget on system startup",
+            text=tr("load_on_startup", self.lang),
             variable=self.load_on_startup_var,
             bg=self.bg_color,
             fg=self.text_color,
@@ -220,7 +225,7 @@ class SettingsCard(tk.Toplevel):
             self.transparent_var = tk.BooleanVar(value=self.settings.get("transparent_background", False))
             transparent_checkbutton = tk.Checkbutton(
                 widget_frame,
-                text="Transparent background (hover to show)",
+                text=tr("transparent_bg", self.lang),
                 variable=self.transparent_var,
                 command=self._update_transparency_live,
                 bg=self.bg_color,
@@ -235,37 +240,34 @@ class SettingsCard(tk.Toplevel):
             self.transparent_var = tk.BooleanVar(value=False)
         
         # === Info Section ===
-        self._create_section(main_frame, "Application Info")
+        self._create_section(main_frame, tr("app_info", self.lang))
         
         info_frame = tk.Frame(main_frame, bg=self.bg_color)
         info_frame.pack(fill=tk.X, pady=(0, 15))
         
         # Version
-        self._add_info_row(info_frame, "Version:", "1.0.0 (2025-12)")
+        self._add_info_row(info_frame, tr("version", self.lang), "1.0.0 (2025-12)")
         
         # Python
-        self._add_info_row(info_frame, "Python:", f"{sys.version.split()[0]}")
+        self._add_info_row(info_frame, tr("python", self.lang), f"{sys.version.split()[0]}")
         
         # OS
-        self._add_info_row(info_frame, "Operating System:", f"{platform.system()} {platform.release()}")
+        self._add_info_row(info_frame, tr("os", self.lang), f"{platform.system()} {platform.release()}")
         
         # Timezone
         import time
         tz_name = time.tzname[0]
-        self._add_info_row(info_frame, "System Timezone:", tz_name)
+        self._add_info_row(info_frame, tr("system_timezone", self.lang), tz_name)
         
         # === License & Credits Section ===
-        self._create_section(main_frame, "License & Credits")
+        self._create_section(main_frame, tr("license_credits", self.lang))
         
         license_frame = tk.Frame(main_frame, bg=self.bg_color)
         license_frame.pack(fill=tk.X, pady=(0, 15))
         
         license_text = tk.Label(
             license_frame,
-            text="Core algorithms: Astronomical Watch Core License (restrictive)\n"
-                 "UI & Application: MIT License\n\n"
-                 "© 2025 Astronomical Watch Project\n"
-                 "github.com/NndMlc/Astronomical-watch",
+            text=tr("license_text", self.lang),
             bg=self.bg_color,
             fg=self.text_color,
             font=("Arial", 9),
@@ -274,16 +276,14 @@ class SettingsCard(tk.Toplevel):
         license_text.pack(anchor="w")
         
         # === Data & Privacy Section ===
-        self._create_section(main_frame, "Data & Privacy")
+        self._create_section(main_frame, tr("data_privacy", self.lang))
         
         privacy_frame = tk.Frame(main_frame, bg=self.bg_color)
         privacy_frame.pack(fill=tk.X, pady=(0, 15))
         
         privacy_text = tk.Label(
             privacy_frame,
-            text="🔒 This application works entirely offline.\n"
-                 "No data is collected or sent to external servers.\n"
-                 "Settings are stored locally in your home directory.",
+            text=tr("privacy_text", self.lang),
             bg=self.bg_color,
             fg=self.text_color,
             font=("Arial", 9),
@@ -298,7 +298,7 @@ class SettingsCard(tk.Toplevel):
         # Save & Close (centered)
         save_btn = tk.Button(
             button_frame,
-            text="💾 Save & Close",
+            text=tr("save_close", self.lang),
             command=self._save_and_close,
             bg="#4CAF50",
             fg="white",

@@ -45,25 +45,33 @@ def get_monospace_font(size=14):
 # Language options - all 20 languages from translations.py
 LANGUAGES = [
     ("English", "en"),
-    ("Español", "es"),
     ("中文 (Chinese)", "zh"),
-    ("العربية (Arabic)", "ar"),
-    ("Português", "pt"),
-    ("Français", "fr"),
-    ("Deutsch", "de"),
-    ("Русский (Russian)", "ru"),
-    ("日本語 (Japanese)", "ja"),
     ("हिन्दी (Hindi)", "hi"),
-    ("فارسی (Persian)", "fa"),
+    ("Español", "es"),
+    ("Français", "fr"),
+    ("العربية (Arabic)", "ar"),
+    ("বাংলা (Bengali)", "bn"),
+    ("Português", "pt"),
+    ("Русский (Russian)", "ru"),
+    ("اردو (Urdu)", "ur"),
     ("Bahasa Indonesia", "id"),
+    ("Deutsch", "de"),
+    ("日本語 (Japanese)", "ja"),
     ("Kiswahili", "sw"),
-    ("Hausa", "ha"),
     ("Türkçe", "tr"),
-    ("Ελληνικά (Greek)", "el"),
-    ("Polski", "pl"),
+    ("한국어 (Korean)", "ko"),
+    ("Tiếng Việt (Vietnamese)", "vi"),
     ("Italiano", "it"),
+    ("فارسی (Persian)", "fa"),
+    ("Polski", "pl"),
+    ("Hausa", "ha"),
+    ("Kurdî (Kurdish)", "ku"),
     ("Nederlands", "nl"),
-    ("Српски (Serbian)", "sr")
+    ("Română (Romanian)", "ro"),
+    ("Српскохрватски (Serbo-Croatian)", "sr"),
+    ("isiZulu (Zulu)", "zu"),
+    ("עברית (Hebrew)", "he"),
+    ("Ελληνικά (Greek)", "el")
 ]
 
 def tr(key: str, lang: str = "en") -> str:
@@ -476,21 +484,78 @@ class ModernNormalMode:
         self.title_label.bind("<B1-Motion>", do_drag)
         
     def _show_language_menu(self):
-        """Show language selection menu."""
-        menu = tk.Menu(self.master, tearoff=0, bg="#3d3d3d", fg="white")
+        """Show language selection menu with scrollbar."""
+        # Create toplevel window for language selection
+        lang_window = tk.Toplevel(self.master)
+        lang_window.overrideredirect(True)  # Remove window decorations
+        lang_window.configure(bg="#3d3d3d")
         
-        for lang_name, lang_code in LANGUAGES:
-            menu.add_command(
-                label=f"{lang_name} ({lang_code.upper()})",
-                command=lambda lc=lang_code: self._change_language(lc)
-            )
-            
+        # Position below the language button
         try:
             x = self.lang_button.winfo_rootx()
             y = self.lang_button.winfo_rooty() + self.lang_button.winfo_height()
-            menu.post(x, y)
+            lang_window.geometry(f"300x400+{x}+{y}")
         except tk.TclError:
-            pass
+            lang_window.geometry("300x400")
+        
+        # Make window topmost and grab focus
+        lang_window.attributes('-topmost', True)
+        lang_window.grab_set()
+        
+        # Create frame for listbox and scrollbar
+        frame = tk.Frame(lang_window, bg="#3d3d3d", bd=2, relief=tk.RAISED)
+        frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Create scrollbar
+        scrollbar = tk.Scrollbar(frame, bg="#3d3d3d", troughcolor="#2d2d2d")
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Create listbox
+        listbox = tk.Listbox(
+            frame,
+            bg="#3d3d3d",
+            fg="white",
+            selectbackground="#5d5d5d",
+            selectforeground="white",
+            font=("Arial", 11),
+            bd=0,
+            highlightthickness=0,
+            activestyle="none",
+            yscrollcommand=scrollbar.set
+        )
+        listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.config(command=listbox.yview)
+        
+        # Add languages to listbox
+        for lang_name, lang_code in LANGUAGES:
+            listbox.insert(tk.END, f"{lang_name} ({lang_code.upper()})")
+        
+        # Highlight current language
+        for i, (_, lang_code) in enumerate(LANGUAGES):
+            if lang_code == self.current_language:
+                listbox.selection_set(i)
+                listbox.see(i)
+                break
+        
+        def on_select(event):
+            selection = listbox.curselection()
+            if selection:
+                index = selection[0]
+                _, lang_code = LANGUAGES[index]
+                lang_window.destroy()
+                self._change_language(lang_code)
+        
+        def on_close(event=None):
+            lang_window.destroy()
+        
+        # Bind events
+        listbox.bind('<<ListboxSelect>>', on_select)
+        listbox.bind('<Return>', on_select)
+        listbox.bind('<Escape>', on_close)
+        lang_window.bind('<FocusOut>', on_close)
+        
+        # Focus on listbox
+        listbox.focus_set()
             
     def bring_to_front(self):
         """Bring Normal Mode window to front temporarily."""
