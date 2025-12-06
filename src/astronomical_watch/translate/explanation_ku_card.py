@@ -58,11 +58,11 @@ Bikaranîna pratîk
 ------------------
 Demjimêra Astronomî ji bo zanyaran, astronomên, perwerdekaran, hezkaran ê xwezayê, û her kesê ku dixwaze bi rîtmên cîhanî yên Erdê ve hevdem bibe bikêr e. Hestê girêdanê bi gerstêrk û bûyerên kozmîk dide, fêhmkirina cîhanî ya hêsan a demê bêyî cûdahiyên herêmî yên tevlihevî dide, û bikarhêneran teşwîq dike ku li ser demê wek fenomeneke cîhanî, xwezayî bifikirin.
 
+Faydaya herî mezin a Demjimêra Astronomî **cîhanîtiya wê ye**. Ji ber ku di her demê de ji bo her kesê li ser gerstêrkê heman e, dikare alîkariya hevdemkirina bûyerên cûda bike, hem li ser înternetê û hem jî li derveyî wê. Çalakî û bûyerên cûda yên ku pêdivî bi hevdemiyê hene dikarin bi alîkariya Demjimêra Astronomî bêne hevdemkirin — ji bo konferansên navneteweyî, bûyerên vîrtual, destpêkirina projeyên cîhanî an hevdemkirina lêkolînên zanistî. Ji bilî veguheztina qatên demê û hesabkirina cûdahiyên herêmî, Demjimêra Astronomî sîstemeke demê ya yek, zelal û cîhanî peyda dike ku hemû dikarin di heman demê de bikar bînin.
+
 Çima şopandina dema astronomî?
 ---------------------------------
 Demjimêra Astronomî bikarhêneran dide destûr ku demê bi awayê herî nêzîkî devrên astronomî yên rastîn û tevgera Erdê li derdora Rojê bişopînin. Ev nêzîkatî fêhmkirineke kûrtir a rîtmên xwezayî dide, di perwerdehiyê de alîkarî dike, girêdana bi xwezayê ve teşwîq dike û hevdemkirina cîhanî bêyî cûdahiyên çêkirî di demê de dide.
-
-Faydaya herî mezin a Demjimêra Astronomî **cîhanîtiya wê ye**. Ji ber ku di her demê de ji bo her kesê li ser gerstêrkê heman e, dikare alîkariya hevdemkirina bûyerên cûda bike, hem li ser înternetê û hem jî li derveyî wê. Çalakî û bûyerên cûda yên ku pêdivî bi hevdemiyê hene dikarin bi alîkariya Demjimêra Astronomî bêne hevdemkirin — ji bo konferansên navneteweyî, bûyerên vîrtual, destpêkirina projeyên cîhanî an hevdemkirina lêkolînên zanistî. Ji bilî veguheztina qatên demê û hesabkirina cûdahiyên herêmî, Demjimêra Astronomî sîstemeke demê ya yek, zelal û cîhanî peyda dike ku hemû dikarin di heman demê de bikar bînin.
 
 Bi kurtî, Demjimêra Astronomî demjimêra pêşerojê ye — cîhanî, rast, perwerdehî û îlhambexş.
 """

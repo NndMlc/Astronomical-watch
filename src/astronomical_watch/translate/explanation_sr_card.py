@@ -58,11 +58,11 @@ Praktična upotreba
 ------------------
 Astronomski Sat je koristan za naučnike, astronome, edukatore, ljubitelje prirode, kao i za svakoga ko želi da se uskladi sa univerzalnim ritmovima Zemlje. Pruža osećaj povezanosti sa planetom i kosmičkim događanjima, omogućava lakše globalno razumevanje vremena bez zbunjujućih lokalnih razlika, i podstiče korisnike da razmišljaju o vremenu kao o univerzalnom, prirodnom fenomenu.
 
+Najveća korist od Astronomskog Sata je njegova **globalnost**. Pošto je u svakom trenutku svakome na planeti isti, može pomoći da se usklade razna dešavanja, kako na internetu, tako i van njega. Razne akcije i događaji kojima je potreban sinhronitet mogu da se usklade pomoću Astronomskog Sata — bilo da se radi o međunarodnim konferencijama, virtuelnim događajima, lansiranju globalnih projekata ili koordinaciji naučnih istraživanja. Umesto prevodjenja vremenskih zona i računanja lokalnih razlika, Astronomski Sat pruža jedan, jasan i univerzalan vremenski sistem koji svi mogu koristiti istovremeno.
+
 Zašto pratiti vreme astronomski?
 ---------------------------------
 Astronomki Sat omogućava korisnicima da prate vreme na način koji je najbliži stvarnim astronomskim ciklusima i kretanjima Zemlje oko Sunca. Takav pristup daje dublje razumevanje prirodnih ritmova, pomaže u edukaciji, podstiče povezivanje sa prirodom i omogućava globalnu koordinaciju bez veštačkih razlika u vremenu.
-
-Najveća korist od Astronomskog Sata je njegova **globalnost**. Pošto je u svakom trenutku svakome na planeti isti, može pomoći da se usklade razna dešavanja, kako na internetu, tako i van njega. Razne akcije i događaji kojima je potreban sinhronitet mogu da se usklade pomoću Astronomskog Sata — bilo da se radi o međunarodnim konferencijama, virtuelnim događajima, lansiranju globalnih projekata ili koordinaciji naučnih istraživanja. Umesto prevodjenja vremenskih zona i računanja lokalnih razlika, Astronomski Sat pruža jedan, jasan i univerzalan vremenski sistem koji svi mogu koristiti istovremeno.
 
 Ukratko, Astronomki Sat je sat budućnosti — univerzalan, precizan, edukativan i inspirativan.
 """

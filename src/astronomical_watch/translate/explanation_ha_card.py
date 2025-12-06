@@ -58,11 +58,11 @@ Amfani na zahiri
 ------------------
 Agogon Taurari yana da amfani ga masana kimiyya, taurari, malamai, masu sha'awar yanayi da duk wanda ke son daidaita rayuwa da tsarin duniya na Duniya. Yana ba da damar jin haɗin kai da duniya da abubuwan taurari, yana sauƙaƙa fahimtar lokaci ta duniya ba tare da rikice-rikicen na gida ba, kuma yana ƙarfafa masu amfani su ɗauki lokaci a matsayin wani lamari na duniya da na halitta.
 
+Babbar fa'idar Agogon Taurari ita ce **yanayin duniyarsa**. Da yake daidai ga kowa a duniya a kowane lokaci, zai iya taimakawa wajen daidaita abubuwa daban-daban, ko a intanet ko a wajen ta. Ana iya daidaita ayyuka da al'amuran daban-daban da ke buƙatar daidaitawa ta hanyar Agogon Taurari — ko dai tarurrukan ƙasa da ƙasa, abubuwan kama-da-wane, ƙaddamar da ayyukan duniya ko daidaita binciken kimiyya. Maimakon juyar da yankunan lokaci da ƙididdige bambance-bambancen gida, Agogon Taurari yana ba da tsarin lokaci guda ɗaya, bayyananne kuma na duniya wanda kowa zai iya amfani dashi lokaci guda.
+
 Me ya sa a bi lokaci ta taurari?
 ---------------------------------
 Agogon Taurari yana ba wa masu amfani damar bin lokaci yadda ya fi kusa da zagayowar taurari na gaske da motsin Duniya a kusa da Rana. Wannan hanyar tana ba da fahimta mai zurfi game da tsarin lokaci na halitta, yana taimakawa ilimi, yana ƙarfafa haɗin kai da yanayi, kuma yana ba da damar daidaita lokaci na duniya ba tare da bambance-bambancen da aka ƙirƙira ba.
-
-Babbar fa'idar Agogon Taurari ita ce **yanayin duniyarsa**. Da yake daidai ga kowa a duniya a kowane lokaci, zai iya taimakawa wajen daidaita abubuwa daban-daban, ko a intanet ko a wajen ta. Ana iya daidaita ayyuka da al'amuran daban-daban da ke buƙatar daidaitawa ta hanyar Agogon Taurari — ko dai tarurrukan ƙasa da ƙasa, abubuwan kama-da-wane, ƙaddamar da ayyukan duniya ko daidaita binciken kimiyya. Maimakon juyar da yankunan lokaci da ƙididdige bambance-bambancen gida, Agogon Taurari yana ba da tsarin lokaci guda ɗaya, bayyananne kuma na duniya wanda kowa zai iya amfani dashi lokaci guda.
 
 A takaice, Agogon Taurari agogon gaba ne — na duniya, daidai, na ilimi, kuma mai ba da ƙarfafawa.
 """

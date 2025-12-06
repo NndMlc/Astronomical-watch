@@ -58,11 +58,11 @@ Ukusetshenziswa okungokoqobo
 ------------------
 IWashi Lezinkanyezi luwusizo kwizazi, kwizinkanyezi, kwabafundisi, kubathanda imvelo, nakubo bonke abafuna ukuhlanganiswa nezingqimango zomhlaba wonke zeNhlabathi. Linikela umuzwa wokuxhumana neplanethi nezenzakalo ze-cosmic, linikela ukuqonda okulula komhlaba wonke kwesikhathi ngaphandle kwezinto ezahlukeneyo zomhlaba ezixakayo, futhi likhuthaza abasebenzisi ukuba bacabange ngesikhathi njengento yomhlaba wonke, yemvelo.
 
+Inzuzo enkulu kakhulu yeWashi Lezinkanyezi **ukuba somhlaba wonke kwalo**. Ngoba lilingana ngaso sonke isikhathi sonke umuntu emhlabeni, lingasiza ukuhlanganisa izenzakalo ezahlukeneyo, zombili ku-inthanethi nangaphandle. Imisebenzi nezenzakalo ezahlukeneyo ezidinga ukuhlanganiswa zingahlanganiswa ngosizo lweWashi Lezinkanyezi — izinkomfa zamazwe omhlaba, izenzakalo ze-virtual, ukuqalisa kwamaphrojekthi omhlaba wonke noma ukuhlanganiswa kwezifundo zesayensi. Ngaphandle kokuguqulwa kwezoni zesikhathi nokubala umehluko womhlaba, iWashi Lezinkanyezi lidala uhlelo lwesikhathi olulodwa, olucacile, lwomhlaba wonke sonke esingasisebenzisa ngesikhathi esifanayo.
+
 Kungani ukulandelela isikhathi sezinkanyezi?
 ---------------------------------
 IWashi Lezinkanyezi linikela abasebenzisi ukuthetha isikhathi ngendlela esondelene kakhulu nemijikelezo yezinkanyezi yangempela nokujikeleza kweNhlabathi ngoLanga. Le ndlela esondelene inikela ukuqonda okujulile kwezingqimango zemvelo, isiza ekufundiseni, ikhuthaza ukuxhumana nemvelo futhi inikela ukuhlanganiswa komhlaba wonke ngaphandle kwezinto ezenziwe ezikhatshini.
-
-Inzuzo enkulu kakhulu yeWashi Lezinkanyezi **ukuba somhlaba wonke kwalo**. Ngoba lilingana ngaso sonke isikhathi sonke umuntu emhlabeni, lingasiza ukuhlanganisa izenzakalo ezahlukeneyo, zombili ku-inthanethi nangaphandle. Imisebenzi nezenzakalo ezahlukeneyo ezidinga ukuhlanganiswa zingahlanganiswa ngosizo lweWashi Lezinkanyezi — izinkomfa zamazwe omhlaba, izenzakalo ze-virtual, ukuqalisa kwamaphrojekthi omhlaba wonke noma ukuhlanganiswa kwezifundo zesayensi. Ngaphandle kokuguqulwa kwezoni zesikhathi nokubala umehluko womhlaba, iWashi Lezinkanyezi lidala uhlelo lwesikhathi olulodwa, olucacile, lwomhlaba wonke sonke esingasisebenzisa ngesikhathi esifanayo.
 
 Ngokufingqwe, iWashi Lezinkanyezi lihola lesikhathi esizayo — somhlaba wonke, elinembile, elifundisayo nelikhuthazayo.
 """

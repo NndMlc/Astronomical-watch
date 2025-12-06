@@ -58,11 +58,11 @@ Matumizi ya kivitendo
 ------------------
 Saa ya Astronomia ni muhimu kwa wanasayansi, wanaastronomia, walimu, wapenda asili, na yeyote anayetaka kuendana na midundo ya kimataifa ya Dunia. Inatoa hisia ya muunganiko na sayari na matukio ya anga, inarahisisha uelewa wa muda wa kimataifa bila tofauti za eneo zilizochanganya, na inahamasisha watumiaji kufikiria muda kama jambo la asili na la kimataifa.
 
+Faida kubwa zaidi ya Saa ya Astronomia ni **kimataifa chake**. Kwa kuwa ni sawa kwa kila mtu duniani kila wakati, inaweza kusaidia kuratibu matukio mbalimbali, ikiwa ni pamoja na mtandao au nje yake. Shughuli na matukio mbalimbali yanayohitaji uratibu yanaweza kusawazishwa kwa kutumia Saa ya Astronomia — iwe ni mikutano ya kimataifa, matukio ya kimtandao, uzinduzi wa miradi ya kimataifa au uratibu wa utafiti wa kisayansi. Badala ya kubadilisha maeneo ya saa na kuhesabu tofauti za eneo, Saa ya Astronomia inatoa mfumo mmoja, wazi na wa kimataifa wa wakati ambao wote wanaweza kutumia kwa wakati mmoja.
+
 Kwa nini ufuatilie muda kwa mtazamo wa anga?
 ---------------------------------
 Saa ya Astronomia inaruhusu watumiaji kufuatilia muda kwa njia iliyo karibu zaidi na mizunguko halisi ya anga na mwendo wa Dunia kuzunguka Jua. Njia hii inatoa uelewa wa kina wa midundo ya asili, inasaidia elimu, inaimarisha muunganiko na asili, na kuwezesha uratibu wa muda wa kimataifa bila tofauti za kubuni.
-
-Faida kubwa zaidi ya Saa ya Astronomia ni **kimataifa chake**. Kwa kuwa ni sawa kwa kila mtu duniani kila wakati, inaweza kusaidia kuratibu matukio mbalimbali, ikiwa ni pamoja na mtandao au nje yake. Shughuli na matukio mbalimbali yanayohitaji uratibu yanaweza kusawazishwa kwa kutumia Saa ya Astronomia — iwe ni mikutano ya kimataifa, matukio ya kimtandao, uzinduzi wa miradi ya kimataifa au uratibu wa utafiti wa kisayansi. Badala ya kubadilisha maeneo ya saa na kuhesabu tofauti za eneo, Saa ya Astronomia inatoa mfumo mmoja, wazi na wa kimataifa wa wakati ambao wote wanaweza kutumia kwa wakati mmoja.
 
 Kwa kifupi, Saa ya Astronomia ni saa ya baadaye — ya kimataifa, sahihi, ya kielimu na ya kuhamasisha.
 """
