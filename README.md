@@ -22,33 +22,34 @@ python astronomical_watch_desktop.py
 
 ### What You Get
 - **Widget Mode**: 180×110 borderless floating display
-- **Normal Mode**: Full-featured interface with explanations
-- **20 Languages**: Complete multilingual support
+- **Normal Mode**: Full-featured tabbed interface with 4 cards
+- **28 Languages**: Complete multilingual support (including RTL)
 - **Real-time Updates**: 86ms intervals (1 mikroDies)
 
 ### Usage
-- **Drag widget**: Move the floating display
+- **Drag widget**: Move the floating display anywhere
 - **Double-click widget**: Open Normal Mode
-- **Language selector**: Choose from 20 languages
-- **Explanation button**: Learn about astronomical time
+- **Language selector**: Choose from 28 languages
+- **4 Interactive Cards**: Standard Time, Explanation, Comparison, Settings
 
 ## Features
 - ⏰ **Real-time Display**: Dies.miliDies.mikroDies format
-- 🌍 **20 Languages**: Full localization
+- 🌍 **28 Languages**: Full localization (en, sr, es, zh, ar, pt, fr, de, ru, ja, hi, fa, id, sw, ha, tr, el, pl, it, nl, ro, he, bn, ku, zu, vi, ko, ur)
 - 🎨 **Sky Themes**: Background changes with solar position  
 - 📱 **Borderless Widget**: Floating overlay without title bar
 - 🔄 **Ultra-fast Updates**: Every 86ms (1 mikroDies)
-- 📚 **Educational**: Built-in explanations and comparisons
---max-error-arcsec N   # Request tighter solar longitude precision (if coefficient subsets available)
-```
+- 📅 **Calendar View**: Interactive calendar with Dies display
+- 🔄 **Time Converter**: Convert between standard and astronomical time
+- ⚙️ **Settings Card**: Widget preferences and app information
+- 📚 **Educational**: Built-in explanations in 28 languages
 
-Examples:
+## Architecture
 
-```
-python core/cli.py now --max-error-arcsec 5
-python core/cli.py longitude --unit rad
-python core/cli.py equinox 2026 --json
-```
+The application consists of:
+- **Core astronomical calculations** (`src/astronomical_watch/core/`) - Frozen implementation
+- **UI components** (`src/astronomical_watch/ui/`) - Widget and Normal Mode interfaces  
+- **Translation system** (`src/astronomical_watch/translate/`) - 28 language files
+- **Desktop launchers** (root directory) - Easy-to-use entry points
 
 ## Platform Support (Summary)
 
@@ -210,55 +211,42 @@ lon_precise = solar_longitude_from_datetime(datetime_obj, max_error_arcsec=1.0)
 
 **Generator Script:** `scripts/generate_vsop87.py` can download VSOP87D data and create coefficient files with custom precision levels.
 
-### Implementation Plan
+## Implementation Status
 
-1. Core library:
-   - Language: (To be decided; e.g., Python/TypeScript/Rust).
-   - Module: solar.py / solar.ts for Sun position & EoT.
-   - Function: compute_vernal_equinox(year) -> datetime (UTC).
-   - Function: astronomical_now(t_utc) -> {equinox_epoch, next_equinox, dies, miliDies, raw_fraction, eot, metadata}.
-2. CLI Tool:
-   - astronomical-watch now → prints current astronomical timestamp.
-3. Tests:
-   - Compare equinox times to published tables (e.g., NASA) within tolerance.
-4. Future UI:
-   - Web viz: Circular dial 0–999; year progress bar 0–365(6).
-   - Option to show difference to civil time (UTC offset).
+✅ **Completed:**
+- Core astronomical calculations (VSOP87D, equinox computation, Dies/miliDies/mikroDies)
+- Desktop GUI application with widget and normal modes
+- 28-language localization system
+- Interactive calendar with Dies display
+- Bidirectional time converter
+- Educational explanation cards
+- Settings and preferences system
+- Cross-platform support (Linux, macOS, Windows)
 
-### Example Pseudocode (High-Level)
+📋 **Future Considerations:**
+- Web visualization with circular dial
+- Mobile applications (PWA or native)
+- Additional astronomical data displays
 
-```python
-t = now_utc()
+## Testing
 
-eq = compute_vernal_equinox(frame_year_guess(t))
-next_eq = compute_vernal_equinox(frame_year_guess(t)+1)
+The project includes comprehensive test coverage:
 
-if t < eq:
-    # Use previous frame
-    eq = compute_vernal_equinox(frame_year_guess(t)-1)
-    next_eq = compute_vernal_equinox(frame_year_guess(t))
+```bash
+# Run all tests
+python -m pytest tests/
 
-day0_start = first_mean_noon_at_or_after(eq, lambda_ref)
-
-# Compute current day start
-days_since_day0 = floor((t - day0_start)/DAY_SECONDS)
-current_day_start = day0_start + days_since_day0 * DAY_SECONDS
-
-if t >= next_eq:
-    rollover...
-
-intra = t - current_day_start
-miliDies = int((intra / DAY_SECONDS) * 1000)  # clamp 0..999
-
-timestamp = f"{eq.year}eq:{days_since_day0:03d}.{miliDies:03d}"
+# Run specific test suites
+python -m pytest tests/test_astro_time_core.py -v
+python -m pytest tests/test_equinox.py -v
+python -m pytest tests/test_vsop87d_system.py -v
 ```
 
-### Open Questions
-
-- Confirm interpretation of “Equation of time = 0” in original definition.
-- Decide library language.
-- Decide handling of partial last day.
-- Will we expose ΔT configuration for higher precision?
+Test categories:
+- **Core calculations**: Equinox computation, Dies/miliDies conversion
+- **VSOP87D system**: Solar longitude precision and accuracy
+- **UI components**: Gradient themes, widget functionality
+- **Time scales**: Delta-T calculations and time conversions
 
 ---
 
@@ -309,27 +297,23 @@ Ensures a stable canonical definition while allowing broad ecosystem tooling.
 
 ## Roadmap
 - [ ] ΔT refinement & higher precision solar terms
-- [ ] Error bound verification tests
-- [ ] JavaScript banner widget (MIT)
-- [ ] Web assembly build of core logic (read-only)
-
 ## Disclaimer
 Not for navigation; educational / experimental.
 
 ## Contributing
-Read CONTRIBUTING.md first.
+Read CONTRIBUTING.md first. Contributions welcome for:
+- Bug fixes and optimizations
+- Extensions and integrations
+- Documentation improvements
+- Translation additions
 
-(Placeholder — to be expanded.)
 ## License
 
-(Choose a suitable license: e.g., MIT / Apache-2.0.)
+- **Core algorithms**: Astronomical Watch Core License v1.0 (restrictive)
+- **UI & Application**: MIT License
+
+See LICENSE.CORE and LICENSE.MIT for details.
 
 ---
 
-## Next Steps
-
-- Decide primary language (code).
-- Implement equinox + EoT functions.
-- Implement core conversion to (dies, miliDies).
-- Add tests.
-- Publish first CLI.
+**Built with Python 3.8+ • Tkinter • VSOP87D astronomical algorithms**

@@ -37,22 +37,29 @@
    - Separated labels: "Dies" below left number, "miliDies" below right number
    - mikroDies progress bar (YellowGreen color, 0-999, visual only)
    - Ultra-fast updates (86ms intervals)
-2. **Double-click the widget** to open Normal Mode with full features
+2. **Double-click the widget** to open Normal Mode with 4 interactive cards
 3. **Drag the widget** to move it around (no title bar to grab)
-4. **Language Selection**: Choose from 20 languages (applies to both modes)
-5. **Explanation Button**: Detailed explanation in your chosen language
+4. **Language Selection**: Choose from 28 languages (applies to both modes)
+5. **Interactive Cards**:
+   - **Standard Time**: Current astronomical time display
+   - **Explanation**: Learn about the Dies system in your language
+   - **Comparison**: Calendar, time converter, countdown to equinox
+   - **Settings**: Widget preferences and app information
 
 ## Requirements:
 - Python 3.8+ (usually pre-installed on most systems)
 - No additional packages needed (uses built-in tkinter)
 
 ## Features:
-- ⏰ Real-time astronomical time display (Dies.miliDies format)
-- 🌍 20-language support
+- ⏰ Real-time astronomical time display (Dies.miliDies.mikroDies format)
+- 🌍 28-language support (including RTL languages: Arabic, Hebrew, Farsi, Urdu)
 - 🎨 Sky gradient themes based on solar position
-- 📊 Time conversion utilities
-- 🔬 Astronomical calculations
-- 📚 Educational explanations
+- 📅 Interactive calendar with Dies display for each day
+- 🔄 Bidirectional time converter (standard ↔ astronomical)
+- ⏱️ MiliDies ↔ HH:MM:SS conversion table
+- 🎯 Countdown to next vernal equinox
+- 🔬 Astronomical calculations (precise equinox computation)
+- 📚 Educational explanations in all 28 languages
 
 ## Troubleshooting:
 - **"Python is not recognized"**: Install Python from python.org

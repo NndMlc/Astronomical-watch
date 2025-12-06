@@ -34,6 +34,10 @@ class AstronomicalWatchApp:
                 if os.path.exists(png_path):
                     img = tk.PhotoImage(file=png_path)
                     window.iconphoto(True, img)
+                    # Keep reference to prevent garbage collection
+                    if not hasattr(self, '_icon_images'):
+                        self._icon_images = []
+                    self._icon_images.append(img)
         except Exception:
             pass
     

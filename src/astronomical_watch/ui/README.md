@@ -23,7 +23,7 @@ This directory contains the user interface components for the Astronomical Watch
 ### `normal_mode.py` - Full-Featured Normal Mode  
 - Detailed astronomical time interface with explanation system
 - Same gradient background logic as widget mode
-- **20-language support** with live switching
+- **28-language support** with scrollable language menu
 - **Explanation button** - loads content from `translate/` folder
 - Extended information display including solar altitude
 - Auto-updating themes and time displays
@@ -39,7 +39,7 @@ This directory contains the user interface components for the Astronomical Watch
 2. **Double-Click Activation**: Smart interaction - drag to move, double-click to activate
 3. **Outline Text Rendering**: Canvas-based text with black outline for visibility
 4. **Ultra-Fast Updates**: 86ms intervals matching astronomical precision
-5. **Multilingual Explanations**: Dynamic content loading from 20 language files
+5. **Multilingual Explanations**: Dynamic content loading from 28 language files
 6. **Drag Support**: Full widget repositioning without title bar
 
 ## Usage

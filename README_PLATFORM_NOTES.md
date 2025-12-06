@@ -16,7 +16,11 @@ This document tracks current and planned platform support for Astronomical-watch
 - **📱 Drag Support**: Move widget by dragging anywhere
 - **⚡ 86ms Updates**: Ultra-fast refresh (1 mikroDies precision)
 - **🎨 Outline Text**: White text with black outline for any background
-- **🌍 20 Languages**: Complete localization with explanations
+- **🌍 28 Languages**: Complete localization with explanations
+- **📇 4 Interactive Cards**: Standard Time, Explanation, Comparison, Settings
+- **📅 Calendar View**: Interactive calendar with Dies for each day
+- **🔄 Time Converter**: Bidirectional standard ↔ astronomical conversion
+- **🌐 RTL Support**: Right-to-left languages (Arabic, Hebrew, Farsi, Urdu)
 
 ## 2. Web / PWA (Planned – introducing now)
 

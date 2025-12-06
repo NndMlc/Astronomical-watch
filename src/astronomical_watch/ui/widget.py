@@ -95,7 +95,6 @@ class AstronomicalWidgetMode:
         
     def _set_icon(self):
         """Set application icon if available."""
-        import os
         try:
             # Get the root directory of the project
             current_file = os.path.abspath(__file__)
@@ -106,18 +105,21 @@ class AstronomicalWidgetMode:
                 self.master.iconbitmap(icon_path)
             else:
                 # Try alternative icon formats
-                for icon_file in ["astronomical_watch.png", "astronomical_watch.gif", "icon.ico", "icon.png"]:
+                for icon_file in ["astronomical_watch.png", "astronomical_watch.gif"]:
                     alt_path = os.path.join(project_root, "icons", icon_file)
                     if os.path.exists(alt_path):
                         # For PNG files, we need to use PhotoImage
                         if alt_path.endswith('.png'):
                             img = tk.PhotoImage(file=alt_path)
                             self.master.iconphoto(True, img)
+                            # Keep reference to prevent garbage collection
+                            self._icon_image = img
                         else:
                             self.master.iconbitmap(alt_path)
                         break
-        except Exception:
+        except Exception as e:
             # Ignore icon errors - not critical for functionality
+            pass
             pass
         
     def _create_context_menu(self):
