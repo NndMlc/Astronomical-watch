@@ -1,5 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
+setlocal enabledelayedexpansion
 REM Astronomical Watch - Complete Windows Installer
 
 cls
@@ -92,13 +93,8 @@ pip install --upgrade --force-reinstall .
 REM Save errorlevel to variable IMMEDIATELY
 set "PIP_RESULT=%ERRORLEVEL%"
 
-echo.
-echo *** VERSION CC9BEE9 FINAL - PIP_RESULT=%PIP_RESULT% ***
-echo.
-pause
-
-REM Check saved errorlevel, not current
-if not "%PIP_RESULT%"=="0" (
+REM Check saved errorlevel using delayed expansion
+if not "!PIP_RESULT!"=="0" (
     echo.
     echo X INSTALLATION FAILED!
     echo ========================================
