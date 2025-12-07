@@ -2,23 +2,32 @@
 
 Desktop application for astronomical timekeeping using Dies.miliDies format.
 
+## 📦 Installation
+
+### Quick Install (Linux)
+```bash
+git clone https://github.com/NndMlc/Astronomical-watch.git
+cd Astronomical-watch
+sudo ./install.sh
+```
+
+Then launch from your application menu or run `astronomical-watch` in terminal.
+
+### Other Platforms
+- **Full installation guide**: [INSTALL.md](INSTALL.md)
+- **Quick reference**: [QUICK_INSTALL.md](QUICK_INSTALL.md)
+- **User guide**: [USER_GUIDE.md](USER_GUIDE.md)
+
+### Run Without Installing
+```bash
+python3 astronomical_watch_desktop.py
+```
+
 ## Overview
 Represents UTC time as `DDD.mmm` where:
 - `DDD` = Dies (universal day index since vernal equinox)
 - `mmm` = miliDies (thousandths of current Dies)
 - Ultra-precise mikroDies subdivision (1/1000th of miliDies)
-
-## Quick Start
-
-### Download & Run
-```bash
-# Download the project
-git clone https://github.com/NndMlc/Astronomical-watch.git
-cd Astronomical-watch
-
-# Run desktop application
-python astronomical_watch_desktop.py
-```
 
 ### What You Get
 - **Widget Mode**: 180×110 borderless floating display

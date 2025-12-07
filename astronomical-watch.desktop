@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Astronomical Watch
+Comment=Track time based on real astronomical cycles
+Exec=astronomical-watch
+Icon=astronomical-watch
+Terminal=false
+Categories=Education;Science;Astronomy;
+Keywords=astronomy;time;astronomical;watch;
+StartupWMClass=astronomical-watch

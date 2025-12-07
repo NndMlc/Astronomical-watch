@@ -1,0 +1,13 @@
+include README.md
+include LICENSE.MIT
+include LICENSE.CORE
+include INSTALL.md
+include QUICK_INSTALL.md
+include pyproject.toml
+include astronomical-watch.desktop
+recursive-include icons *.png *.ico
+recursive-include src/astronomical_watch/translate *.py
+recursive-include tests *.py *.json
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store
