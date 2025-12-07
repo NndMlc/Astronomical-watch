@@ -89,6 +89,9 @@ echo.
 
 pip install --upgrade --force-reinstall .
 
+REM Save errorlevel before cls clears it
+set INSTALL_ERROR=%ERRORLEVEL%
+
 echo.
 cls
 echo ========================================
@@ -96,7 +99,7 @@ echo Installation finished - checking result...
 echo ========================================
 echo.
 
-if errorlevel 1 (
+if %INSTALL_ERROR% NEQ 0 (
     echo.
     echo X INSTALLATION FAILED!
     echo ========================================
