@@ -1,109 +1,340 @@
 @echo off
-REM Windows Installation Script for Astronomical Watch
+setlocal enabledelayedexpansion
+REM Astronomical Watch - Complete Windows Installer
 
-echo ================================
-echo Astronomical Watch - Installation
-echo ================================
+cls
+echo ========================================
+echo   ASTRONOMICAL WATCH - INSTALLATION
+echo ========================================
+echo.
+echo This will:
+echo   1. Install Astronomical Watch Python package
+echo   2. Create desktop shortcut with icon
+echo   3. Verify installation
+echo.
+pause
 echo.
 
-REM Get the directory where this script is located
-set SCRIPT_DIR=%~dp0
-cd /d "%SCRIPT_DIR%"
+REM ====================================
+REM Step 1: Check Directory
+REM ====================================
+cd /d "%~dp0"
 
-REM Check if pyproject.toml exists in current directory
 if not exist "pyproject.toml" (
-    echo ERROR: pyproject.toml not found!
-    echo Please run this script from the Astronomical-watch directory.
+    echo X ERROR: Installation files not found!
+    echo.
+    echo Please run this script from the Astronomical-watch folder
+    echo where pyproject.toml is located.
     echo.
     echo Current directory: %CD%
+    echo.
     pause
     exit /b 1
 )
 
-REM Check if Python is installed
+echo + Installation files found
+echo   Directory: %CD%
+echo.
+
+REM ====================================
+REM Step 2: Check Python
+REM ====================================
+echo Checking Python installation...
+
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo ERROR: Python is not installed or not in PATH.
-    echo Please install Python 3.11 or newer from https://www.python.org
+    echo X ERROR: Python not found!
+    echo.
+    echo Please install Python 3.11 or newer from:
+    echo https://www.python.org/downloads/
+    echo.
+    echo Make sure to check "Add Python to PATH" during installation!
+    echo.
     pause
     exit /b 1
 )
 
-echo Found Python:
-python --version
+for /f "delims=" %%v in ('python --version 2^>^&1') do set PYTHON_VER=%%v
+echo + %PYTHON_VER% found
 echo.
 
-REM Check if pip is available
+REM ====================================
+REM Step 3: Check pip
+REM ====================================
+echo Checking pip...
+
 pip --version >nul 2>&1
 if errorlevel 1 (
-    echo ERROR: pip is not installed.
+    echo X ERROR: pip not found!
+    echo.
     echo Please reinstall Python with pip included.
+    echo.
     pause
     exit /b 1
 )
 
-echo Found pip:
-pip --version
+for /f "delims=" %%v in ('pip --version 2^>^&1') do set PIP_VER=%%v
+echo + %PIP_VER%
 echo.
 
-REM Install the package
+REM ====================================
+REM Step 4: Install Package
+REM ====================================
+echo ========================================
 echo Installing Astronomical Watch...
-echo Installing from: %CD%
+echo ========================================
 echo.
-pip install --upgrade .
+echo This may take a minute...
+echo.
+
+pip install --upgrade --force-reinstall .
+
 if errorlevel 1 (
     echo.
-    echo ERROR: Installation failed.
-    echo Please check the error messages above.
+    echo X Installation failed!
     echo.
-    echo Make sure you are running this script from the Astronomical-watch directory.
+    echo Please check the error messages above.
+    echo Common issues:
+    echo   - No internet connection (for downloading dependencies)
+    echo   - Antivirus blocking installation
+    echo   - Insufficient permissions (try running as Administrator)
+    echo.
     pause
     exit /b 1
 )
 
 echo.
-echo ================================
-echo Installation complete!
-echo ================================
+echo + Package installed successfully!
 echo.
 
-REM Create desktop shortcut
-echo Creating desktop shortcut...
+REM ====================================
+REM Step 5: Find Desktop Location
+REM ====================================
+echo ========================================
+echo Creating Desktop Shortcut...
+echo ========================================
+echo.
 
-REM Get Python path
-for /f "delims=" %%i in ('python -c "import sys; print(sys.executable)"') do set PYTHON_PATH=%%i
-set PYTHONW_PATH=%PYTHON_PATH:python.exe=pythonw.exe%
+set DESKTOP_FOUND=0
+set DESKTOP=
 
-REM Get desktop path
-for /f "usebackq tokens=3*" %%A in (`reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop`) do set DESKTOP=%%B
-call set DESKTOP=%DESKTOP%
+REM Try standard Desktop
+if exist "%USERPROFILE%\Desktop" (
+    set DESKTOP=%USERPROFILE%\Desktop
+    echo + Desktop found: %DESKTOP%
+    set DESKTOP_FOUND=1
+    goto :desktop_confirmed
+)
 
-REM Get current directory (where script is)
-set INSTALL_DIR=%CD%
+REM Try OneDrive Desktop
+if exist "%USERPROFILE%\OneDrive\Desktop" (
+    set DESKTOP=%USERPROFILE%\OneDrive\Desktop
+    echo + Desktop found: %DESKTOP%
+    set DESKTOP_FOUND=1
+    goto :desktop_confirmed
+)
 
-REM Create VBScript to make shortcut with icon
+REM Try Public Desktop
+if exist "%PUBLIC%\Desktop" (
+    set DESKTOP=%PUBLIC%\Desktop
+    echo + Public Desktop found: %DESKTOP%
+    set DESKTOP_FOUND=1
+    goto :desktop_confirmed
+)
+
+REM Try Registry
+for /f "usebackq tokens=3*" %%A in (`reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop 2^>nul`) do (
+    set DESKTOP_RAW=%%B
+    call set DESKTOP=!DESKTOP_RAW!
+    if exist "!DESKTOP!" (
+        echo + Desktop found via registry: !DESKTOP!
+        set DESKTOP_FOUND=1
+        goto :desktop_confirmed
+    )
+)
+
+REM Desktop not found - ask user
+:ask_desktop
+echo.
+echo ! Could not automatically find your Desktop folder.
+echo.
+echo Please enter the full path to your Desktop:
+echo.
+echo To find it:
+echo   1. Open File Explorer
+echo   2. Right-click "Desktop" in the sidebar
+echo   3. Select "Properties" and check the "Location" tab
+echo.
+echo Examples:
+echo   C:\Users\%USERNAME%\Desktop
+echo   D:\MyDesktop
+echo.
+set /p DESKTOP="Desktop path: "
+
+REM Remove quotes if present
+set DESKTOP=!DESKTOP:"=!
+
+if not exist "!DESKTOP!" (
+    echo.
+    echo X That path doesn't exist: !DESKTOP!
+    echo.
+    set /p RETRY="Try again? (Y/N): "
+    if /i "!RETRY!"=="Y" goto :ask_desktop
+    
+    echo.
+    echo Installation completed, but shortcut not created.
+    echo You can run: astronomical-watch from Command Prompt
+    echo.
+    pause
+    exit /b 0
+)
+
+set DESKTOP_FOUND=1
+
+:desktop_confirmed
+echo.
+
+REM ====================================
+REM Step 6: Get Python Paths
+REM ====================================
+echo Finding Python executable...
+
+for /f "delims=" %%i in ('python -c "import sys; print(sys.executable)" 2^>nul') do set PYTHON_PATH=%%i
+
+if not defined PYTHON_PATH (
+    echo X Could not find Python executable
+    echo Shortcut not created
+    goto :finish
+)
+
+set PYTHONW_PATH=!PYTHON_PATH:python.exe=pythonw.exe!
+
+if not exist "!PYTHONW_PATH!" (
+    echo ! pythonw.exe not found
+    echo Using python.exe instead (will show console window)
+    set PYTHONW_PATH=!PYTHON_PATH!
+)
+
+echo + Python executable: !PYTHONW_PATH!
+echo.
+
+REM ====================================
+REM Step 7: Find Icon
+REM ====================================
+set ICON_PATH=
+if exist "%CD%\icons\astronomical_watch.ico" (
+    set ICON_PATH=%CD%\icons\astronomical_watch.ico
+    echo + Icon found: !ICON_PATH!
+) else (
+    echo ! Icon not found (shortcut will use default icon)
+)
+echo.
+
+REM ====================================
+REM Step 8: Create Shortcut
+REM ====================================
+echo Creating shortcut...
+
+REM Create VBScript to make shortcut
 echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
-echo sLinkFile = "%DESKTOP%\Astronomical Watch.lnk" >> CreateShortcut.vbs
+echo sLinkFile = "!DESKTOP!\Astronomical Watch.lnk" >> CreateShortcut.vbs
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> CreateShortcut.vbs
-echo oLink.TargetPath = "%PYTHONW_PATH%" >> CreateShortcut.vbs
+echo oLink.TargetPath = "!PYTHONW_PATH!" >> CreateShortcut.vbs
 echo oLink.Arguments = "-m astronomical_watch.ui.main" >> CreateShortcut.vbs
-echo oLink.WorkingDirectory = "%INSTALL_DIR%" >> CreateShortcut.vbs
-echo oLink.IconLocation = "%INSTALL_DIR%\icons\astronomical_watch.ico" >> CreateShortcut.vbs
-echo oLink.Description = "Astronomical Watch - Astronomical Time Tracking" >> CreateShortcut.vbs
+echo oLink.WorkingDirectory = "%CD%" >> CreateShortcut.vbs
+if defined ICON_PATH (
+    echo oLink.IconLocation = "!ICON_PATH!" >> CreateShortcut.vbs
+)
+echo oLink.Description = "Astronomical Watch - Astronomical Time System" >> CreateShortcut.vbs
 echo oLink.Save >> CreateShortcut.vbs
 
 REM Execute VBScript
-cscript //nologo CreateShortcut.vbs
-del CreateShortcut.vbs
+cscript //nologo CreateShortcut.vbs >nul 2>&1
+
+REM Clean up
+del CreateShortcut.vbs >nul 2>&1
+
+REM Verify shortcut was created
+if exist "!DESKTOP!\Astronomical Watch.lnk" (
+    echo + Desktop shortcut created successfully!
+    echo   Location: !DESKTOP!\Astronomical Watch.lnk
+) else (
+    echo X Failed to create shortcut
+    echo   You can run: astronomical-watch from Command Prompt
+)
 
 echo.
-echo Desktop shortcut created!
+
+REM ====================================
+REM Step 9: Verify Installation
+REM ====================================
+:finish
+echo ========================================
+echo Verifying installation...
+echo ========================================
 echo.
-echo You can now:
-echo   1. Double-click "Astronomical Watch" on your Desktop
-echo   2. Or type: astronomical-watch in Command Prompt
+
+pip show astronomical-watch >nul 2>&1
+if errorlevel 1 (
+    echo X Package verification failed
+    echo.
+    pause
+    exit /b 1
+)
+
+for /f "tokens=2" %%v in ('pip show astronomical-watch ^| findstr "^Version:"') do set PKG_VER=%%v
+echo + Astronomical Watch v!PKG_VER! installed
+
+REM Get installation location
+for /f "tokens=2*" %%a in ('pip show astronomical-watch ^| findstr "^Location:"') do set PKG_LOCATION=%%b
+echo + Installation location: !PKG_LOCATION!
 echo.
-echo To uninstall: pip uninstall astronomical-watch
-echo (and delete the desktop shortcut)
+
+REM ====================================
+REM Installation Complete
+REM ====================================
+echo ========================================
+echo   INSTALLATION COMPLETE!
+echo ========================================
 echo.
-pause
+echo Python: !PYTHON_VER!
+echo Package: Astronomical Watch v!PKG_VER!
+echo Installed at: !PKG_LOCATION!
+if exist "!DESKTOP!\Astronomical Watch.lnk" (
+    echo Shortcut: !DESKTOP!\Astronomical Watch.lnk
+)
+echo.
+echo ========================================
+echo   HOW TO USE
+echo ========================================
+echo.
+if exist "!DESKTOP!\Astronomical Watch.lnk" (
+    echo 1. Double-click "Astronomical Watch" on your Desktop
+    echo    ^(Runs without console window^)
+    echo.
+)
+echo 2. Or from Command Prompt: astronomical-watch
+echo    ^(Shows console with any error messages^)
+echo.
+echo 3. Widget Mode: Small floating display
+echo    - Double-click to open full interface
+echo    - Right-click for menu
+echo.
+echo To uninstall: Run uninstall.bat
+echo.
+echo ========================================
+echo.
+
+set /p LAUNCH="Launch now? (Y/N): "
+if /i "!LAUNCH!"=="Y" (
+    echo.
+    echo Starting Astronomical Watch...
+    start "" "!PYTHONW_PATH!" -m astronomical_watch.ui.main
+    echo.
+    echo Application started!
+    timeout /t 2 >nul
+)
+
+echo.
+echo Press any key to exit...
+pause >nul
