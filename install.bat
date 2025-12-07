@@ -66,14 +66,44 @@ echo ================================
 echo Installation complete!
 echo ================================
 echo.
-echo You can now run the application by typing:
-echo   astronomical-watch
+
+REM Create desktop shortcut
+echo Creating desktop shortcut...
+
+REM Get Python path
+for /f "delims=" %%i in ('python -c "import sys; print(sys.executable)"') do set PYTHON_PATH=%%i
+set PYTHONW_PATH=%PYTHON_PATH:python.exe=pythonw.exe%
+
+REM Get desktop path
+for /f "usebackq tokens=3*" %%A in (`reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop`) do set DESKTOP=%%B
+call set DESKTOP=%DESKTOP%
+
+REM Get current directory (where script is)
+set INSTALL_DIR=%CD%
+
+REM Create VBScript to make shortcut with icon
+echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
+echo sLinkFile = "%DESKTOP%\Astronomical Watch.lnk" >> CreateShortcut.vbs
+echo Set oLink = oWS.CreateShortcut(sLinkFile) >> CreateShortcut.vbs
+echo oLink.TargetPath = "%PYTHONW_PATH%" >> CreateShortcut.vbs
+echo oLink.Arguments = "-m astronomical_watch.ui.main" >> CreateShortcut.vbs
+echo oLink.WorkingDirectory = "%INSTALL_DIR%" >> CreateShortcut.vbs
+echo oLink.IconLocation = "%INSTALL_DIR%\icons\astronomical_watch.ico" >> CreateShortcut.vbs
+echo oLink.Description = "Astronomical Watch - Astronomical Time Tracking" >> CreateShortcut.vbs
+echo oLink.Save >> CreateShortcut.vbs
+
+REM Execute VBScript
+cscript //nologo CreateShortcut.vbs
+del CreateShortcut.vbs
+
 echo.
-echo Or create a desktop shortcut:
-echo   1. Right-click on Desktop - New - Shortcut
-echo   2. Enter: pythonw -m astronomical_watch.ui.main
-echo   3. Name it "Astronomical Watch"
+echo Desktop shortcut created!
+echo.
+echo You can now:
+echo   1. Double-click "Astronomical Watch" on your Desktop
+echo   2. Or type: astronomical-watch in Command Prompt
 echo.
 echo To uninstall: pip uninstall astronomical-watch
+echo (and delete the desktop shortcut)
 echo.
 pause

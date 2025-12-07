@@ -24,14 +24,27 @@ cd Astronomical-watch
 
 ### Step 3: Install Astronomical Watch
 
-**Method 1: Using the Installer Script (Easiest)**
+**Method 1: Easy Install with Desktop Shortcut (RECOMMENDED)**
+
+1. Open File Explorer
+2. Navigate to the `Astronomical-watch` folder
+3. Double-click **`INSTALL_EASY.bat`** (or **`install.ps1`** if you prefer PowerShell)
+4. Follow the on-screen instructions
+5. When asked, press Y to launch the application
+
+✅ This will automatically:
+- Install the Python package
+- Create a desktop shortcut with icon
+- Ask if you want to launch it immediately
+
+**Method 2: Using the Original Installer**
 
 1. Open File Explorer
 2. Navigate to the `Astronomical-watch` folder
 3. Double-click `install.bat`
-4. Follow the on-screen instructions
+4. This now also creates a desktop shortcut automatically
 
-**Method 2: Using Command Prompt**
+**Method 3: Using Command Prompt (Manual)**
 
 1. Open Command Prompt (press `Win + R`, type `cmd`, press Enter)
 2. Navigate to the project folder:
@@ -43,34 +56,73 @@ cd Astronomical-watch
    pip install .
    ```
 
+**Method 4: Using PowerShell (Advanced)**
+
+```powershell
+cd C:\Users\YourName\Downloads\Astronomical-watch
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
 ### Step 4: Run the Application
 
-**Option A: From Command Prompt**
+**The shortcut was created automatically!**
+
+Just double-click **"Astronomical Watch"** on your Desktop!
+
+**Other options:**
+
+**Option A: Test if it works (shows errors if any)**
+- Double-click `TEST_LAUNCH.bat` in the project folder
+- This will show any error messages in a console window
+
+**Option B: From Command Prompt**
 ```cmd
 astronomical-watch
 ```
-
-**Option B: Create Desktop Shortcut**
-
-1. Right-click on Desktop
-2. Select "New" → "Shortcut"
-3. Enter this as the location:
-   ```
-   pythonw -m astronomical_watch.ui.main
-   ```
-4. Click "Next"
-5. Name it "Astronomical Watch"
-6. Click "Finish"
-7. (Optional) Right-click the shortcut → "Properties" → "Change Icon" → Browse to `icons\astronomical_watch.ico` in the project folder
 
 **Option C: From Start Menu**
 1. Press the Windows key
 2. Type: `astronomical-watch`
 3. Press Enter
 
+**If the desktop shortcut doesn't work:**
+1. Right-click the shortcut → Properties
+2. Check "Target" field - should be: `pythonw.exe -m astronomical_watch.ui.main`
+3. Or use `TEST_LAUNCH.bat` to see error messages
+
 ## Troubleshooting
 
-### "Python is not recognized"
+### Desktop shortcut created but nothing happens when I double-click it
+
+**Quick diagnosis:**
+1. Double-click `TEST_LAUNCH.bat` - this will show error messages
+2. Check if the package is installed: `pip list | findstr astronomical`
+3. Test if Python/tkinter works: `python -m tkinter`
+
+**Common causes:**
+
+1. **Package not installed correctly**
+   - Solution: Run `install.bat` or `INSTALL_EASY.bat` again
+   - Verify: `pip show astronomical-watch`
+
+2. **Python not in PATH**
+   - The shortcut uses `pythonw.exe` which might not be found
+   - Solution: Edit shortcut, use full path to pythonw.exe
+   - Example: `C:\Users\YourName\AppData\Local\Programs\Python\Python311\pythonw.exe`
+
+3. **Tkinter missing**
+   - Test: Open Command Prompt and run `python -m tkinter`
+   - If error: Reinstall Python and make sure "tcl/tk and IDLE" is checked during installation
+
+4. **Working directory wrong**
+   - Right-click shortcut → Properties → "Start in" should be empty or project folder
+
+**Fix the shortcut manually:**
+1. Right-click "Astronomical Watch" shortcut → Properties
+2. Target should be: `pythonw -m astronomical_watch.ui.main`
+3. Or full path: `C:\Path\To\pythonw.exe -m astronomical_watch.ui.main`
+4. Icon location: Browse to `icons\astronomical_watch.ico` in project folder
+5. Click OK and try again
 - Python is not installed or not in PATH
 - Solution: Reinstall Python and check "Add Python to PATH"
 
@@ -121,11 +173,15 @@ Or double-click `AUTOSTART_WINDOWS.bat` in the project folder.
 
 ## Uninstalling
 
+**Easy way:**
+Double-click `uninstall.bat` in the project folder
+
+**Manual way:**
 ```cmd
 pip uninstall astronomical-watch
 ```
 
-Then delete the desktop shortcut if you created one.
+Then delete the desktop shortcut "Astronomical Watch"
 
 ## Additional Features
 
