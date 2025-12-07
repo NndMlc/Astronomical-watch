@@ -245,39 +245,21 @@ class AstronomicalWidgetMode:
             self._make_transparent()
             
     def _apply_theme(self):
-        """Apply sky gradient theme based on current time."""
-        # In transparent mode: only update time display, skip background
-        if self._transparent_mode and not self._is_hovered:
-            self._draw_time_display()  # Update time even in transparent mode
-            return
-            
-        # Update shared theme for all windows using local time
+        """Apply solid color theme based on current time."""
+        # Always update shared theme for all windows (even in transparent mode)
+        from .theme_manager import update_shared_theme
         theme = update_shared_theme()
         now_local = datetime.now()
         self._last_theme_time = now_local  # Cache for consistency across windows
         
-        # Create gradient on canvas
-        from .gradient import create_gradient_colors
-        canvas_height = self.canvas.winfo_height()
-        if canvas_height <= 1:
-            canvas_height = 110  # Default widget height
-        
-        gradient_colors = create_gradient_colors(theme, steps=canvas_height)
-        
-        # Draw gradient
-        self.canvas.delete("gradient")
-        canvas_width = self.canvas.winfo_width()
-        if canvas_width <= 1:
-            canvas_width = 180
-        
-        for i, color in enumerate(gradient_colors):
-            self.canvas.create_rectangle(
-                0, i, canvas_width, i + 1,
-                fill=color, outline=color, width=0, tags="gradient"
-            )
-        
-        # Set frame/master background to bottom color
-        self.master.configure(bg=theme.bottom_color)
+        # In transparent mode: only update time display, skip background rendering
+        if self._transparent_mode and not self._is_hovered:
+            self._draw_time_display()  # Update time even in transparent mode
+            return
+            
+        # Set solid background color (top_color)
+        self.canvas.configure(bg=theme.top_color)
+        self.master.configure(bg=theme.top_color)
         self.frame.configure(bg=theme.bottom_color)
         
         # Redraw time display with current background

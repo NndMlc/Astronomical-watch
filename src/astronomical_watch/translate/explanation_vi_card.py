@@ -64,6 +64,5 @@ Tại sao theo dõi thời gian thiên văn?
 -------------------------------------
 Đồng Hồ Thiên Văn cho phép người dùng theo dõi thời gian theo cách gần nhất với các chu kỳ thiên văn thực và chuyển động của Trái Đất quanh Mặt Trời. Cách tiếp cận này cung cấp hiểu biết sâu sắc hơn về các nhịp điệu tự nhiên, hỗ trợ trong giáo dục, khuyến khích kết nối với thiên nhiên và cung cấp đồng bộ hóa toàn cầu mà không có sự khác biệt nhân tạo trong thời gian.
 
-Tóm lại, Đồng Hồ Thiên Văn là đồng hồ của tương lai — toàn cầu, chính xác, giáo dục và truyền cảm hứng.
-"""
+Tóm lại, Đồng Hồ Thiên Văn là đồng hồ của tương lai - toàn cầu, chính xác, giáo dục và truyền cảm hứng.
 """

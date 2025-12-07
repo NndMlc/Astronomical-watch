@@ -105,17 +105,9 @@ class ComparisonCard(Toplevel):
             return "UTC+00:00"
     
     def _draw_gradient(self):
-        """Draw gradient background on canvas"""
-        # Use window dimensions
-        width = int(self.canvas.cget('width'))
-        height = int(self.canvas.cget('height'))
-        
-        # Create gradient colors
-        colors = create_gradient_colors(self.theme, steps=height)
-        
-        # Draw gradient as horizontal lines
-        for i, color in enumerate(colors):
-            self.canvas.create_line(0, i, width, i, fill=color, width=1)
+        """Set solid background color on canvas"""
+        # Use solid top_color instead of gradient
+        self.canvas.configure(bg=self.theme.top_color)
         
         # Update text color for better contrast
         self.text_color = self.theme.text_color
@@ -168,7 +160,7 @@ class ComparisonCard(Toplevel):
         
         # Get theme colors
         text_color = self.theme.text_color
-        frame_bg = self.theme.bottom_color
+        frame_bg = self.theme.top_color
         
         # Update month/year label
         month_names = {
@@ -324,7 +316,7 @@ class ComparisonCard(Toplevel):
         
         # Get theme colors - use semi-transparent frames
         text_color = self.theme.text_color
-        frame_bg = self.theme.bottom_color
+        frame_bg = self.theme.top_color
         
         # Create outer container
         outer_frame = Frame(self, bg=frame_bg)
@@ -500,7 +492,9 @@ class ComparisonCard(Toplevel):
         left_frame = Frame(inner_frame, bg=frame_bg)
         left_frame.pack(side="left", padx=(0, 15))
         Label(left_frame, text="MiliDies:", font=("Arial", 11, "bold"), bg=frame_bg, fg=text_color).pack(pady=(0, 6))
-        self.milidies_entry = Entry(left_frame, width=5, font=("Arial", 20, "bold"), justify="center", insertbackground=text_color, fg=text_color, highlightthickness=1, highlightbackground=text_color, relief="solid", bd=0)
+        self.milidies_entry = Entry(left_frame, width=5, font=("Arial", 20, "bold"), justify="center", 
+                                     bg=frame_bg, fg=text_color, insertbackground=text_color, 
+                                     highlightthickness=1, highlightbackground=text_color, relief="solid", bd=0)
         self.milidies_entry.pack(ipady=8)
         self.milidies_entry.bind('<KeyRelease>', self._validate_milidies)
         self.milidies_entry.bind('<Button-1>', lambda e: self._on_field_click('milidies'))
@@ -525,7 +519,9 @@ class ComparisonCard(Toplevel):
         time_input_frame = Frame(right_frame, bg=frame_bg)
         time_input_frame.pack()
         
-        self.hours_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center", insertbackground=text_color, fg=text_color, highlightthickness=1, highlightbackground=text_color, relief="solid", bd=0)
+        self.hours_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center", 
+                                 bg=frame_bg, fg=text_color, insertbackground=text_color, 
+                                 highlightthickness=1, highlightbackground=text_color, relief="solid", bd=0)
         self.hours_entry.pack(side="left", ipady=8)
         self.hours_entry.bind('<KeyRelease>', self._validate_hours_and_move)
         self.hours_entry.bind('<Button-1>', lambda e: self._on_field_click('time'))
@@ -533,7 +529,9 @@ class ComparisonCard(Toplevel):
         
         Label(time_input_frame, text=":", font=("Arial", 20, "bold"), bg=frame_bg, fg=text_color).pack(side="left", padx=6)
         
-        self.minutes_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center", insertbackground=text_color, fg=text_color, highlightthickness=1, highlightbackground=text_color, relief="solid", bd=0)
+        self.minutes_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center", 
+                                   bg=frame_bg, fg=text_color, insertbackground=text_color, 
+                                   highlightthickness=1, highlightbackground=text_color, relief="solid", bd=0)
         self.minutes_entry.pack(side="left", ipady=8)
         self.minutes_entry.bind('<KeyRelease>', self._validate_minutes)
         self.minutes_entry.bind('<Button-1>', lambda e: self._on_field_click('time'))
@@ -553,6 +551,13 @@ class ComparisonCard(Toplevel):
             return 'break'  # Block input to time fields
         elif self.active_field == 'time' and widget == self.milidies_entry:
             return 'break'  # Block input to miliDies field
+        
+        # If no active field yet, set it based on which widget received the key
+        if self.active_field is None:
+            if widget == self.milidies_entry:
+                self.active_field = 'milidies'
+            elif widget in (self.hours_entry, self.minutes_entry):
+                self.active_field = 'time'
         
         # Map numpad keys to regular digit keys (both NumLock ON and OFF)
         numpad_map = {

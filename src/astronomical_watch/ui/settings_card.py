@@ -45,7 +45,7 @@ class SettingsCard(tk.Toplevel):
         
         # Colors from theme
         self.text_color = self.theme.text_color
-        self.bg_color = self.theme.bottom_color
+        self.bg_color = self.theme.top_color
         
         # Load current settings
         self.settings = self._load_settings()
@@ -56,17 +56,85 @@ class SettingsCard(tk.Toplevel):
         # Setup drag functionality
         self._setup_dragging()
         
+        # Start theme update loop
+        self._schedule_theme_update()
+    
+    def _schedule_theme_update(self):
+        """Schedule periodic theme updates."""
+        self._update_theme()
+        self.after(86, self._schedule_theme_update)  # Update every 86ms (1 mikroDies)
+    
+    def _update_theme(self):
+        """Update theme colors."""
+        new_theme = get_shared_theme()
+        
+        # Check if theme changed
+        if (new_theme.top_color != self.theme.top_color or 
+            new_theme.text_color != self.theme.text_color):
+            
+            print(f"🎨 Theme changed: top={new_theme.top_color}, text={new_theme.text_color}")
+            
+            self.theme = new_theme
+            self.text_color = self.theme.text_color
+            self.bg_color = self.theme.top_color
+            
+            # Redraw background
+            self._draw_gradient()
+            
+            # Update checkbox colors
+            self._update_checkbox_colors()
+            
+            # Update all labels and frames
+            self._update_all_colors()
+    
+    def _update_all_colors(self):
+        """Update colors of all widgets."""
+        # Update labels
+        for widget in self.winfo_children():
+            if isinstance(widget, tk.Canvas):
+                continue
+            self._update_widget_recursive(widget)
+    
+    def _update_widget_recursive(self, widget):
+        """Recursively update widget colors."""
+        try:
+            if isinstance(widget, (tk.Label, tk.Frame)):
+                widget.config(bg=self.bg_color)
+            if isinstance(widget, tk.Label):
+                widget.config(fg=self.text_color)
+            
+            # Update children
+            for child in widget.winfo_children():
+                self._update_widget_recursive(child)
+        except:
+            pass
+        
     def _draw_gradient(self):
-        """Draw gradient background on canvas."""
-        width = 400
-        height = 700
-        
-        # Create gradient colors
-        colors = create_gradient_colors(self.theme, steps=height)
-        
-        # Draw gradient as horizontal lines
-        for i, color in enumerate(colors):
-            self.canvas.create_line(0, i, width, i, fill=color, width=1)
+        """Set solid background color on canvas."""
+        # Use solid top_color instead of gradient
+        self.canvas.configure(bg=self.theme.top_color)
+    
+    def _is_dark_color(self, color):
+        """Check if a color is dark (for contrast decisions)."""
+        try:
+            # Convert hex to RGB
+            rgb = self.winfo_rgb(color)
+            # Calculate luminance (perceived brightness)
+            r, g, b = [x/65535.0 for x in rgb]
+            luminance = 0.299*r + 0.587*g + 0.114*b
+            return luminance < 0.5
+        except:
+            return True  # Default to dark if can't determine
+    
+    def _update_checkbox_colors(self):
+        """Update checkbox colors based on current theme."""
+        # Gray checkbox background works with both white and black checkmarks
+        if hasattr(self, 'always_on_top_cb'):
+            self.always_on_top_cb.config(fg=self.text_color, bg=self.bg_color, activebackground=self.bg_color)
+        if hasattr(self, 'load_on_startup_cb'):
+            self.load_on_startup_cb.config(fg=self.text_color, bg=self.bg_color, activebackground=self.bg_color)
+        if hasattr(self, 'transparent_checkbutton'):
+            self.transparent_checkbutton.config(fg=self.text_color, bg=self.bg_color, activebackground=self.bg_color)
     
     def _setup_dragging(self):
         """Setup window dragging functionality on background elements."""
@@ -195,47 +263,56 @@ class SettingsCard(tk.Toplevel):
         
         # Always on top checkbox
         self.always_on_top_var = tk.BooleanVar(value=self.settings["always_on_top"])
-        always_on_top_cb = tk.Checkbutton(
+        self.always_on_top_cb = tk.Checkbutton(
             widget_frame,
             text=tr("always_on_top", self.lang),
             variable=self.always_on_top_var,
             bg=self.bg_color,
             fg=self.text_color,
-            selectcolor="white",
+            activeforeground=self.text_color,
+            selectcolor="#808080",
             activebackground=self.bg_color,
             font=("Arial", 10)
         )
-        always_on_top_cb.pack(anchor="w", pady=2)
+        self.always_on_top_cb.pack(anchor="w", pady=5)
+        self.always_on_top_cb.bind("<Enter>", lambda e: e.widget.config(font=("Arial", 10, "underline")))
+        self.always_on_top_cb.bind("<Leave>", lambda e: e.widget.config(font=("Arial", 10)))
         
         # Load on startup checkbox
         self.load_on_startup_var = tk.BooleanVar(value=self.settings["load_on_startup"])
-        load_on_startup_cb = tk.Checkbutton(
+        self.load_on_startup_cb = tk.Checkbutton(
             widget_frame,
             text=tr("load_on_startup", self.lang),
             variable=self.load_on_startup_var,
             bg=self.bg_color,
             fg=self.text_color,
-            selectcolor="white",
+            activeforeground=self.text_color,
+            selectcolor="#808080",
             activebackground=self.bg_color,
             font=("Arial", 10)
         )
-        load_on_startup_cb.pack(anchor="w", pady=2)
+        self.load_on_startup_cb.pack(anchor="w", pady=5)
+        self.load_on_startup_cb.bind("<Enter>", lambda e: e.widget.config(font=("Arial", 10, "underline")))
+        self.load_on_startup_cb.bind("<Leave>", lambda e: e.widget.config(font=("Arial", 10)))
         
         # Transparent background checkbox - Windows only
         if platform.system() == "Windows":
             self.transparent_var = tk.BooleanVar(value=self.settings.get("transparent_background", False))
-            transparent_checkbutton = tk.Checkbutton(
+            self.transparent_checkbutton = tk.Checkbutton(
                 widget_frame,
                 text=tr("transparent_bg", self.lang),
                 variable=self.transparent_var,
                 command=self._update_transparency_live,
                 bg=self.bg_color,
                 fg=self.text_color,
-                selectcolor="white",
+                activeforeground=self.text_color,
+                selectcolor="#808080",
                 activebackground=self.bg_color,
                 font=("Arial", 10)
             )
-            transparent_checkbutton.pack(anchor="w", pady=5)
+            self.transparent_checkbutton.pack(anchor="w", pady=5)
+            self.transparent_checkbutton.bind("<Enter>", lambda e: e.widget.config(font=("Arial", 10, "underline")))
+            self.transparent_checkbutton.bind("<Leave>", lambda e: e.widget.config(font=("Arial", 10)))
         else:
             # Linux/macOS: Feature not available
             self.transparent_var = tk.BooleanVar(value=False)
