@@ -89,6 +89,10 @@ echo.
 
 pip install --upgrade --force-reinstall .
 
+echo.
+echo [DEBUG] ERRORLEVEL after pip = %ERRORLEVEL%
+echo.
+
 REM Check errorlevel IMMEDIATELY before any other command
 if errorlevel 1 (
     echo.
