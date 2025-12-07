@@ -99,6 +99,8 @@ echo.
 REM Check saved errorlevel, not current
 if not "%PIP_RESULT%"=="0" (
     echo.
+    echo [DEBUG] ENTERING ERROR BLOCK - PIP_RESULT=%PIP_RESULT%
+    echo.
     echo X INSTALLATION FAILED!
     echo ========================================
     echo.
