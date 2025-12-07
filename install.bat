@@ -264,7 +264,7 @@ set /p LAUNCH="Launch now? (Y/N): "
 if /i "!LAUNCH!"=="Y" (
     echo.
     echo Starting Astronomical Watch...
-    start "" "!PYTHONW_PATH!" -m astronomical_watch.ui.main
+    start "" /B "!PYTHONW_PATH!" -m astronomical_watch.ui.main
     echo.
     echo Application started!
     timeout /t 2 >nul
