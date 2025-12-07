@@ -92,16 +92,18 @@ pip install --upgrade --force-reinstall .
 REM Save errorlevel to variable IMMEDIATELY
 set "PIP_RESULT=%ERRORLEVEL%"
 
-echo.
-echo [DEBUG] PIP_RESULT = %PIP_RESULT%
-echo.
-
 REM Check saved errorlevel, not current
 if not "%PIP_RESULT%"=="0" (
     echo.
-    echo ============== ERROR ERROR ERROR ==============
-    echo [DEBUG] ENTERING ERROR BLOCK - PIP_RESULT=%PIP_RESULT%
-    echo ============== ERROR ERROR ERROR ==============
+    echo X INSTALLATION FAILED!
+    echo ========================================
+    echo.
+    echo Please check the error messages above.
+    echo.
+    echo Common issues:
+    echo   - No internet connection (for downloading dependencies)
+    echo   - Antivirus blocking installation
+    echo   - Insufficient permissions (try running as Administrator)
     echo.
     pause
     exit /b 1
