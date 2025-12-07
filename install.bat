@@ -89,11 +89,16 @@ echo.
 
 pip install --upgrade --force-reinstall .
 
+echo.
+echo ========================================
+
 if errorlevel 1 (
     echo.
-    echo X Installation failed!
+    echo X INSTALLATION FAILED!
+    echo ========================================
     echo.
     echo Please check the error messages above.
+    echo.
     echo Common issues:
     echo   - No internet connection (for downloading dependencies)
     echo   - Antivirus blocking installation
