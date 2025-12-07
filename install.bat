@@ -134,9 +134,25 @@ if not defined PYTHON_PATH (
 set PYTHONW_PATH=!PYTHON_PATH:python.exe=pythonw.exe!
 
 if not exist "!PYTHONW_PATH!" (
-    echo ! pythonw.exe not found
+    echo.
+    echo ========================================
+    echo WARNING: pythonw.exe not found!
+    echo ========================================
+    echo.
+    echo pythonw.exe is required to run without console window.
+    echo.
+    echo Python path: !PYTHON_PATH!
+    echo Expected pythonw path: !PYTHONW_PATH!
+    echo.
+    echo Please reinstall Python and make sure to check:
+    echo "Install for all users" or "Add to PATH"
+    echo.
+    pause
+    echo.
     echo Using python.exe instead (will show console window)
     set PYTHONW_PATH=!PYTHON_PATH!
+) else (
+    echo + pythonw.exe found: !PYTHONW_PATH!
 )
 
 echo + Python executable: !PYTHONW_PATH!
