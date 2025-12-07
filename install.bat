@@ -93,6 +93,9 @@ REM Save errorlevel before cls clears it
 set "INSTALL_ERROR=%ERRORLEVEL%"
 
 echo.
+echo [DEBUG] INSTALL_ERROR = %INSTALL_ERROR%
+echo.
+pause
 cls
 echo ========================================
 echo Installation finished - checking result...
