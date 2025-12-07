@@ -92,6 +92,11 @@ pip install --upgrade --force-reinstall .
 REM Save errorlevel to variable IMMEDIATELY
 set "PIP_RESULT=%ERRORLEVEL%"
 
+echo.
+echo *** VERSION CC9BEE9 FINAL - PIP_RESULT=%PIP_RESULT% ***
+echo.
+pause
+
 REM Check saved errorlevel, not current
 if not "%PIP_RESULT%"=="0" (
     echo.
