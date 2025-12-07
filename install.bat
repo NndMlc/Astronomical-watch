@@ -90,7 +90,11 @@ echo.
 pip install --upgrade --force-reinstall .
 
 echo.
+cls
 echo ========================================
+echo Installation finished - checking result...
+echo ========================================
+echo.
 
 if errorlevel 1 (
     echo.
