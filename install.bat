@@ -177,7 +177,9 @@ echo Creating launcher script...
 
 REM Create VBScript that runs Python without console window
 echo Set objShell = CreateObject("WScript.Shell") > "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
-echo objShell.Run "\"!PYTHON_PATH!\" -m astronomical_watch.ui.main", 0, False >> "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
+echo pythonPath = "!PYTHON_PATH!" >> "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
+echo command = pythonPath ^& " -m astronomical_watch.ui.main" >> "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
+echo objShell.Run command, 0, False >> "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
 
 echo + Launcher created: !SHORTCUT_DIR!\run_astronomical_watch.vbs
 echo.
