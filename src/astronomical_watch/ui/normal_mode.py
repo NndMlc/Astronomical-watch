@@ -14,6 +14,7 @@ import random
 from datetime import datetime, timezone
 from ..core.astro_time_core import AstroYear
 from .gradient import get_sky_theme, create_gradient_colors
+from .theme_manager import get_shared_theme
 from .translations import TRANSLATIONS
 from .comparison_card import create_comparison_card
 from .settings_card import create_settings_card
@@ -100,6 +101,7 @@ class ModernNormalMode:
         # Theme state
         self.current_theme = None
         self.gradient_canvas = None
+        self.shared_theme_func = None  # Function to get shared theme from widget
         
         # Update timer
         self._update_job = None
@@ -187,14 +189,18 @@ class ModernNormalMode:
             "settings": "⚙️"
         }
         
+    def _get_current_theme(self):
+        """Get current theme - uses shared theme for consistency."""
+        return get_shared_theme()
+        
     def _create_ui(self):
         """Create the modern UI layout."""
         try:
             print("🎨 Creating UI layout...")
             
             # Get initial theme colors
-            theme = get_sky_theme()
-            bg_color = "#1e293b"  # Force dark slate background 
+            theme = self._get_current_theme()
+            bg_color = theme.bottom_color if theme else "#60a5fa"  # Use bottom color for gradient
             print(f"🎨 Canvas background color will be: {bg_color}")
             
             # Create gradient background canvas first
@@ -203,7 +209,7 @@ class ModernNormalMode:
                 highlightthickness=0,
                 relief='flat',
                 borderwidth=0,
-                bg=bg_color  # Set dark background color
+                bg=bg_color  # Use theme color
             )
             self.gradient_canvas.pack(fill=tk.BOTH, expand=True)
             print("✅ Gradient canvas created")
@@ -211,14 +217,13 @@ class ModernNormalMode:
             # Bind canvas resize to update gradient
             self.gradient_canvas.bind('<Configure>', self._on_canvas_resize)
             
-            # Main container over gradient - make truly transparent
-            # Use the parent canvas background for transparency
-            canvas_bg = self.gradient_canvas.cget('bg')
+            # Main container over gradient - match gradient color
+            canvas_bg = theme.top_color  # Use gradient start color
             self.main_frame = tk.Frame(self.gradient_canvas, bg=canvas_bg, relief='flat', bd=0)
             self.canvas_frame_id = self.gradient_canvas.create_window(
                 0, 0, anchor=tk.NW, window=self.main_frame
             )
-            print(f"✅ Main frame created with canvas background: {canvas_bg}")
+            print(f"✅ Main frame created with gradient top color: {canvas_bg}")
             
             # Custom title bar
             self._create_title_bar()
@@ -246,12 +251,29 @@ class ModernNormalMode:
             traceback.print_exc()
             raise
         
+    def _get_gradient_color_at_position(self, relative_y=0.0):
+        """Get interpolated gradient color at relative Y position (0.0 to 1.0)."""
+        if not hasattr(self, 'current_theme') or not self.current_theme:
+            return "#2563eb"  # Fallback
+        
+        theme = self.current_theme
+        # Interpolate between top and bottom colors
+        top_rgb = self.master.winfo_rgb(theme.top_color)
+        bottom_rgb = self.master.winfo_rgb(theme.bottom_color)
+        
+        # Interpolate each color channel
+        r = int(top_rgb[0] + (bottom_rgb[0] - top_rgb[0]) * relative_y) // 256
+        g = int(top_rgb[1] + (bottom_rgb[1] - top_rgb[1]) * relative_y) // 256
+        b = int(top_rgb[2] + (bottom_rgb[2] - top_rgb[2]) * relative_y) // 256
+        
+        return f"#{r:02x}{g:02x}{b:02x}"
+        
     def _create_title_bar(self):
         """Create custom title bar with language selector and close button."""
-        # Use canvas background for all frames
-        canvas_bg = self.gradient_canvas.cget('bg')
+        # Use gradient color for this section (top ~10% of window)
+        bar_color = self._get_gradient_color_at_position(0.05)
         
-        self.title_bar = tk.Frame(self.main_frame, height=50, bg=canvas_bg, relief='flat', bd=0)
+        self.title_bar = tk.Frame(self.main_frame, height=50, bg=bar_color, relief='flat', bd=0)
         self.title_bar.pack(fill=tk.X)
         self.title_bar.pack_propagate(False)
         
@@ -270,7 +292,7 @@ class ModernNormalMode:
         self.close_button.pack(side=tk.RIGHT, padx=10, pady=8)
         
         # Language selector (left side)
-        self.lang_frame = tk.Frame(self.title_bar, bg=canvas_bg)
+        self.lang_frame = tk.Frame(self.title_bar, bg=bar_color)
         self.lang_frame.pack(side=tk.LEFT, padx=10, pady=8)
         
         self.lang_button = tk.Button(
@@ -289,18 +311,18 @@ class ModernNormalMode:
             self.title_bar,
             text="Astronomical Watch", 
             font=("Arial", 14, "bold"),
-            bg=canvas_bg,
+            bg=bar_color,
             fg="#e2e8f0"
         )
         self.title_label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
     def _create_time_display(self):
         """Create the main time display area with proper grid layout."""
-        # Use canvas background for consistency
-        canvas_bg = self.gradient_canvas.cget('bg')
+        # Use gradient color for middle section (~30% down)
+        time_color = self._get_gradient_color_at_position(0.3)
         text_color = "#e2e8f0"  # Light gray text for dark background
         
-        self.time_frame = tk.Frame(self.main_frame, bg=canvas_bg, relief='flat', bd=0)
+        self.time_frame = tk.Frame(self.main_frame, bg=time_color, relief='flat', bd=0)
         self.time_frame.pack(fill=tk.X, pady=5)
         
         # Configure grid columns for consistent layout
@@ -313,7 +335,7 @@ class ModernNormalMode:
             text="Dies:",
             font=("Arial", 14, "bold"),
             anchor="e",
-            bg=canvas_bg,
+            bg=time_color,
             fg=text_color
         )
         self.dies_label_text.grid(row=0, column=0, padx=(15, 8), pady=5, sticky="e")
@@ -323,7 +345,7 @@ class ModernNormalMode:
             text="000",
             font=get_monospace_font(48),
             anchor="w",
-            bg=canvas_bg,
+            bg=time_color,
             fg=text_color
         )
         self.dies_label.grid(row=0, column=1, padx=(8, 15), pady=5, sticky="w")
@@ -334,7 +356,7 @@ class ModernNormalMode:
             text="miliDies:",
             font=("Arial", 14, "bold"),
             anchor="e",
-            bg=canvas_bg,
+            bg=time_color,
             fg=text_color
         )
         self.milidies_label_text.grid(row=1, column=0, padx=(15, 8), pady=5, sticky="e")
@@ -344,7 +366,7 @@ class ModernNormalMode:
             text="000",
             font=get_monospace_font(48),
             anchor="w",
-            bg=canvas_bg,
+            bg=time_color,
             fg=text_color
         )
         self.milidies_label.grid(row=1, column=1, padx=(8, 15), pady=5, sticky="w")
@@ -355,7 +377,7 @@ class ModernNormalMode:
             text="mikroDies:",
             font=("Arial", 14, "bold"),
             anchor="e",
-            bg=canvas_bg,
+            bg=time_color,
             fg=text_color
         )
         self.mikrodies_label_text.grid(row=2, column=0, padx=(15, 8), pady=5, sticky="e")
@@ -365,23 +387,23 @@ class ModernNormalMode:
             text="000",
             font=get_monospace_font(48),
             anchor="w",
-            bg=canvas_bg,
+            bg=time_color,
             fg=text_color
         )
         self.mikrodies_label.grid(row=2, column=1, padx=(8, 15), pady=5, sticky="w")
         
     def _create_standard_time(self):
         """Create standard time display section."""
-        # Use canvas background for consistency
-        canvas_bg = self.gradient_canvas.cget('bg')
+        # Use gradient color for lower-middle section (~60% down)
+        std_color = self._get_gradient_color_at_position(0.6)
         text_color = "#e2e8f0"  # Light gray text for dark background
         
         # Add visual separator
-        separator_frame = tk.Frame(self.main_frame, height=2, bg=canvas_bg, relief='flat', bd=0)
+        separator_frame = tk.Frame(self.main_frame, height=2, bg=std_color, relief='flat', bd=0)
         separator_frame.pack(fill=tk.X, pady=20)
         separator_frame.pack_propagate(False)
         
-        self.std_time_frame = tk.Frame(self.main_frame, bg=canvas_bg, relief='flat', bd=0)
+        self.std_time_frame = tk.Frame(self.main_frame, bg=std_color, relief='flat', bd=0)
         self.std_time_frame.pack(fill=tk.X, pady=5)
         
         # Label for standard time
@@ -389,7 +411,7 @@ class ModernNormalMode:
             self.std_time_frame,
             text=tr("standard_time", self.current_language),
             font=("Arial", 14),
-            bg=canvas_bg,
+            bg=std_color,
             fg=text_color
         )
         self.std_time_label_text.pack(pady=(0, 5))
@@ -398,7 +420,7 @@ class ModernNormalMode:
             self.std_time_frame,
             text="Loading...",
             font=("Arial", 16, "bold"),
-            bg=canvas_bg,
+            bg=std_color,
             fg=text_color
         )
         self.std_time_label.pack()
@@ -408,33 +430,35 @@ class ModernNormalMode:
             self.std_time_frame,  # Koristimo std_time_frame koji koristi pack()
             text="",
             font=("Arial", 11, "italic"),
-            bg=canvas_bg,
+            bg=std_color,
             fg="#FFD700"  # Gold color
         )
         self.countdown_label.pack(pady=(5, 0))
         
     def _create_tab_buttons(self):
         """Create tab navigation buttons with icons."""
-        # Use canvas background for consistency
-        canvas_bg = self.gradient_canvas.cget('bg')
+        # Use gradient color for bottom section (~90% down)
+        tab_color = self._get_gradient_color_at_position(0.9)
         text_color = "#e2e8f0"  # Light gray text for dark background
         
-        self.tab_frame = tk.Frame(self.main_frame, bg=canvas_bg, relief='flat', bd=0)
+        self.tab_frame = tk.Frame(self.main_frame, bg=tab_color, relief='flat', bd=0)
         self.tab_frame.pack(fill=tk.X, pady=5)
         
         # Center the buttons
-        button_container = tk.Frame(self.tab_frame, bg=canvas_bg, relief='flat', bd=0)
+        button_container = tk.Frame(self.tab_frame, bg=tab_color, relief='flat', bd=0)
         button_container.pack()
         
         self.tab_buttons = {}
+        self.tab_tooltip_keys = {}  # Store tooltip translation keys
         
+        # Tab definitions with translation keys for tooltips
         tabs = [
-            ("explanation", self.icons["info"], "Info"),
-            ("comparison", self.icons["compare"], "Compare"), 
-            ("settings", self.icons["settings"], "Settings")
+            ("explanation", self.icons["info"], "explanation"),
+            ("comparison", self.icons["compare"], "comparison"), 
+            ("settings", self.icons["settings"], "settings_title")  # Use settings_title and strip emoji
         ]
         
-        for tab_id, icon, text in tabs:
+        for tab_id, icon, tooltip_key in tabs:
             btn = tk.Button(
                 button_container,
                 text=icon,
@@ -450,6 +474,14 @@ class ModernNormalMode:
             )
             btn.pack(side=tk.LEFT, padx=8)
             self.tab_buttons[tab_id] = btn
+            self.tab_tooltip_keys[tab_id] = tooltip_key  # Store key for updates
+            
+            # Add tooltip with translated text (strip emoji from settings_title)
+            tooltip_text = tr(tooltip_key, self.current_language)
+            if tooltip_key == "settings_title":
+                # Remove emoji and extra spaces
+                tooltip_text = tooltip_text.replace("⚙️", "").strip()
+            self._create_tooltip(btn, tooltip_text)
             
         # Note: Tab content will open in separate windows
         print("Tab buttons configured for external window opening")
@@ -482,6 +514,42 @@ class ModernNormalMode:
         self.title_bar.bind("<B1-Motion>", do_drag)
         self.title_label.bind("<Button-1>", start_drag) 
         self.title_label.bind("<B1-Motion>", do_drag)
+        
+    def _create_tooltip(self, widget, text):
+        """Create a simple tooltip for a widget."""
+        # Store text for updates
+        widget._tooltip_text = text
+        
+        def on_enter(event):
+            # Create tooltip window
+            tooltip = tk.Toplevel()
+            tooltip.wm_overrideredirect(True)
+            tooltip.wm_geometry(f"+{event.x_root+10}+{event.y_root+10}")
+            
+            label = tk.Label(
+                tooltip, 
+                text=widget._tooltip_text,  # Use stored text
+                background="#2d3748", 
+                foreground="white",
+                relief=tk.SOLID, 
+                borderwidth=1,
+                font=("Arial", 10),
+                padx=8,
+                pady=4
+            )
+            label.pack()
+            
+            # Store tooltip reference
+            widget._tooltip = tooltip
+            
+        def on_leave(event):
+            # Destroy tooltip
+            if hasattr(widget, '_tooltip'):
+                widget._tooltip.destroy()
+                del widget._tooltip
+                
+        widget.bind('<Enter>', on_enter)
+        widget.bind('<Leave>', on_leave)
         
     def _show_language_menu(self):
         """Show language selection menu with scrollbar."""
@@ -597,6 +665,17 @@ class ModernNormalMode:
             self.std_time_label_text.config(text="")  # Clear first
             self.std_time_label_text.update_idletasks()  # Force update
             self.std_time_label_text.config(text=new_std_time_text)  # Set new text
+            
+        # Update tab button tooltips
+        if hasattr(self, 'tab_tooltip_keys'):
+            for tab_id, button in self.tab_buttons.items():
+                tooltip_key = self.tab_tooltip_keys.get(tab_id)
+                if tooltip_key:
+                    tooltip_text = tr(tooltip_key, self.current_language)
+                    # Strip emoji from settings_title
+                    if tooltip_key == "settings_title":
+                        tooltip_text = tooltip_text.replace("⚙️", "").strip()
+                    button._tooltip_text = tooltip_text
             
     def _switch_tab(self, tab_id):
         """Open tab content in a new window."""
@@ -820,10 +899,30 @@ class ModernNormalMode:
             explanation_window.bind('<Destroy>', on_explanation_destroy)
             
             # Apply theme to explanation window
-            theme = get_sky_theme()
-            explanation_window.configure(bg=theme.bottom_color)
+            theme = self._get_current_theme()
             
-            # Setup drag functionality first
+            # Create gradient canvas
+            gradient_canvas = tk.Canvas(
+                explanation_window,
+                highlightthickness=0,
+                relief='flat',
+                borderwidth=0,
+                bg=theme.bottom_color,
+                width=480,
+                height=550
+            )
+            gradient_canvas.pack(fill=tk.BOTH, expand=True)
+            
+            # Draw gradient
+            gradient_canvas.update_idletasks()
+            canvas_width = max(gradient_canvas.winfo_width(), 480)
+            canvas_height = max(gradient_canvas.winfo_height(), 550)
+            
+            gradient_colors = create_gradient_colors(theme, steps=canvas_height)
+            for i, color in enumerate(gradient_colors):
+                gradient_canvas.create_line(0, i, canvas_width, i, fill=color, width=1, tags="gradient")
+            
+            # Setup drag functionality
             drag_data = {"x": 0, "y": 0}
             
             def start_drag(event):
@@ -842,28 +941,27 @@ class ModernNormalMode:
                 drag_data["x"] = event.x_root
                 drag_data["y"] = event.y_root
             
-            # Bind to window background
-            explanation_window.bind("<Button-1>", start_drag)
-            explanation_window.bind("<B1-Motion>", do_drag)
+            # Bind to canvas
+            gradient_canvas.bind("<Button-1>", start_drag)
+            gradient_canvas.bind("<B1-Motion>", do_drag)
             
-            # Main container
-            outer_frame = tk.Frame(explanation_window, bg=theme.bottom_color)
-            outer_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-            
-            # Bind drag to outer frame
-            outer_frame.bind("<Button-1>", start_drag)
-            outer_frame.bind("<B1-Motion>", do_drag)
+            # Main container on canvas with solid off-white background
+            outer_frame = tk.Frame(gradient_canvas, bg="#f5f1e8")
+            canvas_window = gradient_canvas.create_window(
+                20, 20, anchor=tk.NW, window=outer_frame,
+                width=canvas_width-40, height=canvas_height-40
+            )
             
             # === Top: Title with close button (fixed) ===
-            title_frame = tk.Frame(outer_frame, bg=theme.bottom_color)
+            title_frame = tk.Frame(outer_frame, bg="#f5f1e8")
             title_frame.pack(fill=tk.X, pady=(0, 15))
             
             title = tk.Label(
                 title_frame,
                 text=f"📖 {tr('explanation', self.current_language)}",
                 font=("Arial", 18, "bold"),
-                bg=theme.bottom_color,
-                fg=theme.text_color
+                bg="#f5f1e8",
+                fg="#2c3e50"
             )
             title.pack(side=tk.LEFT)
             
@@ -885,28 +983,30 @@ class ModernNormalMode:
             
             # Make the empty space in title_frame draggable (between title and close button)
             # We need to create a filler frame
-            filler = tk.Frame(title_frame, bg=theme.bottom_color)
+            filler = tk.Frame(title_frame, bg="#f5f1e8")
             filler.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
             filler.bind("<Button-1>", start_drag)
             filler.bind("<B1-Motion>", do_drag)
             
             # Create scrollable text widget
-            text_frame = tk.Frame(outer_frame, bg=theme.bottom_color)
+            text_frame = tk.Frame(outer_frame, bg="#f5f1e8")
             text_frame.pack(fill=tk.BOTH, expand=True)
             
             # Bind drag to frame as well
             text_frame.bind("<Button-1>", start_drag)
             text_frame.bind("<B1-Motion>", do_drag)
             
-            # Text widget with scrollbar
+            # Text widget with scrollbar - using off-white background
             text_widget = tk.Text(
                 text_frame,
                 wrap=tk.WORD,
-                font=("Arial", 11),
-                bg="#f7fafc",
+                font=("Arial", 12),
+                bg="#f5f1e8",
                 fg="#2c3e50",
                 padx=15,
-                pady=15
+                pady=15,
+                highlightthickness=0,
+                relief='flat'
             )
             
             scrollbar = tk.Scrollbar(text_frame, orient=tk.VERTICAL, command=text_widget.yview)
@@ -917,8 +1017,11 @@ class ModernNormalMode:
             scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
             
             # Insert explanation text
+            print(f"DEBUG: Inserting explanation text, length: {len(explanation_text)}")
+            print(f"DEBUG: Text widget bg: {text_widget.cget('bg')}, fg: {text_widget.cget('fg')}")
             text_widget.insert(tk.END, explanation_text)
             text_widget.config(state=tk.DISABLED)
+            print(f"DEBUG: Text inserted and widget disabled")
             
             # Bind drag to text widget as well (works even when disabled)
             text_widget.bind("<Button-1>", start_drag)
@@ -978,28 +1081,25 @@ class ModernNormalMode:
             print("✅ Normal Mode closed, returned to widget")
             
     def _apply_theme(self):
-        """Apply the astronomical theme with gradient background based on current time."""
+        """Apply the astronomical theme based on current local time."""
         try:
-            print("🎨 Applying theme...")
-            now_utc = datetime.now(timezone.utc)
-            theme = get_sky_theme(now_utc)
+            # Get theme using local system time
+            from datetime import datetime
+            now_local = datetime.now()
+            theme = get_sky_theme(now_local)
+            
+            if not theme:
+                # Fallback to default theme
+                from .gradient import SkyTheme
+                theme = SkyTheme("#2563eb", "#60a5fa", "#000000")
+            
             self.current_theme = theme
-            print(f"✅ Theme calculated: {theme.top_color} → {theme.bottom_color}")
             
-            # Ensure canvas is ready before creating gradient
-            if self.gradient_canvas:
-                self.gradient_canvas.update_idletasks()
-                canvas_w = self.gradient_canvas.winfo_width()
-                canvas_h = self.gradient_canvas.winfo_height()
-                print(f"📐 Canvas state: {canvas_w}x{canvas_h}")
-            
-            # Create gradient background
+            # Set background color
             self._create_gradient_background(theme)
-            print("✅ Gradient background created")
             
             # Apply theme colors to all widgets
             self._update_widget_colors(theme)
-            print("✅ Widget colors updated")
             
         except Exception as e:
             print(f"❌ Theme application failed: {e}")
@@ -1010,88 +1110,37 @@ class ModernNormalMode:
     def _create_gradient_background(self, theme):
         """Create gradient background on canvas."""
         try:
-            print(f"📌 DEBUG: _create_gradient_background called")
-            print(f"📌 DEBUG: gradient_canvas exists: {hasattr(self, 'gradient_canvas')}")
-            if hasattr(self, 'gradient_canvas'):
-                print(f"📌 DEBUG: gradient_canvas is not None: {self.gradient_canvas is not None}")
-                
-            if not self.gradient_canvas:
-                print("⚠️ No gradient canvas available")
+            if theme is None or not self.gradient_canvas:
                 return
                 
-            print(f"🎨 Creating gradient background...")
-            
-            # Clear existing gradient and set canvas background
+            # Clear existing gradient
             self.gradient_canvas.delete("gradient")
             self.gradient_canvas.configure(bg=theme.bottom_color)
-            print(f"📋 Canvas background set to: {theme.bottom_color}")
             
-            # Force canvas update and get dimensions
+            # Get canvas dimensions
             self.gradient_canvas.update_idletasks()
             self.master.update_idletasks()
-            
             canvas_width = self.gradient_canvas.winfo_width()
             canvas_height = self.gradient_canvas.winfo_height()
             
-            # If canvas not properly sized yet, use window dimensions
             if canvas_width <= 1 or canvas_height <= 1:
                 canvas_width = self.window_width
                 canvas_height = self.window_height
-                print(f"📐 Using window dimensions: {canvas_width}x{canvas_height}")
-            else:
-                print(f"📐 Canvas size: {canvas_width}x{canvas_height}")
             
-            if canvas_width <= 1 or canvas_height <= 1:
-                print("❌ Could not get valid canvas dimensions, using solid color")
-                self.gradient_canvas.configure(bg=theme.bottom_color)
-                return
+            # Create gradient colors
+            gradient_colors = create_gradient_colors(theme, steps=canvas_height)
             
-            # Create gradient colors with adequate steps
-            gradient_steps = max(canvas_height, 100)  # At least 100 steps for smooth gradient
-            gradient_colors = create_gradient_colors(theme, steps=gradient_steps)
-            print(f"🌈 Creating gradient: {len(gradient_colors)} colors for {canvas_width}x{canvas_height}")
-            
-            # Draw gradient as filled rectangles for seamless appearance
-            lines_drawn = 0
-            step_height = canvas_height / len(gradient_colors)
-            
+            # Draw gradient as horizontal lines
             for i, color in enumerate(gradient_colors):
-                try:
-                    # Calculate y position for this color strip
-                    y_start = int(i * step_height)
-                    y_end = int((i + 1) * step_height)
-                    
-                    # Ensure we don't exceed canvas bounds
-                    if y_start < canvas_height:
-                        y_end = min(y_end, canvas_height)
-                        
-                        # Use filled rectangles for smooth gradient
-                        self.gradient_canvas.create_rectangle(
-                            0, y_start, canvas_width, y_end,
-                            fill=color, outline=color, width=0, tags="gradient"
-                        )
-                        lines_drawn += 1
-                except Exception as line_error:
-                    print(f"⚠️ Error drawing rectangle {i}: {line_error}")
-                    break
-                
-            print(f"✅ Gradient created: {lines_drawn} strips drawn")
-                
-            # Make main frame transparent so gradient shows through
-            # Note: Cannot use bg="" in Tkinter, frame stays transparent without bg setting
-            print("✅ Main frame inherits gradient canvas background")
+                self.gradient_canvas.create_line(
+                    0, i, canvas_width, i,
+                    fill=color, width=1, tags="gradient"
+                )
                 
         except Exception as e:
-            print(f"❌ Gradient background creation failed: {e}")
-            import traceback
-            traceback.print_exc()
-            # Fallback: set a solid color
-            try:
-                if self.gradient_canvas:
-                    self.gradient_canvas.configure(bg=theme.bottom_color)
-                    print(f"🎨 Fallback: Set solid background {theme.bottom_color}")
-            except:
-                print("❌ Even fallback failed")
+            print(f"❌ Gradient creation failed: {e}")
+            if self.gradient_canvas:
+                self.gradient_canvas.configure(bg=theme.top_color)
     
     def _on_canvas_resize(self, event):
         """Handle canvas resize to update gradient and frame size."""
@@ -1118,7 +1167,7 @@ class ModernNormalMode:
         text_color = theme.text_color
         
         # Determine if background is dark for contrast
-        bg_is_dark = self._is_dark_color(theme.bottom_color)
+        bg_is_dark = self._is_dark_color(theme.top_color)
         button_bg = "#ffffff" if bg_is_dark else "#000000"
         button_fg = "#000000" if bg_is_dark else "#ffffff"
         
@@ -1315,12 +1364,17 @@ class ModernNormalMode:
         
     def _update_gradient_theme(self, current_time):
         """Update gradient theme based on current time (called periodically)."""
-        new_theme = get_sky_theme(current_time)
+        # Use shared theme time if available
+        theme_time = current_time
+        if self.widget_ref and hasattr(self.widget_ref, '_last_theme_time'):
+            theme_time = self.widget_ref._last_theme_time
+        
+        new_theme = get_sky_theme(theme_time)
         
         # Only update if theme has significantly changed (save CPU)
         if (self.current_theme is None or 
             new_theme.top_color != self.current_theme.top_color or
-            new_theme.bottom_color != self.current_theme.bottom_color):
+            new_theme.top_color != self.current_theme.top_color):
             
             self.current_theme = new_theme
             self._create_gradient_background(new_theme)

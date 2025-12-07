@@ -58,10 +58,15 @@ def get_solar_altitude_approximation(dt: datetime) -> float:
 def get_sky_theme(dt: datetime = None) -> SkyTheme:
     """
     Get current sky theme based on astronomical data.
+    Uses local system time to calculate sun position.
     Returns a SkyTheme with appropriate gradient and text colors.
     """
     if dt is None:
-        dt = datetime.now(timezone.utc)
+        # Use local system time, not UTC
+        dt = datetime.now()
+    elif dt.tzinfo is not None:
+        # If dt has timezone info, convert to local time
+        dt = dt.astimezone()
     
     altitude = get_solar_altitude_approximation(dt)
     

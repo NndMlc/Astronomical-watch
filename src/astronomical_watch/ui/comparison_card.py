@@ -6,6 +6,7 @@ from ..core.astro_time_core import AstroYear
 from ..core.equinox import compute_vernal_equinox
 from .translations import tr
 from .gradient import get_sky_theme, create_gradient_colors
+from .theme_manager import get_shared_theme
 
 def milidies_to_hm(milidies):
     total_seconds = milidies * 86.4  # 1 milidies = 86.4 sekunde
@@ -44,8 +45,8 @@ class ComparisonCard(Toplevel):
         # Remove window decorations (minimize/maximize buttons)
         self.overrideredirect(True)
         
-        # Get sky theme
-        self.theme = get_sky_theme(datetime.now(timezone.utc))
+        # Get sky theme from centralized theme manager for consistency
+        self.theme = get_shared_theme()
         
         # Create canvas for gradient background
         self.canvas = Canvas(self, width=window_width, height=window_height, highlightthickness=0)
@@ -67,6 +68,19 @@ class ComparisonCard(Toplevel):
         
         # Setup drag functionality
         self._setup_dragging()
+        
+        # Bind mouse wheel to scroll calendar
+        self.bind_all('<MouseWheel>', self._on_mousewheel)
+        self.bind_all('<Button-4>', self._on_mousewheel)  # Linux scroll up
+        self.bind_all('<Button-5>', self._on_mousewheel)  # Linux scroll down
+    
+    def _on_mousewheel(self, event):
+        """Handle mouse wheel scrolling for card content"""
+        if hasattr(self, 'scroll_canvas') and self.scroll_canvas.winfo_exists():
+            if event.num == 5 or event.delta < 0:  # Scroll down
+                self.scroll_canvas.yview_scroll(1, 'units')
+            elif event.num == 4 or event.delta > 0:  # Scroll up
+                self.scroll_canvas.yview_scroll(-1, 'units')
     
     def _get_timezone_name(self):
         """Get full timezone name from system"""
@@ -362,6 +376,9 @@ class ComparisonCard(Toplevel):
         scroll_canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
+        # Store scroll_canvas reference for mouse wheel
+        self.scroll_canvas = scroll_canvas
+        
         # All content goes in scrollable_frame
         parent_widget = scrollable_frame
         
@@ -483,12 +500,11 @@ class ComparisonCard(Toplevel):
         left_frame = Frame(inner_frame, bg=frame_bg)
         left_frame.pack(side="left", padx=(0, 15))
         Label(left_frame, text="MiliDies:", font=("Arial", 11, "bold"), bg=frame_bg, fg=text_color).pack(pady=(0, 6))
-        self.milidies_entry = Entry(left_frame, width=5, font=("Arial", 20, "bold"), justify="center")
-        self.milidies_entry.config(highlightthickness=3, highlightbackground="#0066cc", relief="solid", bd=2)
+        self.milidies_entry = Entry(left_frame, width=5, font=("Arial", 20, "bold"), justify="center", insertbackground=text_color, fg=text_color, highlightthickness=1, highlightbackground=text_color, relief="solid", bd=0)
         self.milidies_entry.pack(ipady=8)
         self.milidies_entry.bind('<KeyRelease>', self._validate_milidies)
         self.milidies_entry.bind('<Button-1>', lambda e: self._on_field_click('milidies'))
-        self.milidies_entry.bind('<KeyPress>', self._handle_keypress)
+        self.milidies_entry.bind('<Key>', self._handle_keypress)
         
         # Middle: Convert button with dynamic arrow
         middle_frame = Frame(inner_frame, bg=frame_bg)
@@ -509,25 +525,28 @@ class ComparisonCard(Toplevel):
         time_input_frame = Frame(right_frame, bg=frame_bg)
         time_input_frame.pack()
         
-        self.hours_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center")
-        self.hours_entry.config(highlightthickness=3, highlightbackground="#0066cc", relief="solid", bd=2)
+        self.hours_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center", insertbackground=text_color, fg=text_color, highlightthickness=1, highlightbackground=text_color, relief="solid", bd=0)
         self.hours_entry.pack(side="left", ipady=8)
         self.hours_entry.bind('<KeyRelease>', self._validate_hours_and_move)
         self.hours_entry.bind('<Button-1>', lambda e: self._on_field_click('time'))
-        self.hours_entry.bind('<KeyPress>', self._handle_keypress)
+        self.hours_entry.bind('<Key>', self._handle_keypress)
         
         Label(time_input_frame, text=":", font=("Arial", 20, "bold"), bg=frame_bg, fg=text_color).pack(side="left", padx=6)
         
-        self.minutes_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center")
-        self.minutes_entry.config(highlightthickness=3, highlightbackground="#0066cc", relief="solid", bd=2)
+        self.minutes_entry = Entry(time_input_frame, width=3, font=("Arial", 20, "bold"), justify="center", insertbackground=text_color, fg=text_color, highlightthickness=1, highlightbackground=text_color, relief="solid", bd=0)
         self.minutes_entry.pack(side="left", ipady=8)
         self.minutes_entry.bind('<KeyRelease>', self._validate_minutes)
         self.minutes_entry.bind('<Button-1>', lambda e: self._on_field_click('time'))
-        self.minutes_entry.bind('<KeyPress>', self._handle_keypress)
+        self.minutes_entry.bind('<Key>', self._handle_keypress)
 
     def _handle_keypress(self, event):
         """Handle keypress - block input to inactive fields and handle numpad"""
         widget = event.widget
+        
+        # Handle Enter key - trigger conversion
+        if event.keysym in ('Return', 'KP_Enter'):
+            self._convert_bidirectional()
+            return 'break'
         
         # Check if this widget is allowed to receive input
         if self.active_field == 'milidies' and widget in (self.hours_entry, self.minutes_entry):
@@ -535,16 +554,26 @@ class ComparisonCard(Toplevel):
         elif self.active_field == 'time' and widget == self.milidies_entry:
             return 'break'  # Block input to miliDies field
         
-        # Map numpad keys to regular digit keys
+        # Map numpad keys to regular digit keys (both NumLock ON and OFF)
         numpad_map = {
+            # NumLock OFF (KP_x navigation keys)
             'KP_0': '0', 'KP_1': '1', 'KP_2': '2', 'KP_3': '3', 'KP_4': '4',
-            'KP_5': '5', 'KP_6': '6', 'KP_7': '7', 'KP_8': '8', 'KP_9': '9'
+            'KP_5': '5', 'KP_6': '6', 'KP_7': '7', 'KP_8': '8', 'KP_9': '9',
+            # NumLock ON (direct digit symbols)
+            'KP_Insert': '0', 'KP_End': '1', 'KP_Down': '2', 'KP_Next': '3',
+            'KP_Left': '4', 'KP_Begin': '5', 'KP_Right': '6',
+            'KP_Home': '7', 'KP_Up': '8', 'KP_Prior': '9'
         }
         
         if event.keysym in numpad_map:
-            # Insert the digit and prevent default behavior
-            widget.insert('insert', numpad_map[event.keysym])
+            # Insert the digit at cursor position
+            digit = numpad_map[event.keysym]
+            widget.insert(widget.index('insert'), digit)
             return 'break'  # Prevent default handling
+        
+        # Allow regular digit keys from top row
+        if event.char.isdigit():
+            return  # Allow normal processing
     
     def _on_field_click(self, field_type):
         """Handle click on a field - clear all and set active field"""

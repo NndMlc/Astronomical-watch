@@ -7,12 +7,16 @@ import tkinter as tk
 import os
 from .widget import create_widget
 from .normal_mode import create_normal_mode
+from .theme_manager import update_shared_theme
 
 
 class AstronomicalWatchApp:
     """Main application managing Widget and Normal Mode windows."""
     
     def __init__(self):
+        # Initialize shared theme immediately
+        update_shared_theme()
+        
         self.widget_root = None
         self.normal_root = None
         self.widget = None

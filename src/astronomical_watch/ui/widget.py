@@ -9,6 +9,7 @@ from typing import Optional, Callable
 import random
 import math
 from .gradient import get_sky_theme
+from .theme_manager import update_shared_theme, get_shared_theme
 from .translations import tr
 
 from src.astronomical_watch.core.astro_time_core import AstroYear
@@ -48,6 +49,9 @@ class AstronomicalWidgetMode:
         
         # Current language for title
         self.current_language = "en"
+        
+        # Theme time caching for consistency across windows
+        self._last_theme_time = None
         
         # Update job reference
         self.update_job = None
@@ -247,16 +251,34 @@ class AstronomicalWidgetMode:
             self._draw_time_display()  # Update time even in transparent mode
             return
             
-        now_utc = datetime.now(timezone.utc)
-        theme = get_sky_theme(now_utc)
+        # Update shared theme for all windows using local time
+        theme = update_shared_theme()
+        now_local = datetime.now()
+        self._last_theme_time = now_local  # Cache for consistency across windows
         
-        # Use top color for widget background
-        bg_color = theme.top_color
-        self._original_bg = bg_color
+        # Create gradient on canvas
+        from .gradient import create_gradient_colors
+        canvas_height = self.canvas.winfo_height()
+        if canvas_height <= 1:
+            canvas_height = 110  # Default widget height
         
-        self.master.configure(bg=bg_color)
-        self.frame.configure(bg=bg_color)
-        self.canvas.configure(bg=bg_color)
+        gradient_colors = create_gradient_colors(theme, steps=canvas_height)
+        
+        # Draw gradient
+        self.canvas.delete("gradient")
+        canvas_width = self.canvas.winfo_width()
+        if canvas_width <= 1:
+            canvas_width = 180
+        
+        for i, color in enumerate(gradient_colors):
+            self.canvas.create_rectangle(
+                0, i, canvas_width, i + 1,
+                fill=color, outline=color, width=0, tags="gradient"
+            )
+        
+        # Set frame/master background to bottom color
+        self.master.configure(bg=theme.bottom_color)
+        self.frame.configure(bg=theme.bottom_color)
         
         # Redraw time display with current background
         self._draw_time_display()

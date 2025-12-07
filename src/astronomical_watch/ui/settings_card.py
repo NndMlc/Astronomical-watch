@@ -12,6 +12,7 @@ import sys
 import platform
 from datetime import datetime, timezone
 from .gradient import get_sky_theme, create_gradient_colors
+from .theme_manager import get_shared_theme
 from .translations import TRANSLATIONS
 
 def tr(key: str, lang: str = "en") -> str:
@@ -35,7 +36,7 @@ class SettingsCard(tk.Toplevel):
         self.overrideredirect(True)
         
         # Get sky theme for gradient
-        self.theme = get_sky_theme(datetime.now(timezone.utc))
+        self.theme = get_shared_theme()
         
         # Create canvas for gradient background
         self.canvas = tk.Canvas(self, width=400, height=700, highlightthickness=0)
@@ -200,7 +201,7 @@ class SettingsCard(tk.Toplevel):
             variable=self.always_on_top_var,
             bg=self.bg_color,
             fg=self.text_color,
-            selectcolor="#333333",
+            selectcolor="white",
             activebackground=self.bg_color,
             font=("Arial", 10)
         )
@@ -214,7 +215,7 @@ class SettingsCard(tk.Toplevel):
             variable=self.load_on_startup_var,
             bg=self.bg_color,
             fg=self.text_color,
-            selectcolor="#333333",
+            selectcolor="white",
             activebackground=self.bg_color,
             font=("Arial", 10)
         )
@@ -230,7 +231,7 @@ class SettingsCard(tk.Toplevel):
                 command=self._update_transparency_live,
                 bg=self.bg_color,
                 fg=self.text_color,
-                selectcolor="#333333",
+                selectcolor="white",
                 activebackground=self.bg_color,
                 font=("Arial", 10)
             )
