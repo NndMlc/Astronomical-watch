@@ -75,10 +75,16 @@ Just double-click **"Astronomical Watch"** on your Desktop!
 - Double-click `TEST_LAUNCH.bat` in the project folder
 - This will show any error messages in a console window
 
-**Option B: From Command Prompt**
+**Option B: Check if shortcut was created**
+- Double-click `TEST_SHORTCUT.bat` in the project folder
+- This will verify the desktop shortcut exists and test launching it
+
+**Option C: From Command Prompt**
 ```cmd
 astronomical-watch
 ```
+
+**NOTE:** If you run from Command Prompt, the application will close when you close the terminal. Use the desktop shortcut instead!
 
 **Option C: From Start Menu**
 1. Press the Windows key
@@ -117,13 +123,25 @@ astronomical-watch
 4. **Working directory wrong**
    - Right-click shortcut → Properties → "Start in" should be empty or project folder
 
+5. **Desktop shortcut not on Desktop**
+   - Run `TEST_SHORTCUT.bat` to check where it was created
+   - Some systems have Desktop in OneDrive folder
+   - Solution: Create shortcut manually (see below)
+
 **Fix the shortcut manually:**
-1. Right-click "Astronomical Watch" shortcut → Properties
-2. Target should be: `pythonw -m astronomical_watch.ui.main`
-3. Or full path: `C:\Path\To\pythonw.exe -m astronomical_watch.ui.main`
-4. Icon location: Browse to `icons\astronomical_watch.ico` in project folder
-5. Click OK and try again
-- Python is not installed or not in PATH
+1. Right-click on Desktop → New → Shortcut
+2. For location, enter:
+   ```
+   C:\Users\YourName\AppData\Local\Programs\Python\Python314\pythonw.exe -m astronomical_watch.ui.main
+   ```
+   (Replace `YourName` and `Python314` with your actual username and Python version)
+3. Click Next, name it "Astronomical Watch"
+4. Click Finish
+5. Right-click the new shortcut → Properties
+6. Click "Change Icon" → Browse to the project folder → `icons\astronomical_watch.ico`
+7. Click OK and try the shortcut
+
+**Important:** The shortcut must use `pythonw.exe` (not `python.exe`) so it runs without showing a console window!
 - Solution: Reinstall Python and check "Add Python to PATH"
 
 ### "pip is not recognized"

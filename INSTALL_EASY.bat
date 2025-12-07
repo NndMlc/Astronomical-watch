@@ -78,9 +78,14 @@ REM Get Python path
 for /f "delims=" %%i in ('python -c "import sys; print(sys.executable)"') do set PYTHON_PATH=%%i
 set PYTHONW_PATH=%PYTHON_PATH:python.exe=pythonw.exe%
 
-REM Get desktop path
-for /f "usebackq tokens=3*" %%A in (`reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop`) do set DESKTOP=%%B
-call set DESKTOP=%DESKTOP%
+echo Python executable: %PYTHONW_PATH%
+echo.
+
+REM Get desktop path - use USERPROFILE directly to avoid expansion issues
+set DESKTOP=%USERPROFILE%\Desktop
+
+echo Desktop path: %DESKTOP%
+echo.
 
 REM Get current directory (where script is)
 set INSTALL_DIR=%CD%
@@ -93,6 +98,7 @@ if exist "%INSTALL_DIR%\icons\astronomical_watch.ico" (
     set ICON_PATH=
     echo Warning: Icon file not found
 )
+echo.
 
 REM Create VBScript to make shortcut with icon
 echo Creating shortcut script...
@@ -117,7 +123,16 @@ if errorlevel 1 (
     echo You can create it manually later
 ) else (
     echo.
-    echo Desktop shortcut created successfully!
+    REM Check if shortcut actually exists
+    if exist "%DESKTOP%\Astronomical Watch.lnk" (
+        echo ✓ Desktop shortcut created successfully!
+        echo   Location: %DESKTOP%\Astronomical Watch.lnk
+    ) else (
+        echo ✗ Shortcut creation reported success but file not found
+        echo   Expected location: %DESKTOP%\Astronomical Watch.lnk
+        echo.
+        echo Please check if your Desktop is in a different location.
+    )
 )
 
 REM Clean up
