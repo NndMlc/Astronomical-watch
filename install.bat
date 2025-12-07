@@ -108,8 +108,11 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM If we reach here, installation was successful
 echo.
-echo + Package installed successfully!
+echo ========================================
+echo + INSTALLATION SUCCESSFUL!
+echo ========================================
 echo.
 
 REM ====================================
