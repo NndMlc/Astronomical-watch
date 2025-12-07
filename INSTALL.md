@@ -62,15 +62,40 @@ astronomical-watch
 
 ## Windows Installation
 
-### Using pip
+### Using the Installation Script
+
+1. **Download or clone the repository**:
+   ```bash
+   # Using Git
+   git clone https://github.com/NndMlc/Astronomical-watch.git
+   
+   # Or download ZIP and extract it
+   ```
+
+2. **Open the folder** in File Explorer
+
+3. **Double-click `install.bat`**
+   - This will install the package using pip
+   - Make sure you run it from inside the `Astronomical-watch` folder
+
+4. **Run the application**:
+   - Open Command Prompt or PowerShell
+   - Type: `astronomical-watch`
+
+### Manual Installation Using pip
 
 ```bash
-# Open Command Prompt or PowerShell as Administrator
+# Navigate to the project directory
+cd path\to\Astronomical-watch
+
+# Install using pip
 pip install .
 
 # Run the application
 astronomical-watch
 ```
+
+**Important**: Make sure to run the commands from inside the `Astronomical-watch` directory where `pyproject.toml` is located.
 
 ### Creating a Shortcut
 

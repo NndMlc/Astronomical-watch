@@ -14,6 +14,7 @@ sudo ./install.sh
 Then launch from your application menu or run `astronomical-watch` in terminal.
 
 ### Other Platforms
+- **Windows users**: [README_WINDOWS.md](README_WINDOWS.md) ⭐
 - **Full installation guide**: [INSTALL.md](INSTALL.md)
 - **Quick reference**: [QUICK_INSTALL.md](QUICK_INSTALL.md)
 - **User guide**: [USER_GUIDE.md](USER_GUIDE.md)

@@ -6,6 +6,20 @@ echo Astronomical Watch - Installation
 echo ================================
 echo.
 
+REM Get the directory where this script is located
+set SCRIPT_DIR=%~dp0
+cd /d "%SCRIPT_DIR%"
+
+REM Check if pyproject.toml exists in current directory
+if not exist "pyproject.toml" (
+    echo ERROR: pyproject.toml not found!
+    echo Please run this script from the Astronomical-watch directory.
+    echo.
+    echo Current directory: %CD%
+    pause
+    exit /b 1
+)
+
 REM Check if Python is installed
 python --version >nul 2>&1
 if errorlevel 1 (
@@ -34,10 +48,15 @@ echo.
 
 REM Install the package
 echo Installing Astronomical Watch...
+echo Installing from: %CD%
+echo.
 pip install --upgrade .
 if errorlevel 1 (
     echo.
     echo ERROR: Installation failed.
+    echo Please check the error messages above.
+    echo.
+    echo Make sure you are running this script from the Astronomical-watch directory.
     pause
     exit /b 1
 )

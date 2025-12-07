@@ -26,7 +26,14 @@ astronomical-watch
 
 ### Windows
 
+**Important**: Make sure you're inside the `Astronomical-watch` folder!
+
 ```bash
+# Navigate to the project directory
+cd path\to\Astronomical-watch
+
+# Double-click install.bat
+# OR run manually:
 pip install .
 astronomical-watch
 ```
@@ -35,6 +42,8 @@ Or create a desktop shortcut:
 1. Right-click Desktop → New → Shortcut
 2. Target: `pythonw -m astronomical_watch.ui.main`
 3. Choose icon from `icons/astronomical_watch.ico`
+
+📖 **Detailed Windows guide**: [README_WINDOWS.md](README_WINDOWS.md)
 
 ## Uninstall
 
