@@ -113,91 +113,16 @@ echo + Package installed successfully!
 echo.
 
 REM ====================================
-REM Step 5: Find Desktop Location
+REM Step 5: Create Shortcut
 REM ====================================
 echo ========================================
 echo Creating Desktop Shortcut...
 echo ========================================
 echo.
 
-set DESKTOP_FOUND=0
-set DESKTOP=
-
-REM Try standard Desktop
-if exist "%USERPROFILE%\Desktop" (
-    set DESKTOP=%USERPROFILE%\Desktop
-    echo + Desktop found: %DESKTOP%
-    set DESKTOP_FOUND=1
-    goto :desktop_confirmed
-)
-
-REM Try OneDrive Desktop
-if exist "%USERPROFILE%\OneDrive\Desktop" (
-    set DESKTOP=%USERPROFILE%\OneDrive\Desktop
-    echo + Desktop found: %DESKTOP%
-    set DESKTOP_FOUND=1
-    goto :desktop_confirmed
-)
-
-REM Try Public Desktop
-if exist "%PUBLIC%\Desktop" (
-    set DESKTOP=%PUBLIC%\Desktop
-    echo + Public Desktop found: %DESKTOP%
-    set DESKTOP_FOUND=1
-    goto :desktop_confirmed
-)
-
-REM Try Registry
-for /f "usebackq tokens=3*" %%A in (`reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Desktop 2^>nul`) do (
-    set DESKTOP_RAW=%%B
-    call set DESKTOP=!DESKTOP_RAW!
-    if exist "!DESKTOP!" (
-        echo + Desktop found via registry: !DESKTOP!
-        set DESKTOP_FOUND=1
-        goto :desktop_confirmed
-    )
-)
-
-REM Desktop not found - ask user
-:ask_desktop
-echo.
-echo ! Could not automatically find your Desktop folder.
-echo.
-echo Please enter the full path to your Desktop:
-echo.
-echo To find it:
-echo   1. Open File Explorer
-echo   2. Right-click "Desktop" in the sidebar
-echo   3. Select "Properties" and check the "Location" tab
-echo.
-echo Examples:
-echo   C:\Users\%USERNAME%\Desktop
-echo   D:\MyDesktop
-echo.
-set /p DESKTOP="Desktop path: "
-
-REM Remove quotes if present
-set DESKTOP=!DESKTOP:"=!
-
-if not exist "!DESKTOP!" (
-    echo.
-    echo X That path doesn't exist: !DESKTOP!
-    echo.
-    set /p RETRY="Try again? (Y/N): "
-    if /i "!RETRY!"=="Y" goto :ask_desktop
-    
-    echo.
-    echo ! Could not create desktop shortcut.
-    echo   You can still run: astronomical-watch from Command Prompt
-    echo.
-    echo Continuing with installation verification...
-    echo.
-    goto :finish
-)
-
-set DESKTOP_FOUND=1
-
-:desktop_confirmed
+REM Create shortcut in the current directory (install folder)
+set SHORTCUT_DIR=%CD%
+echo Creating shortcut at: %SHORTCUT_DIR%
 echo.
 
 REM ====================================
@@ -241,13 +166,13 @@ REM Step 8: Create Shortcut
 REM ====================================
 echo Creating shortcut...
 
-REM Create VBScript to make shortcut
+REM Create VBScript to make shortcut in current directory
 echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
-echo sLinkFile = "!DESKTOP!\Astronomical Watch.lnk" >> CreateShortcut.vbs
+echo sLinkFile = "!SHORTCUT_DIR!\Astronomical Watch.lnk" >> CreateShortcut.vbs
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> CreateShortcut.vbs
 echo oLink.TargetPath = "!PYTHONW_PATH!" >> CreateShortcut.vbs
 echo oLink.Arguments = "-m astronomical_watch.ui.main" >> CreateShortcut.vbs
-echo oLink.WorkingDirectory = "%CD%" >> CreateShortcut.vbs
+echo oLink.WorkingDirectory = "!SHORTCUT_DIR!" >> CreateShortcut.vbs
 if defined ICON_PATH (
     echo oLink.IconLocation = "!ICON_PATH!" >> CreateShortcut.vbs
 )
@@ -261,9 +186,11 @@ REM Clean up
 del CreateShortcut.vbs >nul 2>&1
 
 REM Verify shortcut was created
-if exist "!DESKTOP!\Astronomical Watch.lnk" (
-    echo + Desktop shortcut created successfully!
-    echo   Location: !DESKTOP!\Astronomical Watch.lnk
+if exist "!SHORTCUT_DIR!\Astronomical Watch.lnk" (
+    echo + Shortcut created successfully!
+    echo   Location: !SHORTCUT_DIR!\Astronomical Watch.lnk
+    echo.
+    echo   ^=^=^> You can now copy this shortcut to your Desktop!
 ) else (
     echo X Failed to create shortcut
     echo   You can run: astronomical-watch from Command Prompt
@@ -307,17 +234,24 @@ echo.
 echo Python: !PYTHON_VER!
 echo Package: Astronomical Watch v!PKG_VER!
 echo Installed at: !PKG_LOCATION!
-if exist "!DESKTOP!\Astronomical Watch.lnk" (
-    echo Shortcut: !DESKTOP!\Astronomical Watch.lnk
+echo.
+if exist "!SHORTCUT_DIR!\Astronomical Watch.lnk" (
+    echo Shortcut created: !SHORTCUT_DIR!\Astronomical Watch.lnk
+    echo.
+    echo ^=^=^> COPY THIS SHORTCUT TO YOUR DESKTOP!
+    echo      Right-click "Astronomical Watch.lnk" in this folder
+    echo      and drag it to your Desktop or any other location.
+) else (
+    echo Shortcut: Not created (you can run from Command Prompt)
 )
 echo.
 echo ========================================
 echo   HOW TO USE
 echo ========================================
 echo.
-if exist "!DESKTOP!\Astronomical Watch.lnk" (
-    echo 1. Double-click "Astronomical Watch" on your Desktop
-    echo    ^(Runs without console window^)
+if exist "!SHORTCUT_DIR!\Astronomical Watch.lnk" (
+    echo 1. Copy "Astronomical Watch.lnk" to your Desktop
+    echo    Then double-click it ^(Runs without console window^)
     echo.
 )
 echo 2. Or from Command Prompt: astronomical-watch
