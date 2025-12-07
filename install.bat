@@ -89,12 +89,15 @@ echo.
 
 pip install --upgrade --force-reinstall .
 
+REM Save errorlevel to variable IMMEDIATELY
+set "PIP_RESULT=%ERRORLEVEL%"
+
 echo.
-echo [DEBUG] ERRORLEVEL after pip = %ERRORLEVEL%
+echo [DEBUG] PIP_RESULT = %PIP_RESULT%
 echo.
 
-REM Check errorlevel IMMEDIATELY before any other command
-if errorlevel 1 (
+REM Check saved errorlevel, not current
+if not "%PIP_RESULT%"=="0" (
     echo.
     echo X INSTALLATION FAILED!
     echo ========================================
