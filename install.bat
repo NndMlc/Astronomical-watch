@@ -89,26 +89,7 @@ echo This may take a minute...
 echo.
 
 pip install --upgrade --force-reinstall .
-
-REM Save errorlevel to variable IMMEDIATELY
-set "PIP_RESULT=%ERRORLEVEL%"
-
-REM Check saved errorlevel using delayed expansion
-if not "!PIP_RESULT!"=="0" (
-    echo.
-    echo X INSTALLATION FAILED!
-    echo ========================================
-    echo.
-    echo Please check the error messages above.
-    echo.
-    echo Common issues:
-    echo   - No internet connection (for downloading dependencies)
-    echo   - Antivirus blocking installation
-    echo   - Insufficient permissions (try running as Administrator)
-    echo.
-    pause
-    exit /b 1
-)
+if errorlevel 1 goto :install_failed
 
 REM If we reach here, installation was successful
 echo.
@@ -292,3 +273,19 @@ if /i "!LAUNCH!"=="Y" (
 echo.
 echo Press any key to exit...
 pause >nul
+exit /b 0
+
+:install_failed
+echo.
+echo X INSTALLATION FAILED!
+echo ========================================
+echo.
+echo Please check the error messages above.
+echo.
+echo Common issues:
+echo   - No internet connection (for downloading dependencies)
+echo   - Antivirus blocking installation
+echo   - Insufficient permissions (try running as Administrator)
+echo.
+pause
+exit /b 1
