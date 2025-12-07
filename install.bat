@@ -171,16 +171,27 @@ if exist "%CD%\icons\astronomical_watch.ico" (
 echo.
 
 REM ====================================
-REM Step 8: Create Shortcut
+REM Step 8: Create VBScript Launcher (no console)
+REM ====================================
+echo Creating launcher script...
+
+REM Create VBScript that runs Python without console window
+echo Set objShell = CreateObject("WScript.Shell") > "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
+echo objShell.Run "\"!PYTHON_PATH!\" -m astronomical_watch.ui.main", 0, False >> "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
+
+echo + Launcher created: !SHORTCUT_DIR!\run_astronomical_watch.vbs
+echo.
+
+REM ====================================
+REM Step 9: Create Shortcut to VBScript
 REM ====================================
 echo Creating shortcut...
 
-REM Create VBScript to make shortcut in current directory
+REM Create shortcut that points to VBScript launcher
 echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
 echo sLinkFile = "!SHORTCUT_DIR!\Astronomical Watch.lnk" >> CreateShortcut.vbs
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> CreateShortcut.vbs
-echo oLink.TargetPath = "!PYTHONW_PATH!" >> CreateShortcut.vbs
-echo oLink.Arguments = "-m astronomical_watch.ui.main" >> CreateShortcut.vbs
+echo oLink.TargetPath = "!SHORTCUT_DIR!\run_astronomical_watch.vbs" >> CreateShortcut.vbs
 echo oLink.WorkingDirectory = "!SHORTCUT_DIR!" >> CreateShortcut.vbs
 if defined ICON_PATH (
     echo oLink.IconLocation = "!ICON_PATH!" >> CreateShortcut.vbs
@@ -280,7 +291,8 @@ set /p LAUNCH="Launch now? (Y/N): "
 if /i "!LAUNCH!"=="Y" (
     echo.
     echo Starting Astronomical Watch...
-    start "" /B "!PYTHONW_PATH!" -m astronomical_watch.ui.main
+    REM Use VBScript to launch without console window
+    start "" wscript.exe "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
     echo.
     echo Application started!
     timeout /t 2 >nul
