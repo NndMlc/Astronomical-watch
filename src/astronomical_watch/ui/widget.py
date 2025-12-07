@@ -12,7 +12,7 @@ from .gradient import get_sky_theme
 from .theme_manager import update_shared_theme, get_shared_theme
 from .translations import tr
 
-from src.astronomical_watch.core.astro_time_core import AstroYear
+from astronomical_watch.core.astro_time_core import AstroYear
 
 class AstronomicalWidgetMode:
     def __init__(self, master: tk.Widget = None, on_click_callback: Optional[Callable] = None):
