@@ -187,11 +187,12 @@ if not exist "!DESKTOP!" (
     if /i "!RETRY!"=="Y" goto :ask_desktop
     
     echo.
-    echo Installation completed, but shortcut not created.
-    echo You can run: astronomical-watch from Command Prompt
+    echo ! Could not create desktop shortcut.
+    echo   You can still run: astronomical-watch from Command Prompt
     echo.
-    pause
-    exit /b 0
+    echo Continuing with installation verification...
+    echo.
+    goto :finish
 )
 
 set DESKTOP_FOUND=1
@@ -282,9 +283,10 @@ echo.
 pip show astronomical-watch >nul 2>&1
 if errorlevel 1 (
     echo X Package verification failed
+    echo   The package was installed but pip cannot find it.
+    echo   Try running: astronomical-watch
     echo.
-    pause
-    exit /b 1
+    goto :show_final_message
 )
 
 for /f "tokens=2" %%v in ('pip show astronomical-watch ^| findstr "^Version:"') do set PKG_VER=%%v
@@ -330,6 +332,7 @@ echo.
 echo ========================================
 echo.
 
+:show_final_message
 set /p LAUNCH="Launch now? (Y/N): "
 if /i "!LAUNCH!"=="Y" (
     echo.
