@@ -35,9 +35,9 @@ class AstronomicalWidgetMode:
         self._drag_start_y = 0
         self._drag_moved = False
         
-        # Always on top state
-        self._always_on_top = True
-        self.master.attributes('-topmost', True)
+        # Always on top state (disabled by default for normal window behavior)
+        self._always_on_top = False
+        # Don't set topmost by default - let it behave like normal window
         
         # Store callback for click events
         self.on_click_callback = on_click_callback
@@ -73,25 +73,6 @@ class AstronomicalWidgetMode:
         
         # Bind click event to entire widget
         self._bind_click_events()
-        
-        # Bind focus events to ensure widget stays visible
-        self._bind_visibility_events()
-        
-    def _bind_visibility_events(self):
-        """Bind events to maintain widget visibility."""
-        # When widget loses focus, bring it back to top if always_on_top is enabled
-        def on_focus_out(event):
-            if self._always_on_top:
-                # Small delay to avoid fighting with window manager
-                self.master.after(100, self._ensure_visibility)
-        
-        # When visibility changes, ensure proper state
-        def on_visibility_change(event):
-            if self._always_on_top and event.state != "VisibilityUnobscured":
-                self.master.after(50, self._ensure_visibility)
-        
-        self.master.bind("<FocusOut>", on_focus_out)
-        self.master.bind("<Visibility>", on_visibility_change)
         
     def _create_widgets(self):
         """Create minimalistic UI elements - only numbers and progress bar."""
@@ -703,22 +684,16 @@ class AstronomicalWidgetMode:
     def start_updates(self):
         """Start the periodic update cycle."""
         self._update_display()
-        self._ensure_visibility()  # Make sure widget stays visible
         # Schedule next update in 86.4 ms (one mikroDies duration)
         self.update_job = self.master.after(86, self.start_updates)  # 86.4ms ≈ 86ms
         
     def _ensure_visibility(self):
-        """Ensure widget remains visible and on top."""
+        """Ensure widget remains in proper state (only if always_on_top is enabled)."""
         try:
-            # Only enforce if always_on_top is enabled
+            # Only enforce topmost if user explicitly enabled it
             if self._always_on_top:
-                # Refresh topmost status (some window managers forget it)
                 self.master.attributes('-topmost', True)
-                # Explicitly lift window to top of stacking order
                 self.master.lift()
-                # Make sure window is not withdrawn or iconified
-                if self.master.state() != 'normal':
-                    self.master.deiconify()
         except Exception as e:
             # Silently ignore errors (window might be closing)
             pass
