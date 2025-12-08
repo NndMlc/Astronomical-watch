@@ -446,9 +446,10 @@ class ComparisonCard(Toplevel):
                     local_dt = test_dt.astimezone()
                     time_str = local_dt.strftime("%H:%M")
                 except:
-                    # Fallback - reference noon is 23:15:54 UTC = 00:15:54 local (Belgrade)
-                    # Round to 00:16 for display
-                    base_minutes = 16  # 00:16 local start
+                    # Fallback - reference noon is 00:44:06 UTC (168°58'30"W)
+                    # For Belgrade (UTC+1): 00:44:06 UTC = 01:44:06 local
+                    # Calculate offset from midnight in minutes
+                    base_minutes = 44 + 60  # 01:44 local start for UTC+1
                     total_minutes = base_minutes + (milidies_value * 1.44)
                     hours = int(total_minutes // 60) % 24
                     minutes = int(total_minutes % 60)
