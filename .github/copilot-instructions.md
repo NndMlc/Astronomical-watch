@@ -12,7 +12,7 @@ Astronomical Watch implements an experimental timekeeping system based on astron
 
 ### 2. Time System Fundamentals
 - **Reference meridian**: 168°58'30"W (between Diomede Islands) 
-- **Day boundary**: Mean solar noon at reference meridian = 23:15:54 UTC
+- **Day boundary**: Mean solar noon at reference meridian = 00:44:06 UTC
 - **Year boundary**: Exact vernal equinox instants (not calendar years)
 - **Day subdivision**: 1000 miliDies (86.4 seconds each)
 - **mikroDies extension**: 1/1000th of miliDies (0.0864 seconds) for ultra-precise timing
@@ -203,7 +203,7 @@ assert reading.milidan == expected_milidan  # Note: actual attribute name
 - Don't modify core algorithm interfaces without license consideration
 - Always pass timezone-aware UTC datetimes to core functions
 - VSOP87 time parameter is millennia since J2000, not centuries
-- Day boundaries at 23:15:54 UTC, not midnight
+- Day boundaries at 00:44:06 UTC, not midnight
 - Equinox resets dies to 0 even if mid-Dies
 - CLI entry point `core.cli:main` is defined but not implemented yet
 - Attribute names in tests: use `milidan` not `miliDies` (check actual implementation)

@@ -20,12 +20,12 @@ from typing import Optional
 
 # ---------------------- Constants (frozen interface) ---------------------- #
 LONGITUDE_REF_DEG: float = -168.975  # 168°58'30" W
-NOON_UTC_HOUR: int = 23
-NOON_UTC_MINUTE: int = 15
-NOON_UTC_SECOND: int = 54
+NOON_UTC_HOUR: int = 0
+NOON_UTC_MINUTE: int = 44
+NOON_UTC_SECOND: int = 6
 NOON_UTC_SECONDS: int = (
     NOON_UTC_HOUR * 3600 + NOON_UTC_MINUTE * 60 + NOON_UTC_SECOND
-)  # 83754
+)  # 2646
 SECONDS_PER_DAY: int = 86400
 MILIDES_PER_DAY: int = 1000
 SECONDS_PER_MILIDES: float = SECONDS_PER_DAY / MILIDES_PER_DAY  # 86.4 s
@@ -247,24 +247,10 @@ class AstroYear:
 
 
 # End of astro_time_core.py
-# Reference meridian (decimal degrees, West negative). Provided by project specification.
-LONGITUDE_REF_DEG: float = -168.975  # -168° 58′ 30″
-
-# Local Mean Time (LMT) = UTC + LONGITUDE/15 h.
-# For the reference longitude this is an offset of about -11.265 hours, meaning that when
-# local mean time is 12:00:00, UTC is approximately 23:15:54.
-NOON_UTC_HOUR: int = 23
-NOON_UTC_MINUTE: int = 15
-NOON_UTC_SECOND: int = 54
-
-# Sub‑day subdivision.
-MILIDIES_PER_DAY: int = 1000
-SECONDS_PER_DAY: int = 86400
-SECONDS_PER_MILIDIES: float = SECONDS_PER_DAY / MILIDIES_PER_DAY  # 86.4 seconds
-
 # Legacy compatibility constants (aliases – keep until full migration).
-MILLIDAN_PER_DAY = MILIDIES_PER_DAY  # legacy name
-SECONDS_PER_MILLIDIES = SECONDS_PER_MILIDIES  # legacy alias from original draft
+# These reference the corrected constants defined at the top of the file
+MILLIDAN_PER_DAY = MILIDES_PER_DAY  # legacy name
+SECONDS_PER_MILLIDIES = SECONDS_PER_MILIDES  # legacy alias from original draft
 
 
 

@@ -10,18 +10,18 @@ Longitude: **168° 58' 30" W** (decimal: -168.975°)
 Mean Solar Noon (LMST = 12h) at the reference meridian corresponds to a fixed UTC time because we adopt the *mean* (uniform) solar day and ignore Equation of Time variations.
 
 Longitude / 15 = -11.265 hours
-UTC hour for LMST=12h is: 12 - (-11.265) = 23.265 h = **23:15:54 UTC**.
+UTC hour for LMST=12h is: 12 + (-11.265) = 0.735 h = **00:44:06 UTC**.
 
-Thus every astronomical day begins at **23:15:54 UTC** globally and lasts exactly 86,400 SI seconds.
+Thus every astronomical day begins at **00:44:06 UTC** globally and lasts exactly 86,400 SI seconds.
 
 ## 3. Milidans
 The day is divided into 1000 equal units (milidans):
 - 1 milidan = 86.4 seconds
 - milidan range: 0 .. 999
-- At the daily boundary (23:15:54 UTC) milidan resets 999 → 000.
+- At the daily boundary (00:44:06 UTC) milidan resets 999 → 000.
 
 Computation for any UTC timestamp *t*:
-1. Determine last global noon (23:15:54 UTC) ≤ t.
+1. Determine last global noon (00:44:06 UTC) ≤ t.
 2. seconds_since = t - last_noon
 3. fraction = seconds_since / 86400
 4. milidan = floor(fraction * 1000)
@@ -54,7 +54,7 @@ The pair (day_index, milidan) is identical worldwide at a given UTC instant beca
 - Automatic rollover when `t >= next_equinox` inside `reading()`.
 
 ## 9. Edge Cases
-- If equinox occurs exactly at 23:15:54 UTC: day_index = 0 and milidan = 0 simultaneously.
+- If equinox occurs exactly at 00:44:06 UTC: day_index = 0 and milidan = 0 simultaneously.
 - If equinox occurs during the day: day_index becomes 0 immediately; milidan keeps progressing until the boundary.
 - Leap seconds are ignored (days are fixed 86400 s). If needed later, a higher-level adjustment layer can handle them without changing core semantics.
 
