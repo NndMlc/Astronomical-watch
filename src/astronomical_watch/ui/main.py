@@ -13,15 +13,38 @@ from .theme_manager import update_shared_theme
 class AstronomicalWatchApp:
     """Main application managing Widget and Normal Mode windows."""
     
-    def __init__(self):
+    def __init__(self, enable_ntp_sync: bool = True):
         # Initialize shared theme immediately
         update_shared_theme()
+        
+        # Start NTP time synchronization (optional, runs in background)
+        if enable_ntp_sync:
+            self._start_time_sync()
         
         self.widget_root = None
         self.normal_root = None
         self.widget = None
         self.normal_mode = None
         self.current_language = "en"
+    
+    def _start_time_sync(self):
+        """Initialize NTP time synchronization."""
+        try:
+            from astronomical_watch.net.time_sync import update_time_sync, start_periodic_sync
+            
+            # Do initial sync
+            print("🕐 Initializing NTP time synchronization...")
+            if update_time_sync(force=True):
+                # Start periodic sync every 60 minutes
+                start_periodic_sync(interval_minutes=60)
+            else:
+                print("⚠️  Initial NTP sync failed, will retry automatically")
+                # Still start periodic sync - it will retry
+                start_periodic_sync(interval_minutes=60)
+        except ImportError:
+            print("⚠️  NTP sync module not available")
+        except Exception as e:
+            print(f"⚠️  Could not start NTP sync: {e}")
     
     def _set_icon(self, window):
         """Set application icon for a window."""

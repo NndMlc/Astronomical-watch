@@ -6,8 +6,8 @@ from astronomical_watch.core.astro_time_core import (
     NOON_UTC_MINUTE,
     NOON_UTC_SECOND,
     SECONDS_PER_DAY,
-    MILLIDAN_PER_DAY,
-    SECONDS_PER_MILLIDAN,
+    MILIDES_PER_DAY,
+    SECONDS_PER_MILIDES,
 )
 
 def test_equnox_reset_mid_day():
@@ -15,8 +15,8 @@ def test_equnox_reset_mid_day():
     ay = AstroYear(eq)
     r_eq = ay.reading(eq)
     assert r_eq.dies == 0
-    # milidan is some value within 0..999
-    assert 0 <= r_eq.milidan < 1000
+    # miliDies is some value within 0..999
+    assert 0 <= r_eq.miliDies < 1000
 
 def test_first_noon_index_progression():
     eq = datetime(2025, 3, 20, 8, 5, tzinfo=timezone.utc)
@@ -25,22 +25,22 @@ def test_first_noon_index_progression():
     # Pre first noon -> still day 0
     r_before = ay.reading(first_noon - timedelta(seconds=10))
     assert r_before.dies == 0
-    # At first noon -> start of day 1, milidan=0
+    # At first noon -> start of day 1, miliDies=0
     r_noon = ay.reading(first_noon)
     assert r_noon.dies == 1
-    assert r_noon.milidan == 0
+    assert r_noon.miliDies == 0
     # After +1 day + 1s -> day 2
     r_next = ay.reading(first_noon + timedelta(days=1, seconds=1))
-    assert r_next.day_index == 2
+    assert r_next.dies == 2
 
-def test_milidan_progression():
+def test_miliDies_progression():
     eq = datetime(2025, 3, 20, 8, 5, tzinfo=timezone.utc)
     ay = AstroYear(eq)
     first_noon = ay._first_noon_after_eq
-    t = first_noon + timedelta(seconds=100 * SECONDS_PER_MILLIDAN)
+    t = first_noon + timedelta(seconds=100 * SECONDS_PER_MILIDES)
     r = ay.reading(t)
-    assert r.day_index == 1
-    assert r.milidan == 100
+    assert r.dies == 1
+    assert r.miliDies == 100
 
 def test_rollover_next_equinox():
     eq = datetime(2025, 3, 20, 8, 5, tzinfo=timezone.utc)
@@ -60,10 +60,10 @@ def test_approximate_mapping():
     ay = AstroYear(eq)
     first_noon = ay._first_noon_after_eq
     # pick a moment in day 2
-    target = first_noon + timedelta(days=1, seconds=200 * SECONDS_PER_MILLIDAN)
+    target = first_noon + timedelta(days=1, seconds=200 * SECONDS_PER_MILIDES)
     r = ay.reading(target)
-    assert r.day_index == 2
-    approx = ay.approximate_utc_from_day_milidan(r.day_index, r.milidan)
-    # Should be close (within one milidan)
-    assert abs((approx - target).total_seconds()) < SECONDS_PER_MILLIDAN + 1
+    assert r.dies == 2
+    approx = ay.approximate_utc_from_day_miliDies(r.dies, r.miliDies)
+    # Should be close (within one miliDies)
+    assert abs((approx - target).total_seconds()) < SECONDS_PER_MILIDES + 1
 

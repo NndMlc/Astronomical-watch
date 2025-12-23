@@ -56,6 +56,28 @@ Tabs for:
 
 ---
 
+## 🚀 Auto-Start with Windows
+
+Want the widget to appear automatically when Windows boots?
+
+**Simply double-click: `install_autostart.bat`**
+
+This will:
+- ✅ Create silent launcher (no console window)
+- ✅ Add shortcut to Windows Startup folder
+- ✅ Widget starts automatically when you log in
+- ✅ Widget visible on desktop (hides behind active windows)
+- 💡 Enable "Always on top" via right-click if you want it above all windows
+
+**To remove autostart:**
+1. Press `Win+R`
+2. Type: `shell:startup`
+3. Delete: `Astronomical Watch Widget.lnk`
+
+For more details, see [WINDOWS_AUTOSTART_GUIDE.md](WINDOWS_AUTOSTART_GUIDE.md)
+
+---
+
 ## Uninstall
 
 Double-click: **`uninstall.bat`**

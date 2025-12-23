@@ -45,12 +45,14 @@ lon = solar_longitude_from_datetime(dt)  # Default precision
 ### CLI Tools
 - **`cli/awatch.py`**: Simple CLI printing DDD.mmm format
 - **Package entry points** in `pyproject.toml`:
-  - `astronomical-watch`: Core CLI (currently missing, needs implementation)
-  - `astronomical-watch-gui`: Desktop GUI via `astronomical_watch.ui.main:main`
+  - `astronomical-watch`: Desktop GUI via `astronomical_watch.ui.main:main`
+  - `awatch`: Alternative CLI entry point (same target)
 
 ### Launch Scripts
 - **Linux**: `run_astronomical_watch.sh`, `startup_widget.sh`, `setup_autostart_linux.sh`
-- **Windows**: `run_astronomical_watch.bat`, `startup_widget.bat`, `AUTOSTART_WINDOWS.bat`
+- **Windows**: `run_astronomical_watch.bat`, `startup_widget.bat`, `install_autostart.bat` (automatic installer)
+  - `install_autostart_windows.ps1` - PowerShell version with full automation
+  - `WINDOWS_AUTOSTART_GUIDE.md` - Complete Windows autostart documentation
 
 ## Development Patterns
 
@@ -65,7 +67,7 @@ lon = solar_longitude_from_datetime(dt)  # Default precision
 core/          # Time calculations, equinox solving, VSOP87 coefficients
 ui/            # Tkinter widgets with sky-based gradients (widget.py, normal_mode.py)
 solar/         # Lightweight solar position algorithms  
-net/           # Network services for equinox data
+net/           # Network services for equinox data and NTP time sync
 offline/       # Caching and offline operation
 routes/        # Web API routes
 services/      # Business logic services
@@ -75,7 +77,7 @@ translate/     # Multilingual explanation cards (20+ languages)
 
 ### Configuration Management
 - Use `pyproject.toml` for all package configuration
-- CLI entry points defined but need implementation for `core.cli:main`
+- CLI entry points use `astronomical_watch.ui.main:main` (desktop GUI)
 - Optional dependencies in `[project.optional-dependencies]`
 - Test markers: `ui: tests requiring a display / tkinter`
 
@@ -135,6 +137,7 @@ python -m pytest tests/test_vsop87d_system.py -v
 - All UI components use `gradient.py` for sky-themed backgrounds
 - Theme calculation based on solar altitude from VSOP87 data
 - Widget supports drag-and-drop repositioning with double-click to open normal mode
+- Widget defaults to `always_on_top = False` for normal window behavior (user can enable via right-click menu)
 - Language support via `translate/` modules (20+ languages)
 
 ### Generating VSOP87 Coefficient Files
@@ -166,6 +169,11 @@ app.show_widget()  # Borderless floating display
 - Julian Day calculations use Terrestrial Time (TT) for astronomical precision
 - ΔT conversion handled in `timebase.py`
 - Constants defined in `astro_time_core.py` with frozen interface
+- **NTP time synchronization** (`net/time_sync.py`) for maximum precision:
+  - Automatic sync every 60 minutes when enabled
+  - Typical accuracy: ±5-50ms
+  - Graceful fallback to system time if network unavailable
+  - Use `_get_current_utc_time()` in UI code for NTP-aware time
 
 ### Error Propagation
 - VSOP87 errors specified in arcseconds, automatically converted to radians
@@ -191,8 +199,10 @@ app.show_widget()  # Borderless floating display
 ay = AstroYear(equinox_datetime)
 reading = ay.reading(test_datetime)
 assert reading.dies == expected_dies
-assert reading.milidan == expected_milidan  # Note: actual attribute name
+assert reading.miliDies == expected_milides  # Note: attribute is miliDies (capital D)
 ```
+
+**IMPORTANT**: The actual attribute name is `miliDies` (capital D). Some older tests incorrectly use `milidan` or `milidies` - these are bugs and should be fixed. Similarly, constants are `MILIDES_PER_DAY` and `SECONDS_PER_MILIDES`, not "MILLIDAN".
 
 ### UI Testing Requirements
 - Mark UI tests with `@pytest.mark.ui`
@@ -205,6 +215,7 @@ assert reading.milidan == expected_milidan  # Note: actual attribute name
 - VSOP87 time parameter is millennia since J2000, not centuries
 - Day boundaries at 00:44:06 UTC, not midnight
 - Equinox resets dies to 0 even if mid-Dies
-- CLI entry point `core.cli:main` is defined but not implemented yet
-- Attribute names in tests: use `milidan` not `miliDies` (check actual implementation)
+- **Attribute naming**: Use `miliDies` (capital D), not `milidan` or `milidies`
+- **Constant naming**: Use `MILIDES_PER_DAY` and `SECONDS_PER_MILIDES`, not "MILLIDAN" variants
 - Desktop launchers are in root directory, not in `src/`
+- Both CLI entry points (`astronomical-watch` and `awatch`) point to the same GUI target

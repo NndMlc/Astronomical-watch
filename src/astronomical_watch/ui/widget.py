@@ -14,6 +14,24 @@ from .translations import tr
 
 from astronomical_watch.core.astro_time_core import AstroYear
 
+
+def _get_current_utc_time() -> datetime:
+    """
+    Get current UTC time with optional NTP synchronization.
+    
+    Returns:
+        Current UTC datetime, adjusted by NTP offset if available
+    """
+    try:
+        from astronomical_watch.net.time_sync import now_utc
+        return now_utc(use_ntp=True)
+    except ImportError:
+        # Fallback to system time if time_sync module not available
+        return datetime.now(timezone.utc)
+    except Exception:
+        # Any other error, fallback to system time
+        return datetime.now(timezone.utc)
+
 class AstronomicalWidgetMode:
     def __init__(self, master: tk.Widget = None, on_click_callback: Optional[Callable] = None):
         self.master = master or tk.Tk()
@@ -26,6 +44,30 @@ class AstronomicalWidgetMode:
         
         # Remove title bar (navbar with minimize/maximize/close buttons)
         self.master.overrideredirect(True)
+        
+        # Platform-specific window type to keep widget visible on desktop
+        import platform
+        system = platform.system()
+        
+        if system == 'Linux':
+            # On Linux, set window type to 'dock' or 'toolbar' so it stays visible
+            try:
+                # Try to set window type to 'dock' (stays on desktop, doesn't disappear)
+                self.master.attributes('-type', 'dock')
+            except tk.TclError:
+                try:
+                    # Fallback to 'toolbar' type
+                    self.master.attributes('-type', 'toolbar')
+                except tk.TclError:
+                    # If neither works, continue without special type
+                    pass
+        elif system == 'Windows':
+            # On Windows, use toolwindow style to prevent disappearing
+            try:
+                # Tool window style keeps widget visible and doesn't steal focus
+                self.master.attributes('-toolwindow', 1)
+            except tk.TclError:
+                pass
         
         # Make window support transparency
         self.master.attributes('-alpha', 1.0)
@@ -273,7 +315,7 @@ class AstronomicalWidgetMode:
         except:
             pass
             
-        now_utc = datetime.now(timezone.utc)
+        now_utc = _get_current_utc_time()
         theme = get_sky_theme(now_utc)
         bg_color = theme.top_color
         
@@ -306,7 +348,7 @@ class AstronomicalWidgetMode:
             # Linux/macOS: Use semi-transparent sky theme
             try:
                 # Get current sky theme
-                now_utc = datetime.now(timezone.utc)
+                now_utc = _get_current_utc_time()
                 theme = get_sky_theme(now_utc)
                 
                 # Apply sky gradient background
@@ -353,7 +395,7 @@ class AstronomicalWidgetMode:
                     pass
             
             # Force theme update
-            now_utc = datetime.now(timezone.utc)
+            now_utc = _get_current_utc_time()
             theme = get_sky_theme(now_utc)
             bg_color = theme.top_color
             self.master.configure(bg=bg_color)
@@ -479,8 +521,8 @@ class AstronomicalWidgetMode:
         try:
             from ..core.equinox import compute_vernal_equinox
             
-            # Get current time
-            now_utc = datetime.now(timezone.utc)
+            # Get current time (with NTP sync if available)
+            now_utc = _get_current_utc_time()
             
             # Use computed equinox values
             current_year = now_utc.year
