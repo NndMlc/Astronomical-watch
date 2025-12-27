@@ -86,19 +86,75 @@ class ModernNormalMode:
     
     def __init__(self, parent, on_back=None, on_language=None, widget_ref=None):
         print("🚀 ModernNormalMode.__init__ starting...")
-        
         self.master = parent
         self.on_back = on_back
         self.on_language = on_language
         self.widget_ref = widget_ref  # Store widget reference for settings
-        
+
         # Data initialization first
         self.dies = 0
         self.miliDies = 0
         self.mikroDies = 0
-        # Load language from config if available
+        # Load language from config ako postoji
         self.current_language = self._load_language_setting()
         self.lang = self.current_language  # Alias for compatibility
+
+        # Theme state
+        self.current_theme = None
+        self.gradient_canvas = None
+        self.shared_theme_func = None  # Function to get shared theme from widget
+
+        # Update timer
+        self._update_job = None
+
+        # Fireworks state
+        self.fireworks_active = False
+        self.fireworks_particles = []
+        self.fireworks_job = None
+
+        # Active tab
+        self.current_tab = "explanation"
+
+        # Track open windows to prevent duplicates
+        self.open_windows = {
+            "explanation": None,
+            "comparison": None,
+            "settings": None
+        }
+
+        # Window configuration
+        self.window_width = 480
+        self.window_height = 550
+
+        print("📐 Setting up window...")
+
+        try:
+            # Remove window decorations
+            self.master.overrideredirect(True)
+            print("✅ Window decorations removed")
+            # Update window to ensure it's ready for geometry operations
+            self.master.update_idletasks()
+            # Center the window
+            self._center_window()
+            print("✅ Window centered")
+            # Create icons
+            self._create_icons()
+            print("✅ Icons created")
+            # Create UI
+            self._create_ui()
+            print("✅ UI created")
+            # Apply theme once after UI is created
+            self._apply_theme()
+            print("✅ Theme applied")
+            # Start time updates
+            self.start_updates()
+            print("✅ Time updates started")
+            print("🎉 ModernNormalMode initialization complete!")
+        except Exception as e:
+            print(f"❌ ModernNormalMode initialization failed: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
 
     def _load_language_setting(self):
         """Load language from config file if exists, else default to 'en'."""
@@ -114,8 +170,9 @@ class ModernNormalMode:
                 pass
         return "en"
 
+
     def _save_language_setting(self, lang_code):
-        """Save language to config file, preserving other settings if possible."""
+        """Sačuvaj jezik u config fajl, čuvajući ostala podešavanja ako postoje."""
         config_path = os.path.expanduser("~/.astronomical_watch_config.json")
         data = {}
         if os.path.exists(config_path):
@@ -130,33 +187,6 @@ class ModernNormalMode:
                 json.dump(data, f, indent=2)
         except Exception:
             pass
-        
-        # Theme state
-        self.current_theme = None
-        self.gradient_canvas = None
-        self.shared_theme_func = None  # Function to get shared theme from widget
-        
-        # Update timer
-        self._update_job = None
-        
-        # Fireworks state
-        self.fireworks_active = False
-        self.fireworks_particles = []
-        self.fireworks_job = None
-        
-        # Active tab
-        self.current_tab = "explanation"
-        
-        # Track open windows to prevent duplicates
-        self.open_windows = {
-            "explanation": None,
-            "comparison": None,
-            "settings": None
-        }
-        
-        # Window configuration
-        self.window_width = 480
-        self.window_height = 550
         
         print("📐 Setting up window...")
         
