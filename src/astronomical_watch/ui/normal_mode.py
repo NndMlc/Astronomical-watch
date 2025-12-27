@@ -9,6 +9,7 @@ Main content shows astronomical time values in hierarchical layout.
 import tkinter as tk
 from tkinter import ttk, font as tk_font
 import math
+import json
 import os
 import random
 from datetime import datetime, timezone
@@ -95,8 +96,39 @@ class ModernNormalMode:
         self.dies = 0
         self.miliDies = 0
         self.mikroDies = 0
-        self.current_language = "en"
-        self.lang = "en"  # Alias for compatibility
+        # Load language from config if available
+        self.current_language = self._load_language_setting()
+        self.lang = self.current_language  # Alias for compatibility
+            def _load_language_setting(self):
+                """Load language from config file if exists, else default to 'en'."""
+                config_path = os.path.expanduser("~/.astronomical_watch_config.json")
+                if os.path.exists(config_path):
+                    try:
+                        with open(config_path, 'r') as f:
+                            data = json.load(f)
+                            lang = data.get("language", "en")
+                            if isinstance(lang, str) and len(lang) == 2:
+                                return lang
+                    except Exception:
+                        pass
+                return "en"
+
+            def _save_language_setting(self, lang_code):
+                """Save language to config file, preserving other settings if possible."""
+                config_path = os.path.expanduser("~/.astronomical_watch_config.json")
+                data = {}
+                if os.path.exists(config_path):
+                    try:
+                        with open(config_path, 'r') as f:
+                            data = json.load(f)
+                    except Exception:
+                        data = {}
+                data["language"] = lang_code
+                try:
+                    with open(config_path, 'w') as f:
+                        json.dump(data, f, indent=2)
+                except Exception:
+                    pass
         
         # Theme state
         self.current_theme = None
@@ -641,14 +673,13 @@ class ModernNormalMode:
             print(f"⚠️ Could not bring Normal Mode to front: {e}")
             
     def _change_language(self, lang_code):
-        """Change the display language and update all UI text."""
+        """Change the display language and update all UI text. Persist selection."""
         self.current_language = lang_code
         self.lang = lang_code  # Keep alias in sync
         self.lang_button.config(text=f"🌐 {lang_code.upper()}")
-        
+        self._save_language_setting(lang_code)
         # Update all translatable text in UI
         self._update_text_labels()
-        
         if self.on_language:
             self.on_language(lang_code)
             

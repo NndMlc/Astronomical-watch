@@ -160,7 +160,7 @@ python3 astronomical_watch_desktop.py
 Or just the widget:
 
 ```bash
-python3 astronomical_watch_widget_only.py
+python3 astronomical_watch_desktop.py
 ```
 
 ## Additional Resources

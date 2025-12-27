@@ -39,7 +39,6 @@ lon = solar_longitude_from_datetime(dt)  # Default precision
 
 ### Desktop Applications (Root Directory)
 - **`astronomical_watch_desktop.py`**: Main desktop app with widget+normal mode
-- **`astronomical_watch_widget_only.py`**: Widget-only borderless display
 - **`main.py`**: Alternative entry point for full desktop experience
 
 ### CLI Tools

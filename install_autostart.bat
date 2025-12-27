@@ -24,7 +24,7 @@ echo [OK] Python found
 echo.
 
 REM Check if widget script exists
-if not exist "astronomical_watch_widget_only.py" (
+if not exist "astronomical_watch_desktop.py" (
     echo Error: Widget script not found!
     echo Please run this from the Astronomical Watch directory
     echo.
@@ -45,7 +45,7 @@ set "VBS_FILE=%~dp0launch_widget_silent.vbs"
 (
 echo Set WshShell = CreateObject^("WScript.Shell"^)
 echo WshShell.CurrentDirectory = "%~dp0"
-echo WshShell.Run "pythonw.exe astronomical_watch_widget_only.py", 0, False
+echo WshShell.Run "pythonw.exe astronomical_watch_desktop.py", 0, False
 echo Set WshShell = Nothing
 ) > "%VBS_FILE%"
 
@@ -77,10 +77,9 @@ echo.
 echo The Astronomical Watch widget will now:
 echo   * Start automatically when Windows boots
 echo   * Run silently in the background (no console)
-echo   * Stay always on top (visible on desktop)
 echo.
 echo To test now, run:
-echo   python astronomical_watch_widget_only.py
+echo   python astronomical_watch_desktop.py
 echo.
 echo To remove autostart:
 echo   1. Press Win+R

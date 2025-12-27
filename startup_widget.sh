@@ -22,7 +22,7 @@ echo "🚀 Starting floating astronomical widget..."
 echo
 
 # Launch widget with error handling
-python3 astronomical_watch_widget_only.py
+python3 astronomical_watch_desktop.py
 
 if [ $? -ne 0 ]; then
     echo

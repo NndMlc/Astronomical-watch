@@ -22,8 +22,8 @@ if errorlevel 1 (
 echo Starting floating astronomical widget...
 echo.
 
-REM Launch widget directly
-python astronomical_watch_widget_only.py
+REM Launch main desktop application
+python astronomical_watch_desktop.py
 
 if errorlevel 1 (
     echo.

@@ -203,7 +203,6 @@ The installer will upgrade automatically.
 | `install.bat` | Install application |
 | `uninstall.bat` | Remove application |
 | `astronomical_watch_desktop.py` | Run without installing (dev mode) |
-| `astronomical_watch_widget_only.py` | Widget-only mode (dev) |
 
 ---
 

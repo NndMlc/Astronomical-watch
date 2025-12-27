@@ -27,8 +27,8 @@ try {
     exit 1
 }
 
-# Check if astronomical_watch_widget_only.py exists
-$widgetScript = Join-Path $scriptDir "astronomical_watch_widget_only.py"
+# Check if astronomical_watch_desktop.py exists
+$desktopScript = Join-Path $scriptDir "astronomical_watch_desktop.py"
 if (-not (Test-Path $widgetScript)) {
     Write-Host "✗ Error: Widget script not found!" -ForegroundColor Red
     Write-Host "  Expected: $widgetScript" -ForegroundColor Yellow
@@ -44,7 +44,7 @@ Write-Host ""
 $vbsContent = @"
 Set WshShell = CreateObject("WScript.Shell")
 WshShell.CurrentDirectory = "$scriptDir"
-WshShell.Run "pythonw.exe astronomical_watch_widget_only.py", 0, False
+WshShell.Run "pythonw.exe astronomical_watch_desktop.py", 0, False
 Set WshShell = Nothing
 "@
 
@@ -84,7 +84,7 @@ Write-Host "  • Run silently in the background (no console)" -ForegroundColor 
 Write-Host "  • Stay always on top (visible on desktop)" -ForegroundColor White
 Write-Host ""
 Write-Host "To test now, run:" -ForegroundColor Yellow
-Write-Host "  python astronomical_watch_widget_only.py" -ForegroundColor White
+Write-Host "  python astronomical_watch_desktop.py" -ForegroundColor White
 Write-Host ""
 Write-Host "To remove autostart:" -ForegroundColor Yellow
 Write-Host "  1. Press Win+R" -ForegroundColor White

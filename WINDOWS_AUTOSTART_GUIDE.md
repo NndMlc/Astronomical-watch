@@ -49,7 +49,7 @@ powershell -ExecutionPolicy Bypass -File install_autostart_windows.ps1
 After installation, test immediately without rebooting:
 
 ```cmd
-python astronomical_watch_widget_only.py
+python astronomical_watch_desktop.py
 ```
 
 The widget should:
@@ -97,7 +97,7 @@ If automatic scripts don't work:
    ```vbscript
    Set WshShell = CreateObject("WScript.Shell")
    WshShell.CurrentDirectory = "C:\path\to\Astronomical-watch"
-   WshShell.Run "pythonw.exe astronomical_watch_widget_only.py", 0, False
+   WshShell.Run "pythonw.exe astronomical_watch_desktop.py", 0, False
    ```
 
 2. Create shortcut to the `.vbs` file
