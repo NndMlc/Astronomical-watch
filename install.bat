@@ -171,29 +171,15 @@ if exist "%CD%\icons\astronomical_watch.ico" (
 echo.
 
 REM ====================================
-REM Step 8: Create VBScript Launcher (no console)
-REM ====================================
-echo Creating launcher script...
-
-REM Create VBScript that runs Python without console window
-echo Set objShell = CreateObject("WScript.Shell") > "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
-echo pythonPath = "!PYTHON_PATH!" >> "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
-echo command = pythonPath ^& " -m astronomical_watch.ui.main" >> "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
-echo objShell.Run command, 0, False >> "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
-
-echo + Launcher created: !SHORTCUT_DIR!\run_astronomical_watch.vbs
-echo.
-
-REM ====================================
-REM Step 9: Create Shortcut to VBScript
+REM Step 8: Create Shortcut to run_astronomical_watch.bat
 REM ====================================
 echo Creating shortcut...
 
-REM Create shortcut that points to VBScript launcher
+REM Create shortcut that points directly to run_astronomical_watch.bat
 echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
 echo sLinkFile = "!SHORTCUT_DIR!\Astronomical Watch.lnk" >> CreateShortcut.vbs
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> CreateShortcut.vbs
-echo oLink.TargetPath = "!SHORTCUT_DIR!\run_astronomical_watch.vbs" >> CreateShortcut.vbs
+echo oLink.TargetPath = "!SHORTCUT_DIR!\run_astronomical_watch.bat" >> CreateShortcut.vbs
 echo oLink.WorkingDirectory = "!SHORTCUT_DIR!" >> CreateShortcut.vbs
 if defined ICON_PATH (
     echo oLink.IconLocation = "!ICON_PATH!" >> CreateShortcut.vbs
@@ -267,6 +253,7 @@ if exist "!SHORTCUT_DIR!\Astronomical Watch.lnk" (
     echo Shortcut: Not created (you can run from Command Prompt)
 )
 echo.
+
 echo ========================================
 echo   HOW TO USE
 echo ========================================
@@ -275,11 +262,23 @@ if exist "!SHORTCUT_DIR!\Astronomical Watch.lnk" (
     echo 1. Copy "Astronomical Watch.lnk" to your Desktop
     echo    Then double-click it ^(Runs without console window^)
     echo.
+    set /p AUTOSTART="2. Želite li da aplikacija automatski startuje sa Windowsom? (Y/N): "
+    if /i "!AUTOSTART!"=="Y" (
+        set "STARTUP_FOLDER=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
+        copy /Y "!SHORTCUT_DIR!\Astronomical Watch.lnk" "!STARTUP_FOLDER!\Astronomical Watch.lnk" >nul 2>&1
+        if exist "!STARTUP_FOLDER!\Astronomical Watch.lnk" (
+            echo + Autostart omogućen: aplikacija će se pokretati sa Windowsom.
+        ) else (
+            echo X Nije moguće automatski kopirati prečicu u Startup folder.
+            echo   To možete uraditi ručno: Win+R, shell:startup, pa kopirajte prečicu.
+        )
+        echo.
+    )
 )
-echo 2. Or from Command Prompt: astronomical-watch
+echo 3. Ili iz Command Prompt-a: astronomical-watch
 echo    ^(Shows console with any error messages^)
 echo.
-echo 3. Widget Mode: Small floating display
+echo 4. Widget Mode: Small floating display
 echo    - Double-click to open full interface
 echo    - Right-click for menu
 echo.

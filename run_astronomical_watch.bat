@@ -19,7 +19,7 @@ echo Checking Python version...
 python --version
 echo.
 echo Starting Astronomical Watch...
-python astronomical_watch_desktop.py
+pythonw.exe astronomical_watch_desktop.py
 echo.
 if %ERRORLEVEL% EQU 0 (
     echo ✓ Application started successfully!
