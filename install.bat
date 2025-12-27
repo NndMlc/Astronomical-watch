@@ -262,15 +262,15 @@ if exist "!SHORTCUT_DIR!\Astronomical Watch.lnk" (
     echo 1. Copy "Astronomical Watch.lnk" to your Desktop
     echo    Then double-click it ^(Runs without console window^)
     echo.
-    set /p AUTOSTART="2. Želite li da aplikacija automatski startuje sa Windowsom? (Y/N): "
+    set /p AUTOSTART="2. Do you want the application to start automatically with Windows? (Y/N): "
     if /i "!AUTOSTART!"=="Y" (
         set "STARTUP_FOLDER=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
         copy /Y "!SHORTCUT_DIR!\Astronomical Watch.lnk" "!STARTUP_FOLDER!\Astronomical Watch.lnk" >nul 2>&1
         if exist "!STARTUP_FOLDER!\Astronomical Watch.lnk" (
-            echo + Autostart omogućen: aplikacija će se pokretati sa Windowsom.
+            echo + Autostart enabled: the application will start with Windows.
         ) else (
-            echo X Nije moguće automatski kopirati prečicu u Startup folder.
-            echo   To možete uraditi ručno: Win+R, shell:startup, pa kopirajte prečicu.
+            echo X Could not automatically copy the shortcut to the Startup folder.
+            echo   You can do this manually: Win+R, shell:startup, then copy the shortcut.
         )
         echo.
     )
@@ -292,8 +292,7 @@ set /p LAUNCH="Launch now? (Y/N): "
 if /i "!LAUNCH!"=="Y" (
     echo.
     echo Starting Astronomical Watch...
-    REM Use VBScript to launch without console window
-    start "" wscript.exe "!SHORTCUT_DIR!\run_astronomical_watch.vbs"
+    start "" "!SHORTCUT_DIR!\run_astronomical_watch.bat"
     echo.
     echo Application started!
     timeout /t 2 >nul
