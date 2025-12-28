@@ -621,14 +621,12 @@ class ModernNormalMode:
         widget.bind('<Leave>', on_leave)
         
     def _show_language_menu(self):
-        """Prikazuje meni za izbor jezika, ali dozvoljava samo jedan istovremeno."""
-        # Ako već postoji otvoren prozor za izbor jezika, samo ga dovedi u prvi plan
+        """Show the language selection menu, ensuring only one instance exists."""
+        # Always destroy any existing language window before opening a new one
         if self._lang_window_ref is not None:
             try:
                 if self._lang_window_ref.winfo_exists():
-                    self._lang_window_ref.lift()
-                    self._lang_window_ref.focus_force()
-                    return
+                    self._lang_window_ref.destroy()
             except Exception:
                 pass
             self._lang_window_ref = None
@@ -638,7 +636,7 @@ class ModernNormalMode:
         lang_window.overrideredirect(True)  # Remove window decorations
         lang_window.configure(bg="#3d3d3d")
 
-        # Pozicioniraj ispod dugmeta
+        # Position below the button
         try:
             x = self.lang_button.winfo_rootx()
             y = self.lang_button.winfo_rooty() + self.lang_button.winfo_height()
@@ -646,11 +644,11 @@ class ModernNormalMode:
         except tk.TclError:
             lang_window.geometry("300x400")
 
-        # Napravi da je uvek iznad i da hvata fokus
+        # Always on top and grab focus
         lang_window.attributes('-topmost', True)
         lang_window.grab_set()
 
-        # Frame za listbox i scrollbar
+        # Frame for listbox and scrollbar
         frame = tk.Frame(lang_window, bg="#3d3d3d", bd=2, relief=tk.RAISED)
         frame.pack(fill=tk.BOTH, expand=True)
 
@@ -674,11 +672,11 @@ class ModernNormalMode:
         listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.config(command=listbox.yview)
 
-        # Dodaj jezike
+        # Add languages
         for lang_name, lang_code in LANGUAGES:
             listbox.insert(tk.END, f"{lang_name} ({lang_code.upper()})")
 
-        # Obeleži trenutni jezik
+        # Highlight current language
         for i, (_, lang_code) in enumerate(LANGUAGES):
             if lang_code == self.current_language:
                 listbox.selection_set(i)
@@ -690,7 +688,13 @@ class ModernNormalMode:
             if selection:
                 index = selection[0]
                 _, lang_code = LANGUAGES[index]
-                lang_window.destroy()
+                # Always clear the reference before changing language
+                if self._lang_window_ref is not None:
+                    try:
+                        self._lang_window_ref.destroy()
+                    except Exception:
+                        pass
+                    self._lang_window_ref = None
                 self._change_language(lang_code)
 
         def on_close(event=None):
@@ -701,14 +705,19 @@ class ModernNormalMode:
                     pass
                 self._lang_window_ref = None
 
-        # Bind događaje
+        # Bind events
         listbox.bind('<<ListboxSelect>>', on_select)
         listbox.bind('<Return>', on_select)
         listbox.bind('<Escape>', on_close)
         lang_window.bind('<FocusOut>', on_close)
         lang_window.protocol("WM_DELETE_WINDOW", on_close)
 
-        # Fokus na listbox
+        # Ensure reference is cleared when window is destroyed
+        def on_destroy(event=None):
+            self._lang_window_ref = None
+        lang_window.bind('<Destroy>', on_destroy)
+
+        # Focus on listbox
         listbox.focus_set()
             
     def bring_to_front(self):
