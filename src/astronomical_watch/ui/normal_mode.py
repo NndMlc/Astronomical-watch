@@ -83,13 +83,15 @@ def tr(key: str, lang: str = "en") -> str:
 
 class ModernNormalMode:
     """Modern Normal Mode without window decorations."""
-    
     def __init__(self, parent, on_back=None, on_language=None, widget_ref=None):
         print("🚀 ModernNormalMode.__init__ starting...")
         self.master = parent
         self.on_back = on_back
         self.on_language = on_language
         self.widget_ref = widget_ref  # Store widget reference for settings
+
+        # Referenca na trenutno otvoren prozor za izbor jezika
+        self._lang_window_ref = None
 
         # Data initialization first
         self.dies = 0
@@ -619,33 +621,44 @@ class ModernNormalMode:
         widget.bind('<Leave>', on_leave)
         
     def _show_language_menu(self):
-        """Show language selection menu with scrollbar."""
-        # Create toplevel window for language selection
+        """Prikazuje meni za izbor jezika, ali dozvoljava samo jedan istovremeno."""
+        # Ako već postoji otvoren prozor za izbor jezika, samo ga dovedi u prvi plan
+        if self._lang_window_ref is not None:
+            try:
+                if self._lang_window_ref.winfo_exists():
+                    self._lang_window_ref.lift()
+                    self._lang_window_ref.focus_force()
+                    return
+            except Exception:
+                pass
+            self._lang_window_ref = None
+
         lang_window = tk.Toplevel(self.master)
+        self._lang_window_ref = lang_window
         lang_window.overrideredirect(True)  # Remove window decorations
         lang_window.configure(bg="#3d3d3d")
-        
-        # Position below the language button
+
+        # Pozicioniraj ispod dugmeta
         try:
             x = self.lang_button.winfo_rootx()
             y = self.lang_button.winfo_rooty() + self.lang_button.winfo_height()
             lang_window.geometry(f"300x400+{x}+{y}")
         except tk.TclError:
             lang_window.geometry("300x400")
-        
-        # Make window topmost and grab focus
+
+        # Napravi da je uvek iznad i da hvata fokus
         lang_window.attributes('-topmost', True)
         lang_window.grab_set()
-        
-        # Create frame for listbox and scrollbar
+
+        # Frame za listbox i scrollbar
         frame = tk.Frame(lang_window, bg="#3d3d3d", bd=2, relief=tk.RAISED)
         frame.pack(fill=tk.BOTH, expand=True)
-        
-        # Create scrollbar
+
+        # Scrollbar
         scrollbar = tk.Scrollbar(frame, bg="#3d3d3d", troughcolor="#2d2d2d")
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        
-        # Create listbox
+
+        # Listbox
         listbox = tk.Listbox(
             frame,
             bg="#3d3d3d",
@@ -660,18 +673,18 @@ class ModernNormalMode:
         )
         listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.config(command=listbox.yview)
-        
-        # Add languages to listbox
+
+        # Dodaj jezike
         for lang_name, lang_code in LANGUAGES:
             listbox.insert(tk.END, f"{lang_name} ({lang_code.upper()})")
-        
-        # Highlight current language
+
+        # Obeleži trenutni jezik
         for i, (_, lang_code) in enumerate(LANGUAGES):
             if lang_code == self.current_language:
                 listbox.selection_set(i)
                 listbox.see(i)
                 break
-        
+
         def on_select(event):
             selection = listbox.curselection()
             if selection:
@@ -679,17 +692,23 @@ class ModernNormalMode:
                 _, lang_code = LANGUAGES[index]
                 lang_window.destroy()
                 self._change_language(lang_code)
-        
+
         def on_close(event=None):
-            lang_window.destroy()
-        
-        # Bind events
+            if self._lang_window_ref is not None:
+                try:
+                    self._lang_window_ref.destroy()
+                except Exception:
+                    pass
+                self._lang_window_ref = None
+
+        # Bind događaje
         listbox.bind('<<ListboxSelect>>', on_select)
         listbox.bind('<Return>', on_select)
         listbox.bind('<Escape>', on_close)
         lang_window.bind('<FocusOut>', on_close)
-        
-        # Focus on listbox
+        lang_window.protocol("WM_DELETE_WINDOW", on_close)
+
+        # Fokus na listbox
         listbox.focus_set()
             
     def bring_to_front(self):
