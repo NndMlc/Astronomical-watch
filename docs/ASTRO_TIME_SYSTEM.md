@@ -14,11 +14,11 @@ UTC hour for LMST=12h is: 12 + (-11.265) = 0.735 h = **00:44:06 UTC**.
 
 Thus every astronomical day begins at **00:44:06 UTC** globally and lasts exactly 86,400 SI seconds.
 
-## 3. Milidans
+## 3. miliDies
 The day is divided into 1000 equal units (milidans):
-- 1 milidan = 86.4 seconds
-- milidan range: 0 .. 999
-- At the daily boundary (00:44:06 UTC) milidan resets 999 → 000.
+- 1 miliDies = 86.4 seconds
+- miliDies range: 0 .. 999
+- At the daily boundary (00:44:06 UTC) miliDies resets 999 → 000.
 
 Computation for any UTC timestamp *t*:
 1. Determine last global noon (00:44:06 UTC) ≤ t.
